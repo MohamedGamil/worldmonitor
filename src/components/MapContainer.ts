@@ -602,6 +602,15 @@ export class MapContainer {
     }
   }
 
+  /** Coalesce multiple data setter calls into a single render pass */
+  public batchUpdate(fn: () => void): void {
+    if (this.useDeckGL) {
+      this.deckGLMap?.batchUpdate(fn);
+    } else {
+      fn(); // SVG map doesn't need batching
+    }
+  }
+
   public setRenderPaused(paused: boolean): void {
     if (this.useDeckGL) {
       this.deckGLMap?.setRenderPaused(paused);

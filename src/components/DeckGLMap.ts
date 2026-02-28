@@ -252,6 +252,7 @@ const MARKER_ICONS = {
 
 export class DeckGLMap {
   private static readonly MAX_CLUSTER_LEAVES = 200;
+  private static readonly MAX_FIRE_POINTS = 10_000;
 
   private container: HTMLElement;
   private deckOverlay: MapboxOverlay | null = null;
@@ -328,7 +329,17 @@ export class DeckGLMap {
   private webglLost = false;
   private resizeObserver: ResizeObserver | null = null;
 
-  private layerCache: Map<string, Layer> = new Map();
+  // --- Optimization: dirty-flag layer rebuilds (spec 06, §1.1) ---
+  private dirtyLayers: Set<string> = new Set();
+  // --- Optimization: batch update coalescing (spec 06, §1.2) ---
+  private _batchingUpdates = false;
+  // --- Optimization: memoized time filtering (spec 06, §1.3) ---
+  private timeFilterCache: Map<string, { dataLength: number; timeRange: TimeRange; result: unknown[] }> = new Map();
+  // --- Optimization: render pause during gestures (spec 06, §4.4) ---
+  private gestureActive = false;
+  private gestureEndTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  private layerCache: Map<string, any> = new Map();
   private lastZoomThreshold = 0;
   private protestSC: Supercluster | null = null;
   private techHQSC: Supercluster | null = null;
@@ -377,7 +388,8 @@ export class DeckGLMap {
       const theme = (e as CustomEvent).detail?.theme as 'dark' | 'light';
       if (theme) {
         this.switchBasemap(theme);
-        this.render(); // Rebuilds Deck.GL layers with new theme-aware colors
+        this.markAllDirty(); // Theme affects all layer colors
+        this.render();
       }
     });
 
@@ -506,6 +518,12 @@ export class DeckGLMap {
     });
 
     this.maplibreMap.on('movestart', () => {
+      // Gesture pause: suppress expensive layer rebuilds during pan/zoom (spec 06, §4.4)
+      this.gestureActive = true;
+      if (this.gestureEndTimeoutId) {
+        clearTimeout(this.gestureEndTimeoutId);
+        this.gestureEndTimeoutId = null;
+      }
       if (this.moveTimeoutId) {
         clearTimeout(this.moveTimeoutId);
         this.moveTimeoutId = null;
@@ -513,8 +531,15 @@ export class DeckGLMap {
     });
 
     this.maplibreMap.on('moveend', () => {
-      this.lastSCZoom = -1;
-      this.rafUpdateLayers();
+      // Resume layer updates 200ms after gesture ends
+      if (this.gestureEndTimeoutId) clearTimeout(this.gestureEndTimeoutId);
+      this.gestureEndTimeoutId = setTimeout(() => {
+        this.gestureActive = false;
+        this.gestureEndTimeoutId = null;
+        this.lastSCZoom = -1;
+        this.markAllDirty(); // Rebuild with final viewport
+        this.rafUpdateLayers();
+      }, 200);
       this.debouncedFetchBases();
     });
 
@@ -573,6 +598,15 @@ export class DeckGLMap {
     ];
 
     const matchExpr: any[] = ['match', ['get', 'name_en']];
+    const addedKeys = new Set<string>();
+
+    const addFallbackPair = (enName: string, localName: string) => {
+      if (!addedKeys.has(enName) && enName && localName) {
+        matchExpr.push(enName, localName);
+        addedKeys.add(enName);
+      }
+    };
+
     try {
       const enNames = new Intl.DisplayNames(['en'], { type: 'region' });
       const localNames = new Intl.DisplayNames([lang], { type: 'region' });
@@ -580,29 +614,28 @@ export class DeckGLMap {
         try {
           const en = enNames.of(c);
           const local = localNames.of(c);
-          if (en && local && en !== local) {
-            matchExpr.push(en, local);
+          // Prevent the ISO code itself from leaking in if English name isn't found
+          if (en && local && en !== local && en !== c) {
+            addFallbackPair(en, local);
           }
         } catch (e) { }
       }
       try {
-        matchExpr.push(
-          "United States of America", localNames.of("US"),
-          "Russia", localNames.of("RU"),
-          "Russian Federation", localNames.of("RU"),
-          "South Korea", localNames.of("KR"),
-          "North Korea", localNames.of("KP"),
-          "Iran", localNames.of("IR"),
-          "Syria", localNames.of("SY"),
-          "Czech Republic", localNames.of("CZ")
-        );
+        addFallbackPair("United States of America", localNames.of("US")!);
+        addFallbackPair("Russia", localNames.of("RU")!);
+        addFallbackPair("Russian Federation", localNames.of("RU")!);
+        addFallbackPair("South Korea", localNames.of("KR")!);
+        addFallbackPair("North Korea", localNames.of("KP")!);
+        addFallbackPair("Iran", localNames.of("IR")!);
+        addFallbackPair("Syria", localNames.of("SY")!);
+        addFallbackPair("Czech Republic", localNames.of("CZ")!);
       } catch (e) { }
 
       // Inject geographic dictionary for non-English locales
       // The shared dictionary is imported from @/locales/geo/ar
       if (lang === 'ar') {
         for (const [enName, arName] of Object.entries(arGeoFallbacks)) {
-          matchExpr.push(enName, arName);
+          addFallbackPair(enName, arName as string);
         }
       }
     } catch (e) { }
@@ -696,6 +729,78 @@ export class DeckGLMap {
     this.resizeObserver.observe(this.container);
   }
 
+  // --- Optimization helpers (spec 06) ---
+
+  /** Mark specific layer groups as needing rebuild on next render */
+  private markDirty(...groups: string[]): void {
+    for (const g of groups) this.dirtyLayers.add(g);
+  }
+
+  /** Force all layers to rebuild (theme change, full layer toggle, etc.) */
+  private markAllDirty(): void {
+    this.dirtyLayers.add('*');
+  }
+
+  private isDirty(group: string): boolean {
+    return this.dirtyLayers.has('*') || this.dirtyLayers.has(group);
+  }
+
+  /** Coalesce multiple data setter calls into a single render pass */
+  public batchUpdate(fn: () => void): void {
+    this._batchingUpdates = true;
+    try {
+      fn();
+    } finally {
+      this._batchingUpdates = false;
+    }
+    this.render();
+  }
+
+  /** Memoized filterByTime — skips re-iteration if data + timeRange unchanged */
+  private cachedFilterByTime<T>(
+    cacheKey: string,
+    items: T[],
+    getTime: (item: T) => Date | string | number | undefined | null
+  ): T[] {
+    if (this.state.timeRange === 'all') return items;
+    const cached = this.timeFilterCache.get(cacheKey);
+    if (cached && cached.dataLength === items.length && cached.timeRange === this.state.timeRange) {
+      return cached.result as T[];
+    }
+    const result = this.filterByTime(items, getTime);
+    this.timeFilterCache.set(cacheKey, { dataLength: items.length, timeRange: this.state.timeRange, result });
+    return result;
+  }
+
+  /** Invalidate a specific time filter cache entry */
+  private invalidateTimeCache(cacheKey: string): void {
+    this.timeFilterCache.delete(cacheKey);
+  }
+
+  /** Invalidate all time filter cache entries (e.g. on time range change) */
+  private invalidateAllTimeCache(): void {
+    this.timeFilterCache.clear();
+  }
+
+  /** Filter data to current viewport bounds + padding (spec 06, §4.2) */
+  private filterByViewport<T>(
+    items: T[],
+    getLat: (d: T) => number,
+    getLon: (d: T) => number,
+    padding = 5
+  ): T[] {
+    const bounds = this.maplibreMap?.getBounds();
+    if (!bounds) return items;
+    const south = bounds.getSouth() - padding;
+    const north = bounds.getNorth() + padding;
+    const west = bounds.getWest() - padding;
+    const east = bounds.getEast() + padding;
+    return items.filter(d => {
+      const lat = getLat(d);
+      const lon = getLon(d);
+      return lat >= south && lat <= north && lon >= west && lon <= east;
+    });
+  }
 
   private getSetSignature(set: Set<string>): string {
     return [...set].sort().join('|');
@@ -1125,23 +1230,32 @@ export class DeckGLMap {
     return zoom >= threshold.minZoom;
   }
 
+  // --- Optimization: Dirty-flag layer rebuilds (spec 06, §1.1) ---
+  private getCachedLayer<T>(groupKey: string, cacheKey: string, createFn: () => T): T {
+    if (this.isDirty(groupKey) || !this.layerCache.has(cacheKey)) {
+      this.layerCache.set(cacheKey, createFn());
+    }
+    return this.layerCache.get(cacheKey) as T;
+  }
+
   private buildLayers(): LayersList {
     const startTime = performance.now();
     // Refresh theme-aware overlay colors on each rebuild
     COLORS = getOverlayColors();
     const layers: (Layer | null | false)[] = [];
     const { layers: mapLayers } = this.state;
-    const filteredEarthquakes = this.filterByTime(this.earthquakes, (eq) => eq.occurredAt);
-    const filteredNaturalEvents = this.filterByTime(this.naturalEvents, (event) => event.date);
-    const filteredWeatherAlerts = this.filterByTime(this.weatherAlerts, (alert) => alert.onset);
-    const filteredOutages = this.filterByTime(this.outages, (outage) => outage.pubDate);
-    const filteredCableAdvisories = this.filterByTime(this.cableAdvisories, (advisory) => advisory.reported);
-    const filteredFlightDelays = this.filterByTime(this.flightDelays, (delay) => delay.updatedAt);
-    const filteredMilitaryFlights = this.filterByTime(this.militaryFlights, (flight) => flight.lastSeen);
-    const filteredMilitaryVessels = this.filterByTime(this.militaryVessels, (vessel) => vessel.lastAisUpdate);
+    // Memoized time filtering (spec 06, §1.3) — avoids re-iterating unchanged arrays
+    const filteredEarthquakes = this.cachedFilterByTime('earthquakes', this.earthquakes, (eq) => eq.occurredAt);
+    const filteredNaturalEvents = this.cachedFilterByTime('naturalEvents', this.naturalEvents, (event) => event.date);
+    const filteredWeatherAlerts = this.cachedFilterByTime('weatherAlerts', this.weatherAlerts, (alert) => alert.onset);
+    const filteredOutages = this.cachedFilterByTime('outages', this.outages, (outage) => outage.pubDate);
+    const filteredCableAdvisories = this.cachedFilterByTime('cableAdvisories', this.cableAdvisories, (advisory) => advisory.reported);
+    const filteredFlightDelays = this.cachedFilterByTime('flightDelays', this.flightDelays, (delay) => delay.updatedAt);
+    const filteredMilitaryFlights = this.cachedFilterByTime('militaryFlights', this.militaryFlights, (flight) => flight.lastSeen);
+    const filteredMilitaryVessels = this.cachedFilterByTime('militaryVessels', this.militaryVessels, (vessel) => vessel.lastAisUpdate);
     const filteredMilitaryFlightClusters = this.filterMilitaryFlightClustersByTime(this.militaryFlightClusters);
     const filteredMilitaryVesselClusters = this.filterMilitaryVesselClustersByTime(this.militaryVesselClusters);
-    const filteredUcdpEvents = this.filterByTime(this.ucdpEvents, (event) => event.date_start);
+    const filteredUcdpEvents = this.cachedFilterByTime('ucdpEvents', this.ucdpEvents, (event) => event.date_start);
 
     // Day/night overlay (rendered first as background)
     if (mapLayers.dayNight) {
@@ -1154,7 +1268,7 @@ export class DeckGLMap {
 
     // Undersea cables layer
     if (mapLayers.cables) {
-      layers.push(this.createCablesLayer());
+      layers.push(this.getCachedLayer('cables', 'cables-layer', () => this.createCablesLayer()));
     } else {
       this.layerCache.delete('cables-layer');
     }
@@ -1212,8 +1326,11 @@ export class DeckGLMap {
 
     // Earthquakes layer + ghost for easier picking
     if (mapLayers.natural && filteredEarthquakes.length > 0) {
-      layers.push(this.createEarthquakesLayer(filteredEarthquakes));
-      layers.push(this.createGhostLayer('earthquakes-layer', filteredEarthquakes, d => [d.location?.longitude ?? 0, d.location?.latitude ?? 0], { radiusMinPixels: 12 }));
+      const eqLayers = this.getCachedLayer('earthquakes', 'earthquakes-group', () => [
+        this.createEarthquakesLayer(filteredEarthquakes),
+        this.createGhostLayer('earthquakes-layer', filteredEarthquakes, d => [d.location?.longitude ?? 0, d.location?.latitude ?? 0], { radiusMinPixels: 12 })
+      ]);
+      layers.push(...((Array.isArray(eqLayers) ? eqLayers : [eqLayers]) as any));
     }
 
     // Natural events layer
@@ -1223,7 +1340,7 @@ export class DeckGLMap {
 
     // Satellite fires layer (NASA FIRMS)
     if (mapLayers.fires && this.firmsFireData.length > 0) {
-      layers.push(this.createFiresLayer());
+      layers.push(this.getCachedLayer('fires', 'fires-layer', () => this.createFiresLayer()));
     }
 
     // Iran events layer
@@ -1281,7 +1398,8 @@ export class DeckGLMap {
 
     // Protests layer (Supercluster-based deck.gl layers)
     if (mapLayers.protests && this.protests.length > 0) {
-      layers.push(...this.createProtestClusterLayers());
+      const protestLayers = this.getCachedLayer('protests', 'protests-group', () => this.createProtestClusterLayers() as any);
+      layers.push(...((Array.isArray(protestLayers) ? protestLayers : [protestLayers]) as any));
     }
 
     // Military vessels layer
@@ -1296,12 +1414,12 @@ export class DeckGLMap {
 
     // Military flights layer
     if (mapLayers.military && filteredMilitaryFlights.length > 0) {
-      layers.push(this.createMilitaryFlightsLayer(filteredMilitaryFlights));
+      layers.push(this.getCachedLayer('military', 'military-flights-layer', () => this.createMilitaryFlightsLayer(filteredMilitaryFlights)));
     }
 
     // Military flight clusters layer
     if (mapLayers.military && filteredMilitaryFlightClusters.length > 0) {
-      layers.push(this.createMilitaryFlightClustersLayer(filteredMilitaryFlightClusters));
+      layers.push(this.getCachedLayer('military', 'military-flight-clusters-layer', () => this.createMilitaryFlightClustersLayer(filteredMilitaryFlightClusters)));
     }
 
     // Strategic waterways layer
@@ -1416,6 +1534,8 @@ export class DeckGLMap {
     }
 
     const result = layers.filter(Boolean) as LayersList;
+    // Clear dirty flags after build (spec 06, §1.1)
+    this.dirtyLayers.clear();
     const elapsed = performance.now() - startTime;
     if (import.meta.env.DEV && elapsed > 16) {
       console.warn(`[DeckGLMap] buildLayers took ${elapsed.toFixed(2)}ms (>16ms budget), ${result.length} layers`);
@@ -1780,9 +1900,16 @@ export class DeckGLMap {
   }
 
   private createFiresLayer(): ScatterplotLayer {
+    // Spec 06, §4.2: Viewport-aware data subsetting
+    const viewPortFires = this.filterByViewport(
+      this.firmsFireData,
+      (d) => d.lat,
+      (d) => d.lon
+    );
+
     return new ScatterplotLayer({
       id: 'fires-layer',
-      data: this.firmsFireData,
+      data: viewPortFires,
       getPosition: (d: (typeof this.firmsFireData)[0]) => [d.lon, d.lat],
       getRadius: (d: (typeof this.firmsFireData)[0]) => Math.min(d.frp * 200, 30000) || 5000,
       getFillColor: (d: (typeof this.firmsFireData)[0]) => {
@@ -3622,6 +3749,7 @@ export class DeckGLMap {
 
   // Public API methods (matching MapComponent interface)
   public render(): void {
+    if (this._batchingUpdates) return; // Coalesced — will render after batch ends
     if (this.renderPaused) {
       this.renderPending = true;
       return;
@@ -3654,6 +3782,8 @@ export class DeckGLMap {
 
   private updateLayers(): void {
     if (this.renderPaused || this.webglLost || !this.maplibreMap) return;
+    // During rapid gestures, skip expensive layer rebuilds — MapLibre tiles keep updating
+    if (this.gestureActive && this.dirtyLayers.size === 0) return;
     const startTime = performance.now();
     try {
       this.deckOverlay?.setProps({ layers: this.buildLayers() });
@@ -3709,10 +3839,12 @@ export class DeckGLMap {
 
   public setTimeRange(range: TimeRange): void {
     this.state.timeRange = range;
+    this.invalidateAllTimeCache(); // Time range changed — all cached filters stale
+    this.markAllDirty();
     this.rebuildProtestSupercluster();
     this.onTimeRangeChange?.(range);
     this.updateTimeSliderButtons();
-    this.render(); // Debounced
+    this.render();
   }
 
   public getTimeRange(): TimeRange {
@@ -3721,7 +3853,8 @@ export class DeckGLMap {
 
   public setLayers(layers: MapLayers): void {
     this.state.layers = layers;
-    this.render(); // Debounced
+    this.markAllDirty(); // Layer toggle affects all groups
+    this.render();
 
     // Update toggle checkboxes
     Object.entries(layers).forEach(([key, value]) => {
@@ -3939,71 +4072,90 @@ export class DeckGLMap {
     });
   }
 
-  // Data setters - all use render() for debouncing
+  // Data setters — markDirty + invalidateTimeCache for targeted rebuilds (spec 06, §1.1)
   public setEarthquakes(earthquakes: Earthquake[]): void {
     this.earthquakes = earthquakes;
+    this.invalidateTimeCache('earthquakes');
+    this.markDirty('earthquakes');
     this.render();
   }
 
   public setWeatherAlerts(alerts: WeatherAlert[]): void {
     this.weatherAlerts = alerts;
+    this.invalidateTimeCache('weatherAlerts');
+    this.markDirty('weather');
     this.render();
   }
 
   public setOutages(outages: InternetOutage[]): void {
     this.outages = outages;
+    this.invalidateTimeCache('outages');
+    this.markDirty('outages');
     this.render();
   }
 
   public setCyberThreats(threats: CyberThreat[]): void {
     this.cyberThreats = threats;
+    this.markDirty('cyberThreats');
     this.render();
   }
 
   public setIranEvents(events: IranEvent[]): void {
     this.iranEvents = events;
+    this.markDirty('iranAttacks');
     this.render();
   }
 
   public setAisData(disruptions: AisDisruptionEvent[], density: AisDensityZone[]): void {
     this.aisDisruptions = disruptions;
     this.aisDensity = density;
+    this.markDirty('ais');
     this.render();
   }
 
   public setCableActivity(advisories: CableAdvisory[], repairShips: RepairShip[]): void {
     this.cableAdvisories = advisories;
     this.repairShips = repairShips;
+    this.invalidateTimeCache('cableAdvisories');
+    this.markDirty('cables');
     this.render();
   }
 
   public setCableHealth(healthMap: Record<string, CableHealthRecord>): void {
     this.healthByCableId = healthMap;
     this.layerCache.delete('cables-layer');
+    this.markDirty('cables');
     this.render();
   }
 
   public setProtests(events: SocialUnrestEvent[]): void {
     this.protests = events;
     this.rebuildProtestSupercluster();
+    this.markDirty('protests');
     this.render();
     this.syncPulseAnimation();
   }
 
   public setFlightDelays(delays: AirportDelayAlert[]): void {
     this.flightDelays = delays;
+    this.invalidateTimeCache('flightDelays');
+    this.markDirty('flights');
     this.render();
   }
 
   public setMilitaryFlights(flights: MilitaryFlight[], clusters: MilitaryFlightCluster[] = []): void {
     this.militaryFlights = flights;
     this.militaryFlightClusters = clusters;
+    this.invalidateTimeCache('militaryFlights');
+    this.markDirty('military');
     this.render();
   }
 
   public setMilitaryVessels(vessels: MilitaryVessel[], clusters: MilitaryVesselCluster[] = []): void {
     this.militaryVessels = vessels;
     this.militaryVesselClusters = clusters;
+    this.invalidateTimeCache('militaryVessels');
+    this.markDirty('military');
     this.render();
   }
 
@@ -4021,6 +4173,7 @@ export class DeckGLMap {
       this.serverBases = result.bases;
       this.serverBaseClusters = result.clusters;
       this.serverBasesLoaded = true;
+      this.markDirty('bases');
       this.render();
     }).catch((err) => {
       console.error('[bases] fetch error', err);
@@ -4029,32 +4182,44 @@ export class DeckGLMap {
 
   public setNaturalEvents(events: NaturalEvent[]): void {
     this.naturalEvents = events;
+    this.invalidateTimeCache('naturalEvents');
+    this.markDirty('natural');
     this.render();
   }
 
   public setFires(fires: Array<{ lat: number; lon: number; brightness: number; frp: number; confidence: number; region: string; acq_date: string; daynight: string }>): void {
+    // Cap fire data to prevent unbounded GPU memory growth (spec 06, §3.4)
+    if (fires.length > DeckGLMap.MAX_FIRE_POINTS) {
+      fires = [...fires].sort((a, b) => b.frp - a.frp).slice(0, DeckGLMap.MAX_FIRE_POINTS);
+    }
     this.firmsFireData = fires;
+    this.markDirty('fires');
     this.render();
   }
 
   public setTechEvents(events: TechEventMarker[]): void {
     this.techEvents = events;
     this.rebuildTechEventSupercluster();
+    this.markDirty('tech');
     this.render();
   }
 
   public setUcdpEvents(events: UcdpGeoEvent[]): void {
     this.ucdpEvents = events;
+    this.invalidateTimeCache('ucdpEvents');
+    this.markDirty('ucdp');
     this.render();
   }
 
   public setDisplacementFlows(flows: DisplacementFlow[]): void {
     this.displacementFlows = flows;
+    this.markDirty('displacement');
     this.render();
   }
 
   public setClimateAnomalies(anomalies: ClimateAnomaly[]): void {
     this.climateAnomalies = anomalies;
+    this.markDirty('climate');
     this.render();
   }
 
@@ -4069,6 +4234,7 @@ export class DeckGLMap {
       if (now - ts > 60_000) this.newsLocationFirstSeen.delete(key);
     }
     this.newsLocations = data;
+    this.markDirty('news');
     this.render();
 
     this.syncPulseAnimation(now);
@@ -4077,12 +4243,14 @@ export class DeckGLMap {
   public setPositiveEvents(events: PositiveGeoEvent[]): void {
     this.positiveEvents = events;
     this.syncPulseAnimation();
+    this.markDirty('positiveEvents');
     this.render();
   }
 
   public setKindnessData(points: KindnessPoint[]): void {
     this.kindnessPoints = points;
     this.syncPulseAnimation();
+    this.markDirty('kindness');
     this.render();
   }
 
@@ -4090,6 +4258,7 @@ export class DeckGLMap {
     this.happinessScores = data.scores;
     this.happinessYear = data.year;
     this.happinessSource = data.source;
+    this.markDirty('happiness');
     this.render();
   }
 
@@ -4098,11 +4267,13 @@ export class DeckGLMap {
       (s): s is SpeciesRecovery & { recoveryZone: { name: string; lat: number; lon: number } } =>
         s.recoveryZone != null
     );
+    this.markDirty('speciesRecovery');
     this.render();
   }
 
   public setRenewableInstallations(installations: RenewableInstallation[]): void {
     this.renewableInstallations = installations;
+    this.markDirty('renewables');
     this.render();
   }
 
@@ -4136,6 +4307,7 @@ export class DeckGLMap {
       updateHotspotEscalation(h.id, matchCount, h.hasBreaking || false, velocity);
     });
 
+    this.markDirty('hotspots');
     this.render();
     this.syncPulseAnimation();
   }
@@ -4200,7 +4372,8 @@ export class DeckGLMap {
       });
     }
 
-    this.render(); // Debounced
+    this.markDirty('cables', 'pipelines', 'bases', 'nuclear', 'datacenters');
+    this.render();
   }
 
   public setOnHotspotClick(callback: (hotspot: Hotspot) => void): void {
@@ -4618,6 +4791,10 @@ export class DeckGLMap {
       clearTimeout(this.moveTimeoutId);
       this.moveTimeoutId = null;
     }
+    if (this.gestureEndTimeoutId) {
+      clearTimeout(this.gestureEndTimeoutId);
+      this.gestureEndTimeoutId = null;
+    }
 
     this.stopPulseAnimation();
     this.stopDayNightTimer();
@@ -4633,6 +4810,61 @@ export class DeckGLMap {
     this.deckOverlay = null;
     this.maplibreMap?.remove();
     this.maplibreMap = null;
+
+    // Explicit data store cleanup for immediate GC (spec 06, §3.1)
+    this.earthquakes = [];
+    this.weatherAlerts = [];
+    this.outages = [];
+    this.cyberThreats = [];
+    this.iranEvents = [];
+    this.aisDisruptions = [];
+    this.aisDensity = [];
+    this.cableAdvisories = [];
+    this.repairShips = [];
+    this.healthByCableId = {};
+    this.protests = [];
+    this.militaryFlights = [];
+    this.militaryFlightClusters = [];
+    this.militaryVessels = [];
+    this.militaryVesselClusters = [];
+    this.serverBases = [];
+    this.serverBaseClusters = [];
+    this.naturalEvents = [];
+    this.firmsFireData = [];
+    this.techEvents = [];
+    this.flightDelays = [];
+    this.news = [];
+    this.newsLocations = [];
+    this.ucdpEvents = [];
+    this.displacementFlows = [];
+    this.climateAnomalies = [];
+    this.tradeRouteSegments = [];
+    this.positiveEvents = [];
+    this.kindnessPoints = [];
+    this.speciesRecoveryZones = [];
+    this.renewableInstallations = [];
+    this.hotspots = [];
+    this.protestClusters = [];
+    this.techHQClusters = [];
+    this.techEventClusters = [];
+    this.datacenterClusters = [];
+    this.protestSuperclusterSource = [];
+    this.protestSC = null;
+    this.techHQSC = null;
+    this.techEventSC = null;
+    this.datacenterSC = null;
+    this.newsLocationFirstSeen.clear();
+    this.happinessScores.clear();
+    this.dirtyLayers.clear();
+    this.timeFilterCache.clear();
+    this.countriesGeoJsonData = null;
+
+    // Clear callbacks
+    this.onHotspotClick = undefined;
+    this.onTimeRangeChange = undefined;
+    this.onCountryClick = undefined;
+    this.onLayerChange = undefined;
+    this.onStateChange = undefined;
 
     this.container.innerHTML = '';
   }
