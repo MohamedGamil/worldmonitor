@@ -95,6 +95,10 @@ body.dir-rtl {
   border-right-style: solid;
 }
 
+[dir="rtl"] .popup-header.hotspot {
+  transform: none;
+}
+
 [dir="rtl"] .item.alert {
   border-left: none;
   border-right: 2px solid var(--red);
