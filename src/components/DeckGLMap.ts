@@ -639,7 +639,7 @@ export class DeckGLMap {
       }
     }
 
-    matchExpr.push(['to-string', ['get', 'name_en']]); // Final fallback clause for mapLibre match
+    // matchExpr.push(['to-string', ['get', 'name_en']]); // Final fallback clause for mapLibre match
 
     // Build a second match expression that matches against the generic 'name' field
     // Many CARTO features only have 'name' (English) without a separate 'name_en'
@@ -657,11 +657,11 @@ export class DeckGLMap {
       'to-string',
       [
         'coalesce',
-        ['get', `name:${lang}`],
-        ['get', `name_${lang}`],
+        // ['get', `name:${lang}`],
+        // ['get', `name_${lang}`],
+        ['get', 'name_en'],
         fallbackField,
         fallbackByName,
-        ['get', 'name'],
         ''
       ]
     ];
