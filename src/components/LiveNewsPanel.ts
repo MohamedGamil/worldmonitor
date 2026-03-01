@@ -79,7 +79,7 @@ const TECH_LIVE_CHANNELS: LiveChannel[] = [
 // Optional channels users can add from the "Available Channels" tab UI
 export const OPTIONAL_LIVE_CHANNELS: LiveChannel[] = [
   // North America
-  { id: 'livenow-fox', name: 'LiveNOW from FOX', handle: '@LiveNOWfromFOX' },
+  { id: 'livenow-fox', name: 'LiveNOW from FOX', handle: '@LiveNOWfromFOX', fallbackVideoId: 'QaftgYkG-ek' },
   { id: 'fox-news', name: 'Fox News', handle: '@FoxNews', fallbackVideoId: 'QaftgYkG-ek', useFallbackOnly: true },
   { id: 'newsmax', name: 'Newsmax', handle: '@NEWSMAX', fallbackVideoId: 'S-lFBzloL2Y', useFallbackOnly: true },
   { id: 'abc-news', name: 'ABC News', handle: '@ABCNews' },
@@ -95,6 +95,7 @@ export const OPTIONAL_LIVE_CHANNELS: LiveChannel[] = [
   { id: 'ntv-turkey', name: 'NTV', handle: '@NTV', fallbackVideoId: 'pqq5c6k70kk' },
   { id: 'cnn-turk', name: 'CNN TURK', handle: '@cnnturk', fallbackVideoId: 'lsY4GFoj_xY' },
   { id: 'tv-rain', name: 'TV Rain', handle: '@tvrain' },
+  { id: 'rt', name: 'RT', handle: '' },
   { id: 'tvp-info', name: 'TVP Info', handle: '@tvpinfo', fallbackVideoId: '3jKb-uThfrg' },
   { id: 'telewizja-republika', name: 'Telewizja Republika', handle: '@Telewizja_Republika', fallbackVideoId: 'dzntyCTgJMQ' },
   // Latin America & Portuguese
@@ -112,9 +113,8 @@ export const OPTIONAL_LIVE_CHANNELS: LiveChannel[] = [
   { id: 'tbs-news', name: 'TBS NEWS DIG', handle: '@tbsnewsdig', fallbackVideoId: 'aUDm173E8k8' },
   { id: 'ann-news', name: 'ANN News', handle: '@ANNnewsCH' },
   { id: 'ntv-news', name: 'NTV News (Japan)', handle: '@ntv_news' },
-  { id: 'cti-news', name: 'CTI News (Taiwan)', handle: '@中天新聞CtiNews', fallbackVideoId: 'wUPPkSANpyo', useFallbackOnly: true },
+  { id: 'cti-news', name: 'CTI News (Taiwan)', handle: '@中天新聞CtiNews' },
   { id: 'wion', name: 'WION', handle: '@WION' },
-  { id: 'vtc-now', name: 'VTC NOW', handle: '@VTCNowOfficial' },
   { id: 'cna-asia', name: 'CNA (NewsAsia)', handle: '@channelnewsasia', fallbackVideoId: 'XWq5kBlakcQ' },
   { id: 'nhk-world', name: 'NHK World Japan', handle: '@NHKWORLDJAPAN' },
   // Middle East
@@ -127,15 +127,15 @@ export const OPTIONAL_LIVE_CHANNELS: LiveChannel[] = [
   { id: 'africanews', name: 'Africanews', handle: '@africanews' },
   { id: 'channels-tv', name: 'Channels TV', handle: '@ChannelsTelevision' },
   { id: 'ktn-news', name: 'KTN News', handle: '@ktnnews_kenya', fallbackVideoId: 'RmHtsdVb3mo' },
-  { id: 'enca', name: 'eNCA', handle: '@eNCA' },
+  { id: 'enca', name: 'eNCA', handle: '@encanews' },
   { id: 'sabc-news', name: 'SABC News', handle: '@SABCDigitalNews' },
 ];
 
 export const OPTIONAL_CHANNEL_REGIONS: { key: string; labelKey: string; channelIds: string[] }[] = [
   { key: 'na', labelKey: 'components.liveNews.regionNorthAmerica', channelIds: ['livenow-fox', 'fox-news', 'newsmax', 'abc-news', 'cbs-news', 'nbc-news', 'cbc-news'] },
-  { key: 'eu', labelKey: 'components.liveNews.regionEurope', channelIds: ['bbc-news', 'france24-en', 'welt', 'rtve', 'trt-haber', 'ntv-turkey', 'cnn-turk', 'tv-rain', 'tvp-info', 'telewizja-republika'] },
+  { key: 'eu', labelKey: 'components.liveNews.regionEurope', channelIds: ['bbc-news', 'france24-en', 'welt', 'rtve', 'trt-haber', 'ntv-turkey', 'cnn-turk', 'tv-rain', 'rt', 'tvp-info', 'telewizja-republika'] },
   { key: 'latam', labelKey: 'components.liveNews.regionLatinAmerica', channelIds: ['cnn-brasil', 'jovem-pan', 'record-news', 'band-jornalismo', 'tn-argentina', 'c5n', 'milenio', 'noticias-caracol', 'ntn24', 't13'] },
-  { key: 'asia', labelKey: 'components.liveNews.regionAsia', channelIds: ['tbs-news', 'ann-news', 'ntv-news', 'cti-news', 'wion', 'vtc-now', 'cna-asia', 'nhk-world'] },
+  { key: 'asia', labelKey: 'components.liveNews.regionAsia', channelIds: ['tbs-news', 'ann-news', 'ntv-news', 'cti-news', 'wion', 'cna-asia', 'nhk-world'] },
   { key: 'me', labelKey: 'components.liveNews.regionMiddleEast', channelIds: ['al-hadath', 'sky-news-arabia', 'trt-world', 'iran-intl', 'cgtn-arabic'] },
   { key: 'africa', labelKey: 'components.liveNews.regionAfrica', channelIds: ['africanews', 'channels-tv', 'ktn-news', 'enca', 'sabc-news'] },
 ];
@@ -169,6 +169,7 @@ const DIRECT_HLS_MAP: Readonly<Record<string, string>> = {
   'trt-world': 'https://tv-trtworld.medya.trt.com.tr/master.m3u8',
   'sky-news-arabia': 'https://live-stream.skynewsarabia.com/c-horizontal-channel/horizontal-stream/index.m3u8',
   'al-hadath': 'https://av.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8',
+  'rt': 'https://rt-glb.rttv.com/dvr/rtnews/playlist.m3u8',
 };
 
 if (import.meta.env.DEV) {
@@ -263,7 +264,7 @@ export class LiveNewsPanel extends Panel {
   private botCheckTimeout: ReturnType<typeof setTimeout> | null = null;
   private static readonly BOT_CHECK_TIMEOUT_MS = 15_000;
 
-  // Native HLS <video> element for desktop playback (bypasses iframe/cookie issues)
+  // Native HLS <video> element for direct stream playback (bypasses iframe/cookie issues)
   private nativeVideoElement: HTMLVideoElement | null = null;
   private hlsFailureCooldown = new Map<string, number>();
   private readonly HLS_COOLDOWN_MS = 5 * 60 * 1000;
@@ -785,7 +786,7 @@ export class LiveNewsPanel extends Panel {
       }
     });
 
-    if (isDesktopRuntime() && this.getDirectHlsUrl(channel.id)) {
+    if (this.getDirectHlsUrl(channel.id)) {
       this.renderNativeHlsPlayer();
       return;
     }
@@ -1075,7 +1076,7 @@ export class LiveNewsPanel extends Panel {
     this.forceFallbackVideoForNextInit = false;
     await this.resolveChannelVideo(this.activeChannel, useFallbackVideo);
 
-    if (isDesktopRuntime() && this.getDirectHlsUrl(this.activeChannel.id)) {
+    if (this.getDirectHlsUrl(this.activeChannel.id)) {
       this.renderNativeHlsPlayer();
       return;
     }
@@ -1240,7 +1241,7 @@ export class LiveNewsPanel extends Panel {
   }
 
   private syncPlayerState(): void {
-    // Native HLS <video> on desktop
+    // Native HLS <video> (desktop + web for CORS-enabled streams)
     if (this.nativeVideoElement) {
       const videoId = this.activeChannel.videoId;
       if (videoId && this.currentVideoId !== videoId) {
@@ -1277,9 +1278,13 @@ export class LiveNewsPanel extends Panel {
         return;
       }
       if (this.isPlaying) {
-        this.player.loadVideoById(videoId);
+        if (typeof this.player.loadVideoById === 'function') {
+          this.player.loadVideoById(videoId);
+        }
       } else {
-        this.player.cueVideoById(videoId);
+        if (typeof this.player.cueVideoById === 'function') {
+          this.player.cueVideoById(videoId);
+        }
       }
     }
 
@@ -1293,7 +1298,7 @@ export class LiveNewsPanel extends Panel {
       if (isNewVideo) {
         // WKWebView loses user gesture context after await.
         // Pause then play after a delay — mimics the manual workaround.
-        this.player.pauseVideo();
+        this.player.pauseVideo?.();
         setTimeout(() => {
           if (this.player && this.isPlaying) {
             this.player.mute?.();

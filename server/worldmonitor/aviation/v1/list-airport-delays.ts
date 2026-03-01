@@ -18,20 +18,22 @@ import {
   determineSeverity,
   generateSimulatedDelay,
   fetchAviationStackDelays,
+  fetchNotamClosures,
+  buildNotamAlert,
 } from './_shared';
 import { CHROME_UA } from '../../../_shared/constants';
-import { cachedFetchJson, getCachedJson, setCachedJson } from '../../../_shared/redis';
+import { cachedFetchJson } from '../../../_shared/redis';
 
 const FAA_CACHE_KEY = 'aviation:delays:faa:v1';
-const INTL_CACHE_KEY = 'aviation:delays:intl:v1';
-const INTL_LOCK_KEY = 'aviation:delays:intl:lock';
-const CACHE_TTL = 1800;   // 30 min for both FAA and intl
-const LOCK_TTL = 30;      // 30s lock — enough for AviationStack batch (~8-10s)
+const INTL_CACHE_KEY = 'aviation:delays:intl:v3';
+const NOTAM_CACHE_KEY = 'aviation:notam:closures:v1';
+const CACHE_TTL = 7200;      // 2h for FAA, intl (real), and NOTAM
 
 export async function listAirportDelays(
   _ctx: ServerContext,
   _req: ListAirportDelaysRequest,
 ): Promise<ListAirportDelaysResponse> {
+  const t0 = Date.now();
   // 1. FAA (US) — independent try-catch
   let faaAlerts: AirportDelayAlert[] = [];
   try {
@@ -80,84 +82,108 @@ export async function listAirportDelays(
       }
     );
     faaAlerts = result?.alerts ?? [];
-  } catch { /* FAA down doesn't blank intl */ }
+    console.log(`[Aviation] FAA: ${faaAlerts.length} alerts`);
+  } catch (err) {
+    console.warn(`[Aviation] FAA fetch failed: ${err instanceof Error ? err.message : 'unknown'}`);
+  }
 
-  // 2. International — with cross-isolate stampede protection
+  // 2. International — cachedFetchJson coalesces concurrent misses into one fetch
   let intlAlerts: AirportDelayAlert[] = [];
   try {
-    intlAlerts = await fetchIntlWithLock();
-  } catch { /* AviationStack + simulation both failed → empty intl */ }
+    const result = await cachedFetchJson<{ alerts: AirportDelayAlert[] }>(
+      INTL_CACHE_KEY, CACHE_TTL, async () => {
+        const nonUs = MONITORED_AIRPORTS.filter(a => a.country !== 'USA');
+        const apiKey = process.env.AVIATIONSTACK_API;
 
-  return { alerts: [...faaAlerts, ...intlAlerts] };
-}
+        if (!apiKey) {
+          console.log('[Aviation] No AVIATIONSTACK_API key — using simulation');
+          const sim = nonUs.map(a => generateSimulatedDelay(a)).filter(Boolean) as AirportDelayAlert[];
+          return { alerts: sim };
+        }
 
-async function fetchIntlWithLock(): Promise<AirportDelayAlert[]> {
-  // Fast path: cache hit
-  const cached = await getCachedJson(INTL_CACHE_KEY);
-  if (cached && typeof cached === 'object' && 'alerts' in (cached as Record<string, unknown>)) {
-    return (cached as { alerts: AirportDelayAlert[] }).alerts;
-  }
+        const avResult = await fetchAviationStackDelays(nonUs);
+        if (!avResult.healthy) {
+          console.warn('[Aviation] AviationStack unhealthy — falling back to simulation');
+          const sim = nonUs.map(a => generateSimulatedDelay(a)).filter(Boolean) as AirportDelayAlert[];
+          return { alerts: sim };
+        }
 
-  // Cache miss — try to acquire Redis lock (SETNX)
-  const gotLock = await tryAcquireLock(INTL_LOCK_KEY, LOCK_TTL);
-
-  if (!gotLock) {
-    // Another isolate is refreshing — wait briefly, then check cache again
-    await new Promise(r => setTimeout(r, 3_000));
-    const retry = await getCachedJson(INTL_CACHE_KEY);
-    if (retry && typeof retry === 'object' && 'alerts' in (retry as Record<string, unknown>)) {
-      return (retry as { alerts: AirportDelayAlert[] }).alerts;
-    }
-    // Still nothing after 3s — fall back to simulation (don't pile on AviationStack)
-    const nonUs = MONITORED_AIRPORTS.filter(a => a.country !== 'USA');
-    return nonUs.map(a => generateSimulatedDelay(a)).filter(Boolean) as AirportDelayAlert[];
-  }
-
-  // We won the lock — do the actual fetch
-  try {
-    const nonUs = MONITORED_AIRPORTS.filter(a => a.country !== 'USA');
-    const apiKey = process.env.AVIATIONSTACK_API;
-
-    let alerts: AirportDelayAlert[];
-    if (!apiKey) {
-      alerts = nonUs.map(a => generateSimulatedDelay(a)).filter(Boolean) as AirportDelayAlert[];
-    } else {
-      const avResult = await fetchAviationStackDelays(nonUs);
-      if (!avResult.healthy) {
-        alerts = nonUs.map(a => generateSimulatedDelay(a)).filter(Boolean) as AirportDelayAlert[];
-      } else {
-        alerts = avResult.alerts;
-      }
-    }
-
-    // Write to cache — all other isolates will pick this up
-    await setCachedJson(INTL_CACHE_KEY, { alerts }, CACHE_TTL);
-    return alerts;
-  } catch {
-    // Fetch failed — still write empty so other isolates don't also try
-    await setCachedJson(INTL_CACHE_KEY, { alerts: [] }, 120);
-    return [];
-  }
-}
-
-async function tryAcquireLock(lockKey: string, ttlSeconds: number): Promise<boolean> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return true; // No Redis → just proceed (single instance)
-
-  try {
-    const resp = await fetch(
-      `${url}/set/${encodeURIComponent(lockKey)}/1/EX/${ttlSeconds}/NX`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        signal: AbortSignal.timeout(2_000),
+        console.log(`[Aviation] AviationStack OK: ${avResult.alerts.length} real alerts`);
+        return { alerts: avResult.alerts };
       }
     );
-    if (!resp.ok) return true; // Redis error → proceed rather than block
-    const data = await resp.json() as { result?: string | null };
-    return data.result === 'OK'; // NX returns OK if set, null if already exists
-  } catch {
-    return true; // Network error → proceed
+    intlAlerts = result?.alerts ?? [];
+    console.log(`[Aviation] Intl: ${intlAlerts.length} alerts`);
+  } catch (err) {
+    console.warn(`[Aviation] Intl fetch failed: ${err instanceof Error ? err.message : 'unknown'}`);
   }
+
+  // 3. NOTAM closures (ICAO API) — overlay on existing alerts
+  let allAlerts = [...faaAlerts, ...intlAlerts];
+  if (process.env.ICAO_API_KEY) {
+    try {
+      const notamResult = await cachedFetchJson<{ closedIcaos: string[]; reasons: Record<string, string> }>(
+        NOTAM_CACHE_KEY, CACHE_TTL, async () => {
+          const mena = MONITORED_AIRPORTS.filter(a => a.region === 'mena');
+          const result = await fetchNotamClosures(mena);
+          const closedIcaos = [...result.closedIcaoCodes];
+          const reasons: Record<string, string> = {};
+          for (const [icao, reason] of result.notamsByIcao) reasons[icao] = reason;
+          return { closedIcaos, reasons };
+        }
+      );
+      if (notamResult && notamResult.closedIcaos.length > 0) {
+        const existingIatas = new Set(allAlerts.map(a => a.iata));
+        for (const icao of notamResult.closedIcaos) {
+          const airport = MONITORED_AIRPORTS.find(a => a.icao === icao);
+          if (!airport) continue;
+          const reason = notamResult.reasons[icao] || 'Airport closure (NOTAM)';
+          if (existingIatas.has(airport.iata)) {
+            const idx = allAlerts.findIndex(a => a.iata === airport.iata);
+            if (idx >= 0) {
+              allAlerts[idx] = buildNotamAlert(airport, reason);
+            }
+          } else {
+            allAlerts.push(buildNotamAlert(airport, reason));
+          }
+        }
+        console.log(`[Aviation] NOTAM: ${notamResult.closedIcaos.length} closures applied`);
+      }
+    } catch (err) {
+      console.warn(`[Aviation] NOTAM fetch failed: ${err instanceof Error ? err.message : 'unknown'}`);
+    }
+  }
+
+  // 4. Fill in ALL monitored airports with no alerts as "normal operations"
+  //    so they always appear on the map (gray dots)
+  const alertedIatas = new Set(allAlerts.map(a => a.iata));
+  let normalCount = 0;
+  for (const airport of MONITORED_AIRPORTS) {
+    if (!alertedIatas.has(airport.iata)) {
+      normalCount++;
+      allAlerts.push({
+        id: `status-${airport.iata}`,
+        iata: airport.iata,
+        icao: airport.icao,
+        name: airport.name,
+        city: airport.city,
+        country: airport.country,
+        location: { latitude: airport.lat, longitude: airport.lon },
+        region: toProtoRegion(airport.region),
+        delayType: toProtoDelayType('general'),
+        severity: toProtoSeverity('normal'),
+        avgDelayMinutes: 0,
+        delayedFlightsPct: 0,
+        cancelledFlights: 0,
+        totalFlights: 0,
+        reason: 'Normal operations',
+        source: toProtoSource('computed'),
+        updatedAt: Date.now(),
+      });
+    }
+  }
+
+  console.log(`[Aviation] Total: ${allAlerts.length} alerts (${normalCount} normal) in ${Date.now() - t0}ms`);
+  return { alerts: allAlerts };
 }
+

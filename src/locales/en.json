@@ -38,7 +38,8 @@
       "climate": "Climate stress",
       "conflictEvents": "conflict events",
       "activeStrikes": "active strikes",
-      "aviationDisruptions": "airport disruptions"
+      "aviationDisruptions": "airport disruptions",
+      "gpsJammingZones": "GPS Jamming Zones"
     },
     "timeAgo": {
       "m": "{{count}}m ago",
@@ -459,7 +460,8 @@
         "climate": "Climate stress",
         "conflictEvents": "conflict events",
         "activeStrikes": "active strikes",
-        "aviationDisruptions": "airport disruptions"
+        "aviationDisruptions": "airport disruptions",
+        "gpsJammingZones": "GPS Jamming Zones"
       },
       "timeAgo": {
         "m": "{{count}}m ago",
@@ -503,7 +505,7 @@
   "components": {
     "webcams": {
       "regions": {
-        "iran": "IRAN",
+        "iran": "IRAN ATTACKS",
         "all": "ALL",
         "mideast": "MIDEAST",
         "europe": "EUROPE",
@@ -842,6 +844,7 @@
         "gulfInvestments": "GCC Investments",
         "tradeRoutes": "Trade Routes",
         "iranAttacks": "Iran Attacks",
+        "gpsJamming": "GPS JAMMING",
         "dayNight": "Day/Night"
       },
       "tooltip": {
@@ -1128,6 +1131,7 @@
       "time": "Time",
       "justNow": "just now",
       "historyCount": "{{count}} alerts in last 24h",
+      "historySummary": "{{count}} alerts in 24h — {{waves}} waves",
       "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding."
     },
     "satelliteFires": {
@@ -1500,6 +1504,13 @@
       "gdelt": "GDELT",
       "riots": "Riots",
       "highSeverity": "High Severity"
+    },
+    "gpsJamming": {
+      "title": "GPS/GNSS Interference",
+      "interference": "Interference",
+      "aircraftAffected": "Aircraft Affected",
+      "aircraftNormal": "Aircraft Normal",
+      "h3Hex": "H3 Hex"
     },
     "flight": {
       "groundStop": "GROUND STOP",

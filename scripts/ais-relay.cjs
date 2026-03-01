@@ -76,6 +76,7 @@ const ALLOW_VERCEL_PREVIEW_ORIGINS = process.env.ALLOW_VERCEL_PREVIEW_ORIGINS ==
 // OREF (Israel Home Front Command) siren alerts — fetched via HTTP proxy (Israel exit)
 const OREF_PROXY_AUTH = process.env.OREF_PROXY_AUTH || ''; // format: user:pass@host:port
 const OREF_ALERTS_URL = 'https://www.oref.org.il/WarningMessages/alert/alerts.json';
+const OREF_HISTORY_URL = 'https://www.oref.org.il/WarningMessages/alert/History/AlertsHistory.json';
 const OREF_POLL_INTERVAL_MS = Math.max(30_000, Number(process.env.OREF_POLL_INTERVAL_MS || 300_000));
 const OREF_ENABLED = !!OREF_PROXY_AUTH;
 const RELAY_OREF_RATE_LIMIT_MAX = Number.isFinite(Number(process.env.RELAY_OREF_RATE_LIMIT_MAX))
@@ -278,6 +279,19 @@ async function initTelegramClientIfNeeded() {
   }
 }
 
+const TELEGRAM_CHANNEL_TIMEOUT_MS = 15_000; // 15s timeout per channel (getEntity + getMessages)
+const TELEGRAM_POLL_CYCLE_TIMEOUT_MS = 180_000; // 3min max for entire poll cycle
+
+function withTimeout(promise, ms, label) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`TIMEOUT after ${ms}ms: ${label}`)), ms);
+    promise.then(
+      v => { clearTimeout(timer); resolve(v); },
+      e => { clearTimeout(timer); reject(e); }
+    );
+  });
+}
+
 async function pollTelegramOnce() {
   const ok = await initTelegramClientIfNeeded();
   if (!ok) return;
@@ -287,20 +301,34 @@ async function pollTelegramOnce() {
 
   const client = telegramState.client;
   const newItems = [];
+  const pollStart = Date.now();
+  let channelsPolled = 0;
+  let channelsFailed = 0;
+  let mediaSkipped = 0;
 
   for (const channel of channels) {
+    if (Date.now() - pollStart > TELEGRAM_POLL_CYCLE_TIMEOUT_MS) {
+      console.warn(`[Relay] Telegram poll cycle timeout (${Math.round(TELEGRAM_POLL_CYCLE_TIMEOUT_MS / 1000)}s), polled ${channelsPolled}/${channels.length} channels`);
+      break;
+    }
+
     const handle = channel.handle;
     const minId = telegramState.cursorByHandle[handle] || 0;
 
     try {
-      const entity = await client.getEntity(handle);
-      const msgs = await client.getMessages(entity, {
-        limit: Math.max(1, Math.min(50, channel.maxMessages || 25)),
-        minId,
-      });
+      const entity = await withTimeout(client.getEntity(handle), TELEGRAM_CHANNEL_TIMEOUT_MS, `getEntity(${handle})`);
+      const msgs = await withTimeout(
+        client.getMessages(entity, {
+          limit: Math.max(1, Math.min(50, channel.maxMessages || 25)),
+          minId,
+        }),
+        TELEGRAM_CHANNEL_TIMEOUT_MS,
+        `getMessages(${handle})`
+      );
 
       for (const msg of msgs) {
-        if (!msg || !msg.id || !msg.message) continue;
+        if (!msg || !msg.id) continue;
+        if (!msg.message) { mediaSkipped++; continue; }
         const item = normalizeTelegramMessage(msg, channel);
         newItems.push(item);
         if (!telegramState.cursorByHandle[handle] || msg.id > telegramState.cursorByHandle[handle]) {
@@ -308,10 +336,11 @@ async function pollTelegramOnce() {
         }
       }
 
-      // Gentle rate limiting between channels
+      channelsPolled++;
       await new Promise(r => setTimeout(r, Math.max(300, Number(process.env.TELEGRAM_RATE_LIMIT_MS || 800))));
     } catch (e) {
       const em = e?.message || String(e);
+      channelsFailed++;
       telegramState.lastError = `poll ${handle} failed: ${em}`;
       console.warn('[Relay] Telegram poll error:', telegramState.lastError);
       if (/AUTH_KEY_DUPLICATED/.test(em)) {
@@ -320,6 +349,11 @@ async function pollTelegramOnce() {
         console.error('[Relay] Telegram session permanently invalidated (AUTH_KEY_DUPLICATED). Generate a new session with: node scripts/telegram/session-auth.mjs');
         try { telegramState.client?.disconnect(); } catch {}
         telegramState.client = null;
+        break;
+      }
+      if (/FLOOD_WAIT/.test(em)) {
+        const wait = parseInt(em.match(/(\d+)/)?.[1] || '60', 10);
+        console.warn(`[Relay] Telegram FLOOD_WAIT ${wait}s — stopping poll cycle early`);
         break;
       }
     }
@@ -338,24 +372,47 @@ async function pollTelegramOnce() {
   }
 
   telegramState.lastPollAt = Date.now();
+  const elapsed = ((Date.now() - pollStart) / 1000).toFixed(1);
+  console.log(`[Relay] Telegram poll: ${channelsPolled}/${channels.length} channels, ${newItems.length} new msgs, ${telegramState.items.length} total, ${channelsFailed} errors, ${mediaSkipped} media-only skipped (${elapsed}s)`);
 }
 
 let telegramPollInFlight = false;
+let telegramPollStartedAt = 0;
 
 function guardedTelegramPoll() {
-  if (telegramPollInFlight) return;
+  if (telegramPollInFlight) {
+    const stuck = Date.now() - telegramPollStartedAt;
+    if (stuck > TELEGRAM_POLL_CYCLE_TIMEOUT_MS + 30_000) {
+      console.warn(`[Relay] Telegram poll stuck for ${Math.round(stuck / 1000)}s — force-clearing in-flight flag`);
+      telegramPollInFlight = false;
+    } else {
+      return;
+    }
+  }
   telegramPollInFlight = true;
+  telegramPollStartedAt = Date.now();
   pollTelegramOnce()
     .catch(e => console.warn('[Relay] Telegram poll error:', e?.message || e))
     .finally(() => { telegramPollInFlight = false; });
 }
 
+const TELEGRAM_STARTUP_DELAY_MS = Math.max(0, Number(process.env.TELEGRAM_STARTUP_DELAY_MS || 60_000));
+
 function startTelegramPollLoop() {
   if (!TELEGRAM_ENABLED) return;
   loadTelegramChannels();
-  guardedTelegramPoll();
-  setInterval(guardedTelegramPoll, TELEGRAM_POLL_INTERVAL_MS).unref?.();
-  console.log('[Relay] Telegram poll loop started');
+  if (TELEGRAM_STARTUP_DELAY_MS > 0) {
+    console.log(`[Relay] Telegram connect delayed ${TELEGRAM_STARTUP_DELAY_MS}ms (waiting for old container to disconnect)`);
+    setTimeout(() => {
+      guardedTelegramPoll();
+      setInterval(guardedTelegramPoll, TELEGRAM_POLL_INTERVAL_MS).unref?.();
+      console.log('[Relay] Telegram poll loop started');
+    }, TELEGRAM_STARTUP_DELAY_MS);
+  } else {
+    guardedTelegramPoll();
+    setInterval(guardedTelegramPoll, TELEGRAM_POLL_INTERVAL_MS).unref?.();
+    console.log('[Relay] Telegram poll loop started');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -367,18 +424,54 @@ function stripBom(text) {
   return text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
 }
 
-function orefCurlFetch(proxyAuth, url) {
+function redactOrefError(msg) {
+  return String(msg || '').replace(/\/\/[^@]+@/g, '//<redacted>@');
+}
+
+function orefDateToUTC(dateStr) {
+  if (!dateStr || !dateStr.includes(' ')) return new Date().toISOString();
+  const [datePart, timePart] = dateStr.split(' ');
+  const [y, m, d] = datePart.split('-').map(Number);
+  const [hh, mm, ss] = timePart.split(':').map(Number);
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Jerusalem',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  });
+  function partsAt(ms) {
+    const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+  }
+  const base2 = Date.UTC(y, m - 1, d, hh - 2, mm, ss);
+  const base3 = Date.UTC(y, m - 1, d, hh - 3, mm, ss);
+  const candidates = [];
+  if (partsAt(base2) === dateStr) candidates.push(base2);
+  if (partsAt(base3) === dateStr) candidates.push(base3);
+  const ms = candidates.length ? Math.min(...candidates) : base2;
+  return new Date(ms).toISOString();
+}
+
+function orefCurlFetch(proxyAuth, url, { toFile } = {}) {
   // Use curl via child_process — Node.js TLS fingerprint (JA3) gets blocked by Akamai,
   // but curl's fingerprint passes. curl is available on Railway (Linux) and macOS.
   // execFileSync avoids shell interpolation — safe with special chars in proxy credentials.
   const { execFileSync } = require('child_process');
   const proxyUrl = `http://${proxyAuth}`;
-  const result = execFileSync('curl', [
-    '-s', '-x', proxyUrl, '--max-time', '15',
+  const args = [
+    '-sS', '-x', proxyUrl, '--max-time', '15',
     '-H', 'Accept: application/json',
     '-H', 'Referer: https://www.oref.org.il/',
-    url,
-  ], { encoding: 'utf8', timeout: 20000 });
+    '-H', 'X-Requested-With: XMLHttpRequest',
+  ];
+  if (toFile) {
+    // Write directly to disk — avoids stdout buffer overflow (ENOBUFS) for large responses
+    args.push('-o', toFile);
+    args.push(url);
+    execFileSync('curl', args, { timeout: 20000, stdio: ['pipe', 'pipe', 'pipe'] });
+    return require('fs').readFileSync(toFile, 'utf8');
+  }
+  args.push(url);
+  const result = execFileSync('curl', args, { encoding: 'utf8', timeout: 20000, stdio: ['pipe', 'pipe', 'pipe'] });
   return result;
 }
 
@@ -415,18 +508,72 @@ async function orefFetchAlerts() {
     orefState.history = orefState.history.filter(
       h => new Date(h.timestamp).getTime() > cutoff
     );
-    orefState.historyCount24h = orefState.history.length;
+    orefState.historyCount24h = orefState.history.reduce((sum, h) => {
+      return sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0);
+    }, 0);
   } catch (err) {
-    orefState.lastError = err.message || String(err);
+    const stderr = err.stderr ? err.stderr.toString().trim() : '';
+    orefState.lastError = redactOrefError(stderr || err.message);
     console.warn('[Relay] OREF poll error:', orefState.lastError);
   }
 }
 
-function startOrefPollLoop() {
+async function orefBootstrapHistory() {
+  const tmpFile = require('path').join(require('os').tmpdir(), `oref-history-${Date.now()}.json`);
+  let raw;
+  try {
+    raw = orefCurlFetch(OREF_PROXY_AUTH, OREF_HISTORY_URL, { toFile: tmpFile });
+  } finally {
+    try { require('fs').unlinkSync(tmpFile); } catch {}
+  }
+  const cleaned = stripBom(raw).trim();
+  if (!cleaned || cleaned === '[]') return;
+
+  const allRecords = JSON.parse(cleaned);
+  const records = allRecords.slice(-500);
+  const waves = new Map();
+  for (const r of records) {
+    const key = r.alertDate;
+    if (!waves.has(key)) waves.set(key, []);
+    waves.get(key).push(r);
+  }
+  const history = [];
+  let totalAlertRecords = 0;
+  for (const [dateStr, recs] of waves) {
+    const iso = orefDateToUTC(dateStr);
+    const byType = new Map();
+    let typeIdx = 0;
+    for (const r of recs) {
+      const k = `${r.category}|${r.title}`;
+      if (!byType.has(k)) {
+        byType.set(k, {
+          id: `${r.category}-${typeIdx++}-${dateStr.replace(/[^0-9]/g, '')}`,
+          cat: String(r.category),
+          title: r.title,
+          data: [],
+          desc: '',
+          alertDate: dateStr,
+        });
+      }
+      byType.get(k).data.push(r.data);
+      totalAlertRecords++;
+    }
+    history.push({ alerts: [...byType.values()], timestamp: new Date(iso).toISOString() });
+  }
+  history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  orefState.history = history;
+  orefState.historyCount24h = totalAlertRecords;
+  console.log(`[Relay] OREF history bootstrap: ${totalAlertRecords} records across ${history.length} waves`);
+}
+
+async function startOrefPollLoop() {
   if (!OREF_ENABLED) {
     console.log('[Relay] OREF disabled (no OREF_PROXY_AUTH)');
     return;
   }
+  await orefBootstrapHistory().catch(err =>
+    console.warn('[Relay] OREF history bootstrap failed:', redactOrefError(err.message))
+  );
   orefFetchAlerts().catch(e => console.warn('[Relay] OREF initial poll error:', e?.message || e));
   setInterval(() => {
     orefFetchAlerts().catch(e => console.warn('[Relay] OREF poll error:', e?.message || e));
@@ -489,6 +636,7 @@ function getRouteGroup(pathname) {
   if (pathname.startsWith('/polymarket')) return 'polymarket';
   if (pathname.startsWith('/ucdp-events')) return 'ucdp-events';
   if (pathname.startsWith('/oref')) return 'oref';
+  if (pathname === '/notam') return 'notam';
   return 'other';
 }
 
@@ -1995,9 +2143,11 @@ const polymarketCircuitBreaker = { failures: 0, openUntil: 0 };
 const POLYMARKET_CB_THRESHOLD = 5;
 const POLYMARKET_CB_COOLDOWN_MS = 60 * 1000;
 
-// Concurrent upstream limiter — caps in-flight upstream requests
+// Concurrent upstream limiter — queues excess requests instead of rejecting them
 const POLYMARKET_MAX_CONCURRENT = 3;
+const POLYMARKET_MAX_QUEUED = 20;
 let polymarketActiveUpstream = 0;
+const polymarketQueue = []; // Array of () => void (resolve-waiters)
 
 function tripPolymarketCircuitBreaker() {
   polymarketCircuitBreaker.failures++;
@@ -2007,58 +2157,78 @@ function tripPolymarketCircuitBreaker() {
   }
 }
 
-function fetchPolymarketUpstream(cacheKey, endpoint, params, tag) {
-  if (polymarketActiveUpstream >= POLYMARKET_MAX_CONCURRENT) {
-    polymarketCache.set(cacheKey, { data: '[]', timestamp: Date.now() - POLYMARKET_CACHE_TTL_MS + POLYMARKET_NEG_TTL_MS });
-    return Promise.resolve(null);
+function releasePolymarketSlot() {
+  polymarketActiveUpstream--;
+  if (polymarketQueue.length > 0) {
+    const next = polymarketQueue.shift();
+    polymarketActiveUpstream++;
+    next();
   }
+}
 
-  const gammaUrl = `https://gamma-api.polymarket.com/${endpoint}?${params}`;
-  console.log('[Relay] Polymarket request (MISS):', endpoint, tag || '');
-  polymarketActiveUpstream++;
+function acquirePolymarketSlot() {
+  if (polymarketActiveUpstream < POLYMARKET_MAX_CONCURRENT) {
+    polymarketActiveUpstream++;
+    return Promise.resolve();
+  }
+  if (polymarketQueue.length >= POLYMARKET_MAX_QUEUED) {
+    return Promise.reject(new Error('queue full'));
+  }
+  return new Promise((resolve) => { polymarketQueue.push(resolve); });
+}
 
-  return new Promise((resolve) => {
-    let finalized = false;
-    function finalize(ok) {
-      if (finalized) return;
-      finalized = true;
-      polymarketActiveUpstream--;
-      if (ok) {
-        polymarketCircuitBreaker.failures = 0;
-      } else {
-        tripPolymarketCircuitBreaker();
-        polymarketCache.set(cacheKey, { data: '[]', timestamp: Date.now() - POLYMARKET_CACHE_TTL_MS + POLYMARKET_NEG_TTL_MS });
-      }
+function fetchPolymarketUpstream(cacheKey, endpoint, params, tag) {
+  return acquirePolymarketSlot().catch(() => 'REJECTED').then((slotResult) => {
+    if (slotResult === 'REJECTED') {
+      polymarketCache.set(cacheKey, { data: '[]', timestamp: Date.now() - POLYMARKET_CACHE_TTL_MS + POLYMARKET_NEG_TTL_MS });
+      return null;
     }
-    const request = https.get(gammaUrl, {
-      headers: { 'Accept': 'application/json' },
-      timeout: 10000,
-    }, (response) => {
-      if (response.statusCode !== 200) {
-        console.error(`[Relay] Polymarket upstream ${response.statusCode} (failures: ${polymarketCircuitBreaker.failures + 1})`);
-        response.resume();
+    const gammaUrl = `https://gamma-api.polymarket.com/${endpoint}?${params}`;
+    console.log('[Relay] Polymarket request (MISS):', endpoint, tag || '');
+
+    return new Promise((resolve) => {
+      let finalized = false;
+      function finalize(ok) {
+        if (finalized) return;
+        finalized = true;
+        releasePolymarketSlot();
+        if (ok) {
+          polymarketCircuitBreaker.failures = 0;
+        } else {
+          tripPolymarketCircuitBreaker();
+          polymarketCache.set(cacheKey, { data: '[]', timestamp: Date.now() - POLYMARKET_CACHE_TTL_MS + POLYMARKET_NEG_TTL_MS });
+        }
+      }
+      const request = https.get(gammaUrl, {
+        headers: { 'Accept': 'application/json' },
+        timeout: 10000,
+      }, (response) => {
+        if (response.statusCode !== 200) {
+          console.error(`[Relay] Polymarket upstream ${response.statusCode} (failures: ${polymarketCircuitBreaker.failures + 1})`);
+          response.resume();
+          finalize(false);
+          resolve(null);
+          return;
+        }
+        let data = '';
+        response.on('data', chunk => data += chunk);
+        response.on('end', () => {
+          finalize(true);
+          polymarketCache.set(cacheKey, { data, timestamp: Date.now() });
+          resolve(data);
+        });
+        response.on('error', () => { finalize(false); resolve(null); });
+      });
+      request.on('error', (err) => {
+        console.error('[Relay] Polymarket error:', err.message);
         finalize(false);
         resolve(null);
-        return;
-      }
-      let data = '';
-      response.on('data', chunk => data += chunk);
-      response.on('end', () => {
-        finalize(true);
-        polymarketCache.set(cacheKey, { data, timestamp: Date.now() });
-        resolve(data);
       });
-      response.on('error', () => { finalize(false); });
-    });
-    request.on('error', (err) => {
-      console.error('[Relay] Polymarket error:', err.message);
-      finalize(false);
-      resolve(null);
-    });
-    request.on('timeout', () => {
-      request.destroy();
-      finalize(false);
-      resolve(null);
+      request.on('timeout', () => {
+        request.destroy();
+        finalize(false);
+        resolve(null);
+      });
     });
   });
 }
@@ -2073,18 +2243,30 @@ function handlePolymarketRequest(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
   // Build canonical params FIRST so cache key is deterministic regardless of
-  // query-string ordering or tag vs tag_slug alias
+  // query-string ordering, tag vs tag_slug alias, or varying limit values.
+  // Cache key excludes limit — always fetch upstream with limit=50, slice on serve.
+  // This prevents cache fragmentation from different callers (limit=20 vs limit=30).
   const endpoint = url.searchParams.get('endpoint') || 'markets';
+  const requestedLimit = Math.max(1, Math.min(100, parseInt(url.searchParams.get('limit') || '50', 10) || 50));
+  const upstreamLimit = 50; // canonical upstream limit for cache sharing
   const params = new URLSearchParams();
   params.set('closed', url.searchParams.get('closed') || 'false');
   params.set('order', url.searchParams.get('order') || 'volume');
   params.set('ascending', url.searchParams.get('ascending') || 'false');
-  const limit = Math.max(1, Math.min(100, parseInt(url.searchParams.get('limit') || '50', 10) || 50));
-  params.set('limit', String(limit));
+  params.set('limit', String(upstreamLimit));
   const tag = url.searchParams.get('tag') || url.searchParams.get('tag_slug');
   if (tag && endpoint === 'events') params.set('tag_slug', tag.replace(/[^a-z0-9-]/gi, '').slice(0, 100));
 
   const cacheKey = endpoint + ':' + params.toString();
+
+  function sliceToLimit(jsonStr) {
+    if (requestedLimit >= upstreamLimit) return jsonStr;
+    try {
+      const arr = JSON.parse(jsonStr);
+      if (!Array.isArray(arr)) return jsonStr;
+      return JSON.stringify(arr.slice(0, requestedLimit));
+    } catch { return jsonStr; }
+  }
 
   const cached = polymarketCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < POLYMARKET_CACHE_TTL_MS) {
@@ -2094,7 +2276,7 @@ function handlePolymarketRequest(req, res) {
       'CDN-Cache-Control': 'public, max-age=600',
       'X-Cache': 'HIT',
       'X-Polymarket-Source': 'railway-cache',
-    }, cached.data);
+    }, sliceToLimit(cached.data));
   }
 
   // Circuit breaker open — serve stale cache or empty, skip upstream
@@ -2127,7 +2309,7 @@ function handlePolymarketRequest(req, res) {
         'CDN-Cache-Control': 'public, max-age=600',
         'X-Cache': 'MISS',
         'X-Polymarket-Source': 'railway',
-      }, data);
+      }, sliceToLimit(data));
     } else if (cached) {
       sendCompressed(req, res, 200, {
         'Content-Type': 'application/json',
@@ -2135,7 +2317,7 @@ function handlePolymarketRequest(req, res) {
         'CDN-Cache-Control': 'no-store',
         'X-Cache': 'STALE',
         'X-Polymarket-Source': 'railway-stale',
-      }, cached.data);
+      }, sliceToLimit(cached.data));
     } else {
       safeEnd(res, 200, { 'Content-Type': 'application/json' }, JSON.stringify([]));
     }
@@ -2365,6 +2547,94 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
+// ─────────────────────────────────────────────────────────────
+// NOTAM proxy — ICAO API times out from Vercel edge, relay proxies
+// ─────────────────────────────────────────────────────────────
+const ICAO_API_KEY = process.env.ICAO_API_KEY;
+const notamCache = { data: null, ts: 0 };
+const NOTAM_CACHE_TTL = 30 * 60 * 1000; // 30 min
+
+function handleNotamProxyRequest(req, res) {
+  const url = new URL(req.url, `http://localhost:${PORT}`);
+  const locations = url.searchParams.get('locations');
+  if (!locations) {
+    return sendCompressed(req, res, 400, { 'Content-Type': 'application/json' },
+      JSON.stringify({ error: 'Missing locations parameter' }));
+  }
+  if (!ICAO_API_KEY) {
+    return sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+      JSON.stringify([]));
+  }
+
+  const cacheKey = locations.split(',').sort().join(',');
+  if (notamCache.data && notamCache.key === cacheKey && Date.now() - notamCache.ts < NOTAM_CACHE_TTL) {
+    return sendCompressed(req, res, 200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=1800, s-maxage=1800',
+      'X-Cache': 'HIT',
+    }, notamCache.data);
+  }
+
+  const apiUrl = `https://dataservices.icao.int/api/notams-realtime-list?api_key=${ICAO_API_KEY}&format=json&locations=${encodeURIComponent(locations)}`;
+
+  const request = https.get(apiUrl, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
+    timeout: 25000,
+  }, (upstream) => {
+    if (upstream.statusCode !== 200) {
+      console.warn(`[Relay] NOTAM upstream HTTP ${upstream.statusCode}`);
+      upstream.resume();
+      return sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+        JSON.stringify([]));
+    }
+    const ct = upstream.headers['content-type'] || '';
+    if (ct.includes('text/html')) {
+      console.warn('[Relay] NOTAM upstream returned HTML (challenge page)');
+      upstream.resume();
+      return sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+        JSON.stringify([]));
+    }
+    const chunks = [];
+    upstream.on('data', c => chunks.push(c));
+    upstream.on('end', () => {
+      const body = Buffer.concat(chunks).toString();
+      try {
+        JSON.parse(body); // validate JSON
+        notamCache.data = body;
+        notamCache.key = cacheKey;
+        notamCache.ts = Date.now();
+        console.log(`[Relay] NOTAM: ${body.length} bytes for ${locations}`);
+        sendCompressed(req, res, 200, {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=1800, s-maxage=1800',
+          'X-Cache': 'MISS',
+        }, body);
+      } catch {
+        console.warn('[Relay] NOTAM: invalid JSON response');
+        sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+          JSON.stringify([]));
+      }
+    });
+  });
+
+  request.on('error', (err) => {
+    console.warn(`[Relay] NOTAM error: ${err.message}`);
+    if (!res.headersSent) {
+      sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+        JSON.stringify([]));
+    }
+  });
+
+  request.on('timeout', () => {
+    request.destroy();
+    console.warn('[Relay] NOTAM timeout (25s)');
+    if (!res.headersSent) {
+      sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
+        JSON.stringify([]));
+    }
+  });
+}
+
 // CORS origin allowlist — only our domains can use this relay
 const ALLOWED_ORIGINS = [
   'https://worldmonitor.app',
@@ -2441,6 +2711,9 @@ const server = http.createServer(async (req, res) => {
         items: telegramState.items?.length || 0,
         lastPollAt: telegramState.lastPollAt ? new Date(telegramState.lastPollAt).toISOString() : null,
         hasError: !!telegramState.lastError,
+        lastError: telegramState.lastError || null,
+        pollInFlight: telegramPollInFlight,
+        pollInFlightSince: telegramPollInFlight && telegramPollStartedAt ? new Date(telegramPollStartedAt).toISOString() : null,
       },
       oref: {
         enabled: OREF_ENABLED,
@@ -2724,12 +2997,17 @@ const server = http.createServer(async (req, res) => {
           return sendError(502, 'Too many redirects');
         }
 
+        const conditionalHeaders = {};
+        if (rssCached?.etag) conditionalHeaders['If-None-Match'] = rssCached.etag;
+        if (rssCached?.lastModified) conditionalHeaders['If-Modified-Since'] = rssCached.lastModified;
+
         const protocol = url.startsWith('https') ? https : http;
         const request = protocol.get(url, {
           headers: {
             'Accept': 'application/rss+xml, application/xml, text/xml, */*',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.9',
+            ...conditionalHeaders,
           },
           timeout: 15000
         }, (response) => {
@@ -2739,6 +3017,20 @@ const server = http.createServer(async (req, res) => {
               : new URL(response.headers.location, url).href;
             logThrottled('log', `rss-redirect:${feedUrl}:${redirectUrl}`, `[Relay] Following redirect to: ${redirectUrl}`);
             return fetchWithRedirects(redirectUrl, redirectCount + 1);
+          }
+
+          if (response.statusCode === 304 && rssCached) {
+            responseHandled = true;
+            rssCached.timestamp = Date.now();
+            resolveInFlight();
+            logThrottled('log', `rss-revalidated:${feedUrl}`, '[Relay] RSS 304 revalidated:', feedUrl);
+            sendCompressed(req, res, 200, {
+              'Content-Type': rssCached.contentType || 'application/xml',
+              'Cache-Control': 'public, max-age=300',
+              'CDN-Cache-Control': 'public, max-age=600, stale-while-revalidate=300',
+              'X-Cache': 'REVALIDATED',
+            }, rssCached.data);
+            return;
           }
 
           const encoding = response.headers['content-encoding'];
@@ -2759,7 +3051,11 @@ const server = http.createServer(async (req, res) => {
               const oldest = rssResponseCache.keys().next().value;
               if (oldest) rssResponseCache.delete(oldest);
             }
-            rssResponseCache.set(feedUrl, { data, contentType: 'application/xml', statusCode: response.statusCode, timestamp: Date.now() });
+            rssResponseCache.set(feedUrl, {
+              data, contentType: 'application/xml', statusCode: response.statusCode, timestamp: Date.now(),
+              etag: response.headers['etag'] || null,
+              lastModified: response.headers['last-modified'] || null,
+            });
             if (response.statusCode < 200 || response.statusCode >= 300) {
               logThrottled('warn', `rss-upstream:${feedUrl}:${response.statusCode}`, `[Relay] RSS upstream ${response.statusCode} for ${feedUrl}`);
             }
@@ -2846,6 +3142,8 @@ const server = http.createServer(async (req, res) => {
     handlePolymarketRequest(req, res);
   } else if (pathname === '/youtube-live') {
     handleYouTubeLiveRequest(req, res);
+  } else if (pathname === '/notam') {
+    handleNotamProxyRequest(req, res);
   } else {
     res.writeHead(404);
     res.end();

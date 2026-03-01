@@ -59,8 +59,9 @@ const DIRECT_RAILWAY_POLY_URL = wsRelayUrl
   ? wsRelayUrl.replace('wss://', 'https://').replace('ws://', 'http://').replace(/\/$/, '') + '/polymarket'
   : '';
 const isLocalhostRuntime = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const PROXY_STRIP_KEYS = new Set(['end_date_min', 'active', 'archived']);
 
-const breaker = createCircuitBreaker<PredictionMarket[]>({ name: 'Polymarket', cacheTtlMs: 5 * 60 * 1000, persistCache: true });
+const breaker = createCircuitBreaker<PredictionMarket[]>({ name: 'Polymarket', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
 
 // Sebuf client for strategy 4
 const client = new PredictionServiceClient('', { fetch: (...args) => globalThis.fetch(...args) });
@@ -122,9 +123,9 @@ async function polyFetch(endpoint: 'events' | 'markets', params: Record<string, 
     } catch { /* Tauri command failed, fall through to proxy */ }
   }
 
-  // Proxy params (expects 'tag' not 'tag_slug' for Vercel handler)
   const proxyParams: Record<string, string> = { endpoint };
   for (const [k, v] of Object.entries(params)) {
+    if (PROXY_STRIP_KEYS.has(k)) continue;
     proxyParams[k === 'tag_slug' ? 'tag' : k] = v;
   }
   const proxyQs = new URLSearchParams(proxyParams).toString();

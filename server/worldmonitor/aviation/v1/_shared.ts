@@ -18,8 +18,10 @@ import { CHROME_UA } from '../../../_shared/constants';
 
 export const FAA_URL = 'https://nasstatus.faa.gov/api/airport-status-information';
 export const AVIATIONSTACK_URL = 'https://api.aviationstack.com/v1/flights';
+export const ICAO_NOTAM_URL = 'https://dataservices.icao.int/api/notams-realtime-list';
 const BATCH_CONCURRENCY = 10;
 const MIN_FLIGHTS_FOR_CLOSURE = 10;
+const NOTAM_CLOSURE_QCODES = new Set(['FA', 'AH', 'AL', 'AW', 'AC', 'AM']);
 
 // ---------- XML Parser ----------
 
@@ -199,14 +201,21 @@ export async function fetchAviationStackDelays(
   allAirports: MonitoredAirport[]
 ): Promise<AviationStackResult> {
   const apiKey = process.env.AVIATIONSTACK_API;
-  if (!apiKey) return { alerts: [], healthy: false };
+  if (!apiKey) {
+    console.log('[Aviation] No AVIATIONSTACK_API key — skipping');
+    return { alerts: [], healthy: false };
+  }
 
+  console.log(`[Aviation] Querying ${allAirports.length} airports (concurrency=${BATCH_CONCURRENCY})`);
   const alerts: AirportDelayAlert[] = [];
   let succeeded = 0, failed = 0;
   const deadline = Date.now() + 50_000;
 
   for (let i = 0; i < allAirports.length; i += BATCH_CONCURRENCY) {
-    if (Date.now() >= deadline) break;
+    if (Date.now() >= deadline) {
+      console.warn(`[Aviation] Deadline hit after ${succeeded + failed}/${allAirports.length} airports`);
+      break;
+    }
     const chunk = allAirports.slice(i, i + BATCH_CONCURRENCY);
     const results = await Promise.allSettled(
       chunk.map(airport => fetchSingleAirport(apiKey, airport))
@@ -222,6 +231,7 @@ export async function fetchAviationStackDelays(
   }
 
   const healthy = allAirports.length < 5 || failed <= succeeded;
+  console.log(`[Aviation] Done: ${succeeded} ok, ${failed} failed, ${alerts.length} alerts, healthy=${healthy}`);
   if (!healthy) {
     console.warn(`[Aviation] Systemic failure: ${failed}/${failed + succeeded} airports failed`);
   }
@@ -243,9 +253,21 @@ async function fetchSingleAirport(
       console.warn(`[Aviation] ${airport.iata}: HTTP ${resp.status}`);
       return { ok: false, alert: null };
     }
-    const json = await resp.json() as { data?: AviationStackFlight[] };
-    return { ok: true, alert: aggregateFlights(airport, json?.data ?? []) };
-  } catch {
+    const json = await resp.json() as { data?: AviationStackFlight[]; error?: { message?: string } };
+    if (json.error) {
+      console.warn(`[Aviation] ${airport.iata}: API error: ${json.error.message}`);
+      return { ok: false, alert: null };
+    }
+    const flights = json?.data ?? [];
+    const alert = aggregateFlights(airport, flights);
+    if (flights.length > 0) {
+      const cancelled = flights.filter(f => f.flight_status === 'cancelled').length;
+      const delayed = flights.filter(f => f.departure?.delay && f.departure.delay > 0).length;
+      console.log(`[Aviation] ${airport.iata}: ${flights.length} flights, ${cancelled} cancelled, ${delayed} delayed → ${alert ? alert.severity.replace('FLIGHT_DELAY_SEVERITY_', '') : 'normal'}`);
+    }
+    return { ok: true, alert };
+  } catch (err) {
+    console.warn(`[Aviation] ${airport.iata}: fetch error: ${err instanceof Error ? err.message : 'unknown'}`);
     return { ok: false, alert: null };
   }
 }
@@ -276,6 +298,12 @@ function aggregateFlights(
   } else if (cancelledPct >= 50 && total >= MIN_FLIGHTS_FOR_CLOSURE) {
     severity = 'major'; delayType = 'ground_stop';
     reason = `${Math.round(cancelledPct)}% flights cancelled`;
+  } else if (cancelledPct >= 20 && total >= MIN_FLIGHTS_FOR_CLOSURE) {
+    severity = 'moderate'; delayType = 'ground_delay';
+    reason = `${Math.round(cancelledPct)}% flights cancelled`;
+  } else if (cancelledPct >= 10 && total >= MIN_FLIGHTS_FOR_CLOSURE) {
+    severity = 'minor'; delayType = 'general';
+    reason = `${Math.round(cancelledPct)}% flights cancelled`;
   } else if (avgDelay > 0) {
     severity = determineSeverity(avgDelay, delayedPct);
     delayType = avgDelay >= 60 ? 'ground_delay' : 'general';
@@ -298,6 +326,153 @@ function aggregateFlights(
     cancelledFlights: cancelled,
     totalFlights: total,
     reason,
+    source: toProtoSource('computed'),
+    updatedAt: Date.now(),
+  };
+}
+
+// ---------- NOTAM closure detection (ICAO API) ----------
+
+interface IcaoNotam {
+  id?: string;
+  location?: string;
+  itema?: string;
+  iteme?: string;
+  code23?: string;
+  code45?: string;
+  scope?: string;
+  startvalidity?: number;
+  endvalidity?: number;
+}
+
+export interface NotamClosureResult {
+  closedIcaoCodes: Set<string>;
+  notamsByIcao: Map<string, string>;
+}
+
+function getRelayBaseUrl(): string | null {
+  const relayUrl = process.env.WS_RELAY_URL;
+  if (!relayUrl) return null;
+  return relayUrl
+    .replace('wss://', 'https://')
+    .replace('ws://', 'http://')
+    .replace(/\/$/, '');
+}
+
+function getRelayHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'User-Agent': CHROME_UA };
+  const relaySecret = process.env.RELAY_SHARED_SECRET;
+  if (relaySecret) {
+    const relayHeader = (process.env.RELAY_AUTH_HEADER || 'x-relay-key').toLowerCase();
+    headers[relayHeader] = relaySecret;
+    headers.Authorization = `Bearer ${relaySecret}`;
+  }
+  return headers;
+}
+
+export async function fetchNotamClosures(
+  airports: MonitoredAirport[]
+): Promise<NotamClosureResult> {
+  const apiKey = process.env.ICAO_API_KEY;
+  const result: NotamClosureResult = { closedIcaoCodes: new Set(), notamsByIcao: new Map() };
+  if (!apiKey) {
+    console.log('[Aviation] NOTAM: no ICAO_API_KEY — skipping');
+    return result;
+  }
+
+  const relayBase = getRelayBaseUrl();
+  const icaoCodes = airports.map(a => a.icao);
+  const now = Math.floor(Date.now() / 1000);
+
+  // Send all locations in one request (relay or direct)
+  const locations = icaoCodes.join(',');
+  let notams: IcaoNotam[] = [];
+
+  try {
+    if (relayBase) {
+      // Route through Railway relay — avoids Vercel edge timeout / CloudFront blocking
+      const relayUrl = `${relayBase}/notam?locations=${encodeURIComponent(locations)}`;
+      console.log(`[Aviation] NOTAM: fetching via relay for ${icaoCodes.length} airports`);
+      const resp = await fetch(relayUrl, {
+        headers: getRelayHeaders(),
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!resp.ok) {
+        console.warn(`[Aviation] NOTAM relay: HTTP ${resp.status}`);
+        return result;
+      }
+      const data = await resp.json();
+      if (Array.isArray(data)) notams = data;
+    } else {
+      // Direct ICAO call (slower from Vercel, may timeout)
+      console.log(`[Aviation] NOTAM: fetching direct for ${icaoCodes.length} airports`);
+      const url = `${ICAO_NOTAM_URL}?api_key=${apiKey}&format=json&locations=${locations}`;
+      const resp = await fetch(url, {
+        headers: { 'User-Agent': CHROME_UA },
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!resp.ok) {
+        console.warn(`[Aviation] NOTAM direct: HTTP ${resp.status}`);
+        return result;
+      }
+      const contentType = resp.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        console.warn('[Aviation] NOTAM direct: got HTML instead of JSON');
+        return result;
+      }
+      const data = await resp.json();
+      if (Array.isArray(data)) notams = data;
+    }
+  } catch (err) {
+    console.warn(`[Aviation] NOTAM fetch: ${err instanceof Error ? err.message : 'unknown'}`);
+    return result;
+  }
+
+  console.log(`[Aviation] NOTAM: ${notams.length} raw NOTAMs received`);
+
+  for (const n of notams) {
+    const icao = n.itema || n.location || '';
+    if (!icao || !icaoCodes.includes(icao)) continue;
+    if (n.endvalidity && n.endvalidity < now) continue;
+
+    const code23 = (n.code23 || '').toUpperCase();
+    const code45 = (n.code45 || '').toUpperCase();
+    const text = (n.iteme || '').toUpperCase();
+    const isClosureCode = NOTAM_CLOSURE_QCODES.has(code23) &&
+      (code45 === 'LC' || code45 === 'AS' || code45 === 'AU' || code45 === 'XX' || code45 === 'AW');
+    const isClosureText = /\b(AD CLSD|AIRPORT CLOSED|AIRSPACE CLOSED|AD NOT AVBL|CLSD TO ALL)\b/.test(text);
+
+    if (isClosureCode || isClosureText) {
+      result.closedIcaoCodes.add(icao);
+      result.notamsByIcao.set(icao, n.iteme || 'Airport closure (NOTAM)');
+    }
+  }
+
+  if (result.closedIcaoCodes.size > 0) {
+    console.log(`[Aviation] NOTAM closures: ${[...result.closedIcaoCodes].join(', ')}`);
+  } else {
+    console.log('[Aviation] NOTAM: no closures found');
+  }
+  return result;
+}
+
+export function buildNotamAlert(airport: MonitoredAirport, reason: string): AirportDelayAlert {
+  return {
+    id: `notam-${airport.iata}`,
+    iata: airport.iata,
+    icao: airport.icao,
+    name: airport.name,
+    city: airport.city,
+    country: airport.country,
+    location: { latitude: airport.lat, longitude: airport.lon },
+    region: toProtoRegion(airport.region),
+    delayType: toProtoDelayType('closure'),
+    severity: toProtoSeverity('severe'),
+    avgDelayMinutes: 0,
+    delayedFlightsPct: 0,
+    cancelledFlights: 0,
+    totalFlights: 0,
+    reason: reason.length > 200 ? reason.slice(0, 200) + '…' : reason,
     source: toProtoSource('computed'),
     updatedAt: Date.now(),
   };
