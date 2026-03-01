@@ -47,7 +47,8 @@ import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import type { WeatherAlert } from '@/services/weather';
 import { escapeHtml } from '@/utils/sanitize';
 import { tokenizeForMatch, matchKeyword, matchesAnyKeyword, findMatchingKeywords } from '@/utils/keyword-match';
-import { t } from '@/services/i18n';
+import { t, getCurrentLanguage, getLocalizedGeoName } from '@/services/i18n';
+import arGeoFallbacks from '@/locales/geo/ar';
 import { debounce, rafSchedule, getCurrentTheme } from '@/utils/index';
 import {
   INTEL_HOTSPOTS,
@@ -502,6 +503,10 @@ export class DeckGLMap {
 
     this.maplibreMap.addControl(this.deckOverlay as unknown as maplibregl.IControl);
 
+    this.maplibreMap.on('styledata', () => {
+      this.applyMapLanguage();
+    });
+
     this.maplibreMap.on('movestart', () => {
       if (this.moveTimeoutId) {
         clearTimeout(this.moveTimeoutId);
@@ -542,6 +547,149 @@ export class DeckGLMap {
       }
       this.state.zoom = this.maplibreMap?.getZoom() ?? this.state.zoom;
       this.onStateChange?.(this.state);
+    });
+  }
+
+
+  private applyMapLanguage(): void {
+    if (!this.maplibreMap) return;
+    const style = this.maplibreMap.getStyle();
+    if (!style || !style.layers) return;
+
+    const lang = getCurrentLanguage();
+    // Even if 'en', we want to coalesce because 'name:en' might be better than missing fields
+    // but the original config mostly expects 'name_en' to work.
+
+    // If tile engine lacks native name:{lang} fields, dynamically fall back to a client-generated match expression
+    // converting English labels to native labels mapping all global ISO-3166 territory codes
+    const FALLBACK_CODES = [
+      "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE",
+      "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CC", "CD",
+      "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM",
+      "DO", "DZ", "EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE", "GF",
+      "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HR", "HT", "HU",
+      "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN",
+      "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME",
+      "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA",
+      "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM",
+      "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI",
+      "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK",
+      "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI",
+      "VN", "VU", "WF", "WS", "YE", "YT", "ZA", "ZM", "ZW", "002", "019", "142", "150", "009"
+    ];
+
+    const matchExpr: any[] = ['match', ['get', 'name_en']];
+    try {
+      const enNames = new Intl.DisplayNames(['en'], { type: 'region' });
+      const localNames = new Intl.DisplayNames([lang], { type: 'region' });
+      for (const c of FALLBACK_CODES) {
+        try {
+          const en = enNames.of(c);
+          const local = localNames.of(c);
+          if (en && local && en !== local) {
+            matchExpr.push(en, local);
+          }
+        } catch (e) { }
+      }
+      try {
+        matchExpr.push(
+          "United States of America", localNames.of("US"),
+          "Russia", localNames.of("RU"),
+          "Russian Federation", localNames.of("RU"),
+          "South Korea", localNames.of("KR"),
+          "North Korea", localNames.of("KP"),
+          "Iran", localNames.of("IR"),
+          "Syria", localNames.of("SY"),
+          "Czech Republic", localNames.of("CZ")
+        );
+      } catch (e) { }
+
+      // Inject geographic dictionary for non-English locales
+      // The shared dictionary is imported from @/locales/geo/ar
+      if (lang === 'ar') {
+        for (const [enName, arName] of Object.entries(arGeoFallbacks)) {
+          matchExpr.push(enName, arName);
+        }
+      }
+    } catch (e) { }
+
+    matchExpr.push(['get', 'name_en']); // Final fallback clause for mapLibre match
+
+    // Build a second match expression that matches against the generic 'name' field
+    // Many CARTO features only have 'name' (English) without a separate 'name_en'
+    const matchExprByName: any[] = ['match', ['get', 'name']];
+    // Copy all the same en→local pairs (skip first 2 items: 'match' and the get-expr)
+    for (let i = 2; i < matchExpr.length - 1; i += 2) {
+      matchExprByName.push(matchExpr[i], matchExpr[i + 1]);
+    }
+    matchExprByName.push(['get', 'name']); // terminal fallback
+
+    const fallbackField = matchExpr.length > 3 ? matchExpr : ['get', 'name_en'];
+    const fallbackByName = matchExprByName.length > 3 ? matchExprByName : ['get', 'name'];
+
+    const localizedNameExpr = [
+      'to-string',
+      [
+        'coalesce',
+        ['get', `name:${lang}`],
+        ['get', `name_${lang}`],
+        fallbackField,
+        fallbackByName,
+        ['get', 'name'],
+        ''
+      ]
+    ];
+
+    const convertStopsToStep = (stopsObj: any): any[] => {
+      const stops = stopsObj.stops;
+      if (!Array.isArray(stops) || stops.length === 0) return [''];
+      const stepExpr = ['step', ['zoom'], stops[0][1]];
+      for (let i = 1; i < stops.length; i++) {
+        stepExpr.push(stops[i][0], stops[i][1]);
+      }
+      return stepExpr;
+    };
+
+    const injectLocale = (ast: any): any => {
+      if (typeof ast === 'string') {
+        if (ast === '{name}' || ast === '{name_en}' || ast === '{name_ar}' || ast === '{name:ar}') return localizedNameExpr;
+        return ast;
+      }
+      if (Array.isArray(ast)) {
+        return ast.map(injectLocale);
+      }
+      if (ast !== null && typeof ast === 'object') {
+        if (ast.stops) {
+          return injectLocale(convertStopsToStep(ast)); // Convert legacy stops to step expression and recurse!
+        }
+        const newObj: any = {};
+        for (const k in ast) {
+          newObj[k] = injectLocale(ast[k]);
+        }
+        return newObj;
+      }
+      return ast;
+    };
+
+    style.layers.forEach((layer) => {
+      if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
+        const textField = layer.layout['text-field'];
+        const strField = JSON.stringify(textField);
+
+        if (strField.includes('{name}') || strField.includes('{name_en}') || strField.includes('name_en') || strField.includes('name:')) {
+          try {
+            // Generate the modern, localized text-field layout expression safely
+            const newTextField = injectLocale(textField);
+
+            // Prevent infinite styledata event loops!
+            if (JSON.stringify(newTextField) !== strField) {
+              this.maplibreMap?.setLayoutProperty(layer.id, 'text-field', newTextField);
+            }
+          } catch (e) {
+            console.warn(`[DeckGLMap] Failed to update layout property for layer ${layer.id}`, e);
+          }
+        }
+      }
     });
   }
 
@@ -2706,7 +2854,7 @@ export class DeckGLMap {
       case 'earthquakes-layer':
         return { html: `<div class="deckgl-tooltip"><strong>M${(obj.magnitude || 0).toFixed(1)} ${t('components.deckgl.tooltip.earthquake')}</strong><br/>${text(obj.place)}</div>` };
       case 'military-vessels-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.operatorCountry)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(getLocalizedGeoName(obj.operatorCountry))}</div>` };
       case 'military-flights-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.callsign || obj.registration || t('components.deckgl.tooltip.militaryAircraft'))}</strong><br/>${text(obj.type)}</div>` };
       case 'military-vessel-clusters-layer':
@@ -2714,13 +2862,13 @@ export class DeckGLMap {
       case 'military-flight-clusters-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name || t('components.deckgl.tooltip.flightCluster'))}</strong><br/>${obj.flightCount || 0} ${t('components.deckgl.tooltip.aircraft')}<br/>${text(obj.activityType)}</div>` };
       case 'protests-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.title)}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.title)}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'protest-clusters-layer':
         if (obj.count === 1) {
           const item = obj.items?.[0];
           return { html: `<div class="deckgl-tooltip"><strong>${text(item?.title || t('components.deckgl.tooltip.protest'))}</strong><br/>${text(item?.city || item?.country || '')}</div>` };
         }
-        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.tooltip.protestsCount', { count: String(obj.count) })}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.tooltip.protestsCount', { count: String(obj.count) })}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'tech-hq-clusters-layer':
         if (obj.count === 1) {
           const hq = obj.items?.[0];
@@ -2738,9 +2886,9 @@ export class DeckGLMap {
           const dc = obj.items?.[0];
           return { html: `<div class="deckgl-tooltip"><strong>${text(dc?.name || '')}</strong><br/>${text(dc?.owner || '')}</div>` };
         }
-        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.tooltip.dataCentersCount', { count: String(obj.count) })}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.tooltip.dataCentersCount', { count: String(obj.count) })}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'bases-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.country)}${obj.kind ? ` · ${text(obj.kind)}` : ''}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(getLocalizedGeoName(obj.country))}${obj.kind ? ` · ${text(obj.kind)}` : ''}</div>` };
       case 'bases-cluster-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${obj.count} bases</strong></div>` };
       case 'nuclear-layer':
@@ -2771,17 +2919,17 @@ export class DeckGLMap {
       case 'waterways-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${t('components.deckgl.layers.strategicWaterways')}</div>` };
       case 'economic-centers-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'stock-exchanges-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.shortName)}</strong><br/>${text(obj.city)}, ${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.shortName)}</strong><br/>${text(obj.city)}, ${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'financial-centers-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.type)} ${t('components.deckgl.tooltip.financialCenter')}</div>` };
       case 'central-banks-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.shortName)}</strong><br/>${text(obj.city)}, ${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.shortName)}</strong><br/>${text(obj.city)}, ${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'commodity-hubs-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.type)} · ${text(obj.city)}</div>` };
       case 'startup-hubs-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.city)}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.city)}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'tech-hqs-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.company)}</strong><br/>${text(obj.city)}</div>` };
       case 'accelerators-layer':
@@ -2796,14 +2944,14 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.country || t('components.deckgl.layers.spaceports'))}</div>` };
       case 'ports-layer': {
         const typeIcon = obj.type === 'naval' ? '⚓' : obj.type === 'oil' || obj.type === 'lng' ? '🛢️' : '🏭';
-        return { html: `<div class="deckgl-tooltip"><strong>${typeIcon} ${text(obj.name)}</strong><br/>${text(obj.type || t('components.deckgl.tooltip.port'))} - ${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${typeIcon} ${text(obj.name)}</strong><br/>${text(obj.type || t('components.deckgl.tooltip.port'))} - ${text(getLocalizedGeoName(obj.country))}</div>` };
       }
       case 'flight-delays-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)} (${text(obj.iata)})</strong><br/>${text(obj.severity)}: ${text(obj.reason)}</div>` };
       case 'apt-groups-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.aka)}<br/>${t('popups.sponsor')}: ${text(obj.sponsor)}</div>` };
       case 'minerals-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.mineral)} - ${text(obj.country)}<br/>${text(obj.operator)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.mineral)} - ${text(getLocalizedGeoName(obj.country))}<br/>${text(obj.operator)}</div>` };
       case 'ais-disruptions-layer':
         return { html: `<div class="deckgl-tooltip"><strong>AIS ${text(obj.type || t('components.deckgl.tooltip.disruption'))}</strong><br/>${text(obj.severity)} ${t('popups.severity')}<br/>${text(obj.description)}</div>` };
       case 'gps-jamming-layer':
@@ -2820,7 +2968,7 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.event || t('components.deckgl.layers.weatherAlerts'))}</strong><br/>${text(obj.severity)}${area}</div>` };
       }
       case 'outages-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.asn || t('components.deckgl.tooltip.internetOutage'))}</strong><br/>${text(obj.country)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.asn || t('components.deckgl.tooltip.internetOutage'))}</strong><br/>${text(getLocalizedGeoName(obj.country))}</div>` };
       case 'cyber-threats-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${t('popups.cyberThreat.title')}</strong><br/>${text(obj.severity || t('components.deckgl.tooltip.medium'))} · ${text(obj.country || t('popups.unknown'))}</div>` };
       case 'iran-events-layer':
@@ -2846,7 +2994,7 @@ export class DeckGLMap {
       }
       case 'renewable-installations-layer': {
         const riTypeLabel = obj.type ? String(obj.type).charAt(0).toUpperCase() + String(obj.type).slice(1) : 'Renewable';
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${riTypeLabel} &middot; ${obj.capacityMW?.toLocaleString() ?? '?'} MW<br/><span style="opacity:.7">${text(obj.country)} &middot; ${obj.year}</span></div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${riTypeLabel} &middot; ${obj.capacityMW?.toLocaleString() ?? '?'} MW<br/><span style="opacity:.7">${text(getLocalizedGeoName(obj.country))} &middot; ${obj.year}</span></div>` };
       }
       case 'gulf-investments-layer': {
         const inv = obj as GulfInvestment;
