@@ -249,6 +249,19 @@ const MARKER_ICONS = {
   star: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 30,12 22,19 25,30 16,23 7,30 10,19 2,12 12,12" fill="white"/></svg>`),
 };
 
+const BASES_ICON_MAPPING = { triangleUp: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const NUCLEAR_ICON_MAPPING = { hexagon: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const DATACENTER_ICON_MAPPING = { square: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+
+const CONFLICT_ZONES_GEOJSON: GeoJSON.FeatureCollection = {
+  type: 'FeatureCollection',
+  features: CONFLICT_ZONES.map(zone => ({
+    type: 'Feature' as const,
+    properties: { id: zone.id, name: zone.name, intensity: zone.intensity },
+    geometry: { type: 'Polygon' as const, coordinates: [zone.coords] },
+  })),
+};
+
 export class DeckGLMap {
   private static readonly MAX_FIRE_POINTS = 10_000;
 
@@ -343,6 +356,11 @@ export class DeckGLMap {
   private mapClusterWorker: Worker | null = null;
   private mapClusterWorkerReady = false;
   private progressiveLoadStep = 5;
+  private protestSC: Supercluster | null = null;
+  private techHQSC: Supercluster | null = null;
+  private techEventSC: Supercluster | null = null;
+  private datacenterSC: Supercluster | null = null;
+  private datacenterSCSource: AIDataCenter[] = [];
   private protestClusters: MapProtestCluster[] = [];
   private techHQClusters: MapTechHQCluster[] = [];
   private techEventClusters: MapTechEventCluster[] = [];
@@ -671,7 +689,7 @@ export class DeckGLMap {
       }
     }
 
-    // matchExpr.push(['to-string', ['get', 'name_en']]); // Final fallback clause for mapLibre match
+    matchExpr.push(['to-string', ['get', 'name_en']]); // Final fallback clause for mapLibre match
 
     // Build a second match expression that matches against the generic 'name' field
     // Many CARTO features only have 'name' (English) without a separate 'name_en'
@@ -1383,21 +1401,9 @@ export class DeckGLMap {
   private createConflictZonesLayer(): GeoJsonLayer {
     const cacheKey = 'conflict-zones-layer';
 
-    const geojsonData = {
-      type: 'FeatureCollection' as const,
-      features: CONFLICT_ZONES.map(zone => ({
-        type: 'Feature' as const,
-        properties: { id: zone.id, name: zone.name, intensity: zone.intensity },
-        geometry: {
-          type: 'Polygon' as const,
-          coordinates: [zone.coords],
-        },
-      })),
-    };
-
     const layer = new GeoJsonLayer({
       id: cacheKey,
-      data: geojsonData,
+      data: CONFLICT_ZONES_GEOJSON,
       filled: true,
       stroked: true,
       getFillColor: () => COLORS.conflict,
@@ -1441,7 +1447,7 @@ export class DeckGLMap {
       getPosition: (d) => [d.lon, d.lat],
       getIcon: () => 'triangleUp',
       iconAtlas: MARKER_ICONS.triangleUp,
-      iconMapping: { triangleUp: { x: 0, y: 0, width: 32, height: 32, mask: true } },
+      iconMapping: BASES_ICON_MAPPING,
       getSize: (d) => highlightedBases.has(d.id) ? 16 : 11,
       getColor: (d) => {
         if (highlightedBases.has(d.id)) {
@@ -1499,7 +1505,7 @@ export class DeckGLMap {
       getPosition: (d) => [d.lon, d.lat],
       getIcon: () => 'hexagon',
       iconAtlas: MARKER_ICONS.hexagon,
-      iconMapping: { hexagon: { x: 0, y: 0, width: 32, height: 32, mask: true } },
+      iconMapping: NUCLEAR_ICON_MAPPING,
       getSize: (d) => highlightedNuclear.has(d.id) ? 15 : 11,
       getColor: (d) => {
         if (highlightedNuclear.has(d.id)) {
@@ -1591,6 +1597,11 @@ export class DeckGLMap {
   }
 
 
+  /** Empty sentinel layer — keeps a stable layer ID for deck.gl interleaved mode without rendering anything. */
+  private createEmptyGhost(id: string): ScatterplotLayer {
+    return new ScatterplotLayer({ id: `${id}-ghost`, data: [], getPosition: () => [0, 0], visible: false });
+  }
+
 
   private createDatacentersLayer(): IconLayer {
     const highlightedDC = this.highlightedAssets.datacenter;
@@ -1603,7 +1614,7 @@ export class DeckGLMap {
       getPosition: (d) => [d.lon, d.lat],
       getIcon: () => 'square',
       iconAtlas: MARKER_ICONS.square,
-      iconMapping: { square: { x: 0, y: 0, width: 32, height: 32, mask: true } },
+      iconMapping: DATACENTER_ICON_MAPPING,
       getSize: (d) => highlightedDC.has(d.id) ? 14 : 10,
       getColor: (d) => {
         if (highlightedDC.has(d.id)) {
@@ -2130,7 +2141,6 @@ export class DeckGLMap {
       updateTriggers: { getRadius: this.lastSCZoom, getFillColor: this.lastSCZoom },
     }));
 
-
     const multiClusters = this.protestClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapProtestCluster>({
@@ -2170,6 +2180,7 @@ export class DeckGLMap {
       }));
     }
 
+    layers.push(this.createEmptyGhost('protest-clusters-layer'));
     return layers;
   }
 
@@ -2193,7 +2204,6 @@ export class DeckGLMap {
       pickable: true,
       updateTriggers: { getRadius: this.lastSCZoom },
     }));
-
 
     const multiClusters = this.techHQClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
@@ -2231,6 +2241,7 @@ export class DeckGLMap {
       }
     }
 
+    layers.push(this.createEmptyGhost('tech-hq-clusters-layer'));
     return layers;
   }
 
@@ -2253,7 +2264,6 @@ export class DeckGLMap {
       updateTriggers: { getRadius: this.lastSCZoom },
     }));
 
-
     const multiClusters = this.techEventClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapTechEventCluster>({
@@ -2273,6 +2283,7 @@ export class DeckGLMap {
       }));
     }
 
+    layers.push(this.createEmptyGhost('tech-event-clusters-layer'));
     return layers;
   }
 
@@ -2295,7 +2306,6 @@ export class DeckGLMap {
       updateTriggers: { getRadius: this.lastSCZoom },
     }));
 
-
     const multiClusters = this.datacenterClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapDatacenterCluster>({
@@ -2315,6 +2325,7 @@ export class DeckGLMap {
       }));
     }
 
+    layers.push(this.createEmptyGhost('datacenter-clusters-layer'));
     return layers;
   }
 
@@ -2349,7 +2360,6 @@ export class DeckGLMap {
       lineWidthMinPixels: 2,
     }));
 
-
     const highHotspots = this.hotspots.filter(h => h.level === 'high' || h.hasBreaking);
     if (highHotspots.length > 0) {
       const pulse = 1.0 + 0.8 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 400));
@@ -2377,6 +2387,7 @@ export class DeckGLMap {
 
     }
 
+    layers.push(this.createEmptyGhost('hotspots-layer'));
     return layers;
   }
 
@@ -2921,6 +2932,16 @@ export class DeckGLMap {
     // Handle cluster layers with single/multi logic
     if (layerId === 'protest-clusters-layer') {
       const cluster = info.object as MapProtestCluster;
+      if (cluster.items.length === 0 && cluster._clusterId != null && this.protestSC) {
+        try {
+          const leaves = this.protestSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
+          cluster.items = leaves.map(l => this.protestSuperclusterSource[l.properties.index]).filter((x): x is SocialUnrestEvent => !!x);
+          cluster.sampled = cluster.items.length < cluster.count;
+        } catch (e) {
+          console.warn('[DeckGLMap] stale protest cluster', cluster._clusterId, e);
+          return;
+        }
+      }
       if (cluster.count === 1 && cluster.items[0]) {
         this.popup.show({ type: 'protest', data: cluster.items[0], x: info.x, y: info.y });
       } else {
@@ -2944,6 +2965,16 @@ export class DeckGLMap {
     }
     if (layerId === 'tech-hq-clusters-layer') {
       const cluster = info.object as MapTechHQCluster;
+      if (cluster.items.length === 0 && cluster._clusterId != null && this.techHQSC) {
+        try {
+          const leaves = this.techHQSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
+          cluster.items = leaves.map(l => TECH_HQS[l.properties.index]).filter(Boolean) as typeof TECH_HQS;
+          cluster.sampled = cluster.items.length < cluster.count;
+        } catch (e) {
+          console.warn('[DeckGLMap] stale techHQ cluster', cluster._clusterId, e);
+          return;
+        }
+      }
       if (cluster.count === 1 && cluster.items[0]) {
         this.popup.show({ type: 'techHQ', data: cluster.items[0], x: info.x, y: info.y });
       } else {
@@ -2967,6 +2998,16 @@ export class DeckGLMap {
     }
     if (layerId === 'tech-event-clusters-layer') {
       const cluster = info.object as MapTechEventCluster;
+      if (cluster.items.length === 0 && cluster._clusterId != null && this.techEventSC) {
+        try {
+          const leaves = this.techEventSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
+          cluster.items = leaves.map(l => this.techEvents[l.properties.index]).filter((x): x is TechEventMarker => !!x);
+          cluster.sampled = cluster.items.length < cluster.count;
+        } catch (e) {
+          console.warn('[DeckGLMap] stale techEvent cluster', cluster._clusterId, e);
+          return;
+        }
+      }
       if (cluster.count === 1 && cluster.items[0]) {
         this.popup.show({ type: 'techEvent', data: cluster.items[0], x: info.x, y: info.y });
       } else {
@@ -2988,6 +3029,16 @@ export class DeckGLMap {
     }
     if (layerId === 'datacenter-clusters-layer') {
       const cluster = info.object as MapDatacenterCluster;
+      if (cluster.items.length === 0 && cluster._clusterId != null && this.datacenterSC) {
+        try {
+          const leaves = this.datacenterSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
+          cluster.items = leaves.map(l => this.datacenterSCSource[l.properties.index]).filter((x): x is AIDataCenter => !!x);
+          cluster.sampled = cluster.items.length < cluster.count;
+        } catch (e) {
+          console.warn('[DeckGLMap] stale datacenter cluster', cluster._clusterId, e);
+          return;
+        }
+      }
       if (cluster.count === 1 && cluster.items[0]) {
         this.popup.show({ type: 'datacenter', data: cluster.items[0], x: info.x, y: info.y });
       } else {
@@ -3071,7 +3122,7 @@ export class DeckGLMap {
       const normalizedLoc = data.locationName.trim().toLowerCase();
       const related = this.iranEvents
         .filter(e => e.id !== clickedId && e.locationName && e.locationName.trim().toLowerCase() === normalizedLoc)
-        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+        .sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0))
         .slice(0, 5);
       data = { ...data, relatedEvents: related };
     }
@@ -3893,6 +3944,7 @@ export class DeckGLMap {
     this.render();
   }
 
+
   public setAisData(disruptions: AisDisruptionEvent[], density: AisDensityZone[]): void {
     this.aisDisruptions = disruptions;
     this.aisDensity = density;
@@ -4014,6 +4066,7 @@ export class DeckGLMap {
     this.gpsJammingHexes = hexes;
     this.render();
   }
+
 
   public setNewsLocations(data: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }>): void {
     const now = Date.now();

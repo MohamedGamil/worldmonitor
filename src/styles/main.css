@@ -867,6 +867,11 @@ canvas,
   background: var(--green-dim);
 }
 
+/* Hidden by default — shown only inside 768px media query */
+.map-collapse-btn {
+  display: none;
+}
+
 .panels-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -890,6 +895,7 @@ canvas,
   overflow: hidden;
   height: 100%;
   min-height: 200px;
+  min-width: 0;
   min-width: 0;
   cursor: grab;
   transition: transform 0.15s, box-shadow 0.15s;
@@ -1099,6 +1105,31 @@ body.panel-resize-active iframe {
   background: var(--border);
   padding: 2px 6px;
   border-radius: 2px;
+  transition: color 0.3s ease, background 0.3s ease;
+}
+
+.panel-count.bump {
+  animation: count-bump 0.5s ease-out;
+}
+
+@keyframes count-bump {
+  0% {
+    transform: scale(1);
+    background: var(--border);
+    color: var(--text-dim);
+  }
+
+  40% {
+    transform: scale(1.3);
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  100% {
+    transform: scale(1);
+    background: var(--border);
+    color: var(--text-dim);
+  }
 }
 
 
@@ -1994,6 +2025,36 @@ body.panel-resize-active iframe {
 
 .live-mute-btn.unmuted {
   color: var(--green);
+}
+
+.live-news-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 10000 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+.live-news-fullscreen .panel-content,
+.live-news-fullscreen .map-container {
+  height: calc(100vh - 80px) !important;
+}
+
+.live-news-fullscreen .live-news-player,
+.live-news-fullscreen .live-news-native-video,
+.live-news-fullscreen .live-news-embed-frame {
+  height: 100% !important;
+}
+
+body.live-news-fullscreen-active {
+  overflow: hidden;
+}
+
+body.live-news-fullscreen-active .community-widget {
+  display: none;
 }
 
 .live-indicator-btn {
@@ -4966,6 +5027,26 @@ body.playback-mode .status-dot {
 
 .market-change.down {
   color: var(--red);
+}
+
+/* Gulf Economies */
+.gulf-section {
+  margin-bottom: 8px;
+}
+
+.gulf-section:last-child {
+  margin-bottom: 0;
+}
+
+.gulf-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  padding: 6px 0 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
 }
 
 /* Commodities */
@@ -9208,10 +9289,23 @@ a.prediction-link:hover {
     padding: 8px;
   }
 
+  body {
+    font-size: 14px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+  }
+
   .panel {
     width: 100% !important;
-    min-height: 300px;
-    max-height: 400px;
+    min-height: 250px;
+    max-height: min(70vh, 500px);
+  }
+
+  .panel-content {
+    font-size: 13px;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Make map section smaller on mobile to show panels */
@@ -9219,6 +9313,41 @@ a.prediction-link:hover {
     height: 40vh !important;
     min-height: 250px !important;
     max-height: 50vh !important;
+  }
+
+  /* Collapsed map on mobile — higher specificity overrides .map-section above */
+  .main-content .map-section.collapsed {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  .main-content .map-section.collapsed .map-container,
+  .main-content .map-section.collapsed .map-resize-handle,
+  .main-content .map-section.collapsed .map-controls,
+  .main-content .map-section.collapsed .time-slider,
+  .main-content .map-section.collapsed .tv-exit-btn {
+    display: none;
+  }
+
+  /* Map collapse toggle button — mobile only */
+  .map-collapse-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .map-collapse-btn:active {
+    background: var(--bg-tertiary, var(--border));
   }
 
   /* Hide pin button and resize handles on mobile */
@@ -16081,6 +16210,228 @@ body.has-breaking-alert .panels-grid {
     align-content: start;
     overflow-y: auto;
   }
+}
+
+/* ==========================================================================
+   Telegram Intel Panel
+   ========================================================================== */
+
+.telegram-intel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.telegram-intel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.telegram-intel-tab {
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.telegram-intel-tab:hover {
+  color: var(--text);
+  background: var(--overlay-subtle);
+}
+
+.telegram-intel-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+
+.telegram-intel-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.telegram-intel-item {
+  display: block;
+  padding: 10px 12px;
+  background: var(--surface);
+  text-decoration: none;
+  transition: background 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.telegram-intel-item:hover {
+  background: var(--overlay-light);
+  border-left-color: var(--accent);
+}
+
+.telegram-intel-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.telegram-intel-channel {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+
+.telegram-intel-topic {
+  font-size: 9px;
+  color: var(--text-dim);
+  background: var(--overlay-subtle);
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.telegram-intel-time {
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.telegram-intel-text {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Telegram Intel Panel
+   ========================================================================== */
+
+.telegram-intel-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.telegram-intel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.telegram-intel-tab {
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.telegram-intel-tab:hover {
+  color: var(--text);
+  background: var(--overlay-subtle);
+}
+
+.telegram-intel-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+
+.telegram-intel-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.telegram-intel-item {
+  display: block;
+  padding: 10px 12px;
+  background: var(--surface);
+  text-decoration: none;
+  transition: background 0.15s ease;
+  border-left: 2px solid transparent;
+}
+
+.telegram-intel-item:hover {
+  background: var(--overlay-light);
+  border-left-color: var(--accent);
+}
+
+.telegram-intel-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.telegram-intel-channel {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 50%;
+}
+
+.telegram-intel-topic {
+  font-size: 9px;
+  color: var(--text-dim);
+  background: var(--overlay-subtle);
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.telegram-intel-time {
+  font-size: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.telegram-intel-text {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ==========================================================================

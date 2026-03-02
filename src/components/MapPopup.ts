@@ -68,7 +68,7 @@ interface IranEventPopupData {
   latitude: number;
   longitude: number;
   locationName: string;
-  timestamp: number;
+  timestamp: string | number;
   severity: string;
   relatedEvents?: IranEventPopupData[];
 }
@@ -2608,10 +2608,11 @@ export class MapPopup {
       const rSev = this.normalizeSeverity(r.severity);
       const rTime = r.timestamp ? this.getTimeAgo(new Date(r.timestamp)) : '';
       const rTitle = r.title.length > 60 ? r.title.slice(0, 60) + '…' : r.title;
-      return `<li class="cluster-item"><span class="popup-badge ${rSev}" style="font-size:9px;padding:1px 4px;">${escapeHtml(rSev.toUpperCase())}</span> ${escapeHtml(rTitle)}${rTime ? ` <span style="color:var(--text-muted);font-size:10px;">${escapeHtml(rTime)}</span>` : ''}</li>`;
-    }).join('')}
-          </ul>
-        </div>` : '';
+      return `< li class="cluster-item" > <span class="popup-badge ${rSev}" style = "font-size:9px;padding:1px 4px;" > ${escapeHtml(rSev.toUpperCase())} </span> ${escapeHtml(rTitle)}${rTime ? ` <span style="color:var(--text-muted);font-size:10px;">${escapeHtml(rTime)}</span > ` : ''}</li>`;
+    }).join('')
+      }
+</ul>
+  </div>` : '';
 
     return `
       <div class="popup-header iranEvent ${severity}">

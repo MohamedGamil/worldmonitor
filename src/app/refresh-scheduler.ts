@@ -17,7 +17,7 @@ export class RefreshScheduler implements AppModule {
     this.ctx = ctx;
   }
 
-  init(): void {}
+  init(): void { }
 
   destroy(): void {
     for (const timeoutId of this.refreshTimeoutIds.values()) {
@@ -85,7 +85,7 @@ export class RefreshScheduler implements AppModule {
         }
       } catch (e) {
         console.error(`[App] Refresh ${name} failed:`, e);
-        currentMultiplier = 1;
+        currentMultiplier = Math.min(currentMultiplier * 2, MAX_BACKOFF_MULTIPLIER);
       } finally {
         this.ctx.inFlight.delete(name);
         scheduleNext(computeDelay(intervalMs * currentMultiplier, false));

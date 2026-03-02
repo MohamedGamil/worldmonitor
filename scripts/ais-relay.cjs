@@ -89,6 +89,83 @@ if (IS_PRODUCTION_RELAY && !RELAY_SHARED_SECRET && !ALLOW_UNAUTHENTICATED_RELAY)
   process.exit(1);
 }
 
+// ─────────────────────────────────────────────────────────────
+// Upstash Redis REST helpers — persist OREF history across restarts
+// ─────────────────────────────────────────────────────────────
+const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL || '';
+const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+const UPSTASH_ENABLED = !!(
+  UPSTASH_REDIS_REST_URL &&
+  UPSTASH_REDIS_REST_TOKEN &&
+  UPSTASH_REDIS_REST_URL.startsWith('https://')
+);
+const RELAY_ENV_PREFIX = process.env.RELAY_ENV ? `${process.env.RELAY_ENV}:` : '';
+const OREF_REDIS_KEY = `${RELAY_ENV_PREFIX}relay:oref:history:v1`;
+
+if (UPSTASH_REDIS_REST_URL && !UPSTASH_REDIS_REST_URL.startsWith('https://')) {
+  console.warn('[Relay] UPSTASH_REDIS_REST_URL must start with https:// — Redis disabled');
+}
+if (UPSTASH_ENABLED) {
+  console.log(`[Relay] Upstash Redis enabled (key: ${OREF_REDIS_KEY})`);
+}
+
+function upstashGet(key) {
+  return new Promise((resolve) => {
+    if (!UPSTASH_ENABLED) return resolve(null);
+    const url = new URL(`/get/${encodeURIComponent(key)}`, UPSTASH_REDIS_REST_URL);
+    const req = https.request(url, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
+      timeout: 5000,
+    }, (resp) => {
+      if (resp.statusCode < 200 || resp.statusCode >= 300) {
+        resp.resume();
+        return resolve(null);
+      }
+      let data = '';
+      resp.on('data', (chunk) => { data += chunk; });
+      resp.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed?.result) return resolve(JSON.parse(parsed.result));
+          resolve(null);
+        } catch { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.end();
+  });
+}
+
+function upstashSet(key, value, ttlSeconds) {
+  return new Promise((resolve) => {
+    if (!UPSTASH_ENABLED) return resolve(false);
+    const url = new URL('/', UPSTASH_REDIS_REST_URL);
+    const body = JSON.stringify(['SET', key, JSON.stringify(value), 'EX', String(ttlSeconds)]);
+    const req = https.request(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      timeout: 5000,
+    }, (resp) => {
+      let data = '';
+      resp.on('data', (chunk) => { data += chunk; });
+      resp.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed?.result === 'OK');
+        } catch { resolve(false); }
+      });
+    });
+    req.on('error', () => resolve(false));
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+    req.end(body);
+  });
+}
+
 let upstreamSocket = null;
 let upstreamPaused = false;
 let upstreamQueue = [];
@@ -177,7 +254,12 @@ const orefState = {
   lastPollAt: 0,
   lastError: null,
   historyCount24h: 0,
+  totalHistoryCount: 0,
   history: [],
+  bootstrapSource: null,
+  _persistVersion: 0,
+  _lastPersistedVersion: 0,
+  _persistInFlight: false,
 };
 
 function loadTelegramChannels() {
@@ -347,7 +429,7 @@ async function pollTelegramOnce() {
         telegramPermanentlyDisabled = true;
         telegramState.lastError = 'session invalidated (AUTH_KEY_DUPLICATED) — generate a new TELEGRAM_SESSION';
         console.error('[Relay] Telegram session permanently invalidated (AUTH_KEY_DUPLICATED). Generate a new session with: node scripts/telegram/session-auth.mjs');
-        try { telegramState.client?.disconnect(); } catch {}
+        try { telegramState.client?.disconnect(); } catch { }
         telegramState.client = null;
         break;
       }
@@ -502,15 +584,24 @@ async function orefFetchAlerts() {
         alerts,
         timestamp: new Date().toISOString(),
       });
+      orefState._persistVersion++;
     }
 
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    orefState.historyCount24h = orefState.history
+      .filter(h => new Date(h.timestamp).getTime() > cutoff)
+      .reduce((sum, h) => sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0), 0);
+    const purgeCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const beforeLen = orefState.history.length;
     orefState.history = orefState.history.filter(
-      h => new Date(h.timestamp).getTime() > cutoff
+      h => new Date(h.timestamp).getTime() > purgeCutoff
     );
-    orefState.historyCount24h = orefState.history.reduce((sum, h) => {
+    if (orefState.history.length !== beforeLen) orefState._persistVersion++;
+    orefState.totalHistoryCount = orefState.history.reduce((sum, h) => {
       return sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0);
     }, 0);
+
+    orefPersistHistory().catch(() => { });
   } catch (err) {
     const stderr = err.stderr ? err.stderr.toString().trim() : '';
     orefState.lastError = redactOrefError(stderr || err.message);
@@ -518,19 +609,19 @@ async function orefFetchAlerts() {
   }
 }
 
-async function orefBootstrapHistory() {
+async function orefBootstrapHistoryFromUpstream() {
   const tmpFile = require('path').join(require('os').tmpdir(), `oref-history-${Date.now()}.json`);
   let raw;
   try {
     raw = orefCurlFetch(OREF_PROXY_AUTH, OREF_HISTORY_URL, { toFile: tmpFile });
   } finally {
-    try { require('fs').unlinkSync(tmpFile); } catch {}
+    try { require('fs').unlinkSync(tmpFile); } catch { }
   }
   const cleaned = stripBom(raw).trim();
   if (!cleaned || cleaned === '[]') return;
 
   const allRecords = JSON.parse(cleaned);
-  const records = allRecords.slice(-500);
+  const records = allRecords.slice(0, 500);
   const waves = new Map();
   for (const r of records) {
     const key = r.alertDate;
@@ -562,8 +653,103 @@ async function orefBootstrapHistory() {
   }
   history.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   orefState.history = history;
-  orefState.historyCount24h = totalAlertRecords;
+  orefState.totalHistoryCount = totalAlertRecords;
+  const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
+  orefState.historyCount24h = history
+    .filter(h => new Date(h.timestamp).getTime() > cutoff24h)
+    .reduce((sum, h) => sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0), 0);
+  orefState.bootstrapSource = 'upstream';
+  if (history.length > 0) orefState._persistVersion++;
   console.log(`[Relay] OREF history bootstrap: ${totalAlertRecords} records across ${history.length} waves`);
+}
+
+const OREF_PERSIST_MAX_WAVES = 200;
+const OREF_PERSIST_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+async function orefPersistHistory() {
+  if (!UPSTASH_ENABLED) return;
+  if (orefState._persistVersion === orefState._lastPersistedVersion) return;
+  if (orefState._persistInFlight) return;
+  orefState._persistInFlight = true;
+  const versionAtStart = orefState._persistVersion;
+  try {
+    let waves = orefState.history;
+    if (waves.length > OREF_PERSIST_MAX_WAVES) {
+      console.warn(`[Relay] OREF persist: truncating ${waves.length} waves to ${OREF_PERSIST_MAX_WAVES}`);
+      waves = waves.slice(-OREF_PERSIST_MAX_WAVES);
+    }
+    const payload = {
+      history: waves,
+      historyCount24h: orefState.historyCount24h,
+      totalHistoryCount: orefState.totalHistoryCount,
+      persistedAt: new Date().toISOString(),
+    };
+    const ok = await upstashSet(OREF_REDIS_KEY, payload, OREF_PERSIST_TTL_SECONDS);
+    if (ok) {
+      orefState._lastPersistedVersion = versionAtStart;
+    }
+  } finally {
+    orefState._persistInFlight = false;
+  }
+}
+
+async function orefBootstrapHistoryWithRetry() {
+  // Phase 1: try Redis first
+  try {
+    const cached = await upstashGet(OREF_REDIS_KEY);
+    if (cached && Array.isArray(cached.history) && cached.history.length > 0) {
+      const valid = cached.history.every(
+        h => Array.isArray(h.alerts) && typeof h.timestamp === 'string'
+      );
+      if (valid) {
+        const cutoff24h = Date.now() - 24 * 60 * 60 * 1000;
+        const purgeCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const filtered = cached.history.filter(
+          h => new Date(h.timestamp).getTime() > purgeCutoff
+        );
+        if (filtered.length > 0) {
+          orefState.history = filtered;
+          orefState.totalHistoryCount = filtered.reduce((sum, h) => {
+            return sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0);
+          }, 0);
+          orefState.historyCount24h = filtered
+            .filter(h => new Date(h.timestamp).getTime() > cutoff24h)
+            .reduce((sum, h) => sum + h.alerts.reduce((s, a) => s + (Array.isArray(a.data) ? a.data.length : 1), 0), 0);
+          const newest = filtered[filtered.length - 1];
+          orefState.lastAlertsJson = JSON.stringify(newest.alerts);
+          orefState.bootstrapSource = 'redis';
+          console.log(`[Relay] OREF history loaded from Redis: ${orefState.totalHistoryCount} records across ${filtered.length} waves (persisted ${cached.persistedAt || 'unknown'})`);
+          return;
+        }
+        console.log('[Relay] OREF Redis data all stale (>7d) — falling through to upstream');
+      }
+    }
+  } catch (err) {
+    console.warn('[Relay] OREF Redis bootstrap failed:', err?.message || err);
+  }
+
+  // Phase 2: upstream with retry + exponential backoff
+  const MAX_ATTEMPTS = 3;
+  const BASE_DELAY_MS = 3000;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await orefBootstrapHistoryFromUpstream();
+      if (UPSTASH_ENABLED) {
+        await orefPersistHistory().catch(() => { });
+      }
+      console.log(`[Relay] OREF upstream bootstrap succeeded on attempt ${attempt}`);
+      return;
+    } catch (err) {
+      const msg = redactOrefError(err?.message || String(err));
+      console.warn(`[Relay] OREF upstream bootstrap attempt ${attempt}/${MAX_ATTEMPTS} failed: ${msg}`);
+      if (attempt < MAX_ATTEMPTS) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1) + Math.random() * 1000;
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+  orefState.bootstrapSource = null;
+  console.warn('[Relay] OREF bootstrap exhausted all attempts — starting with empty history');
 }
 
 async function startOrefPollLoop() {
@@ -571,9 +757,8 @@ async function startOrefPollLoop() {
     console.log('[Relay] OREF disabled (no OREF_PROXY_AUTH)');
     return;
   }
-  await orefBootstrapHistory().catch(err =>
-    console.warn('[Relay] OREF history bootstrap failed:', redactOrefError(err.message))
-  );
+  await orefBootstrapHistoryWithRetry();
+  console.log(`[Relay] OREF bootstrap complete (source: ${orefState.bootstrapSource || 'none'}, redis: ${UPSTASH_ENABLED})`);
   orefFetchAlerts().catch(e => console.warn('[Relay] OREF initial poll error:', e?.message || e));
   setInterval(() => {
     orefFetchAlerts().catch(e => console.warn('[Relay] OREF poll error:', e?.message || e));
@@ -1742,7 +1927,7 @@ function openskyQueuedFetch(url, token) {
     openskyLastUpstreamTime = Date.now();
     return _openskyRawFetch(url, token);
   });
-  openskyUpstreamQueue = job.catch(() => {});
+  openskyUpstreamQueue = job.catch(() => { });
   return job;
 }
 
@@ -1976,11 +2161,11 @@ function handleWorldBankRequest(req, res) {
       'NE.EXP.GNFS.ZS': 'Exports of Goods & Services (% of GDP)',
     };
     const defaultCountries = [
-      'USA','CHN','JPN','DEU','KOR','GBR','IND','ISR','SGP','TWN',
-      'FRA','CAN','SWE','NLD','CHE','FIN','IRL','AUS','BRA','IDN',
-      'ARE','SAU','QAT','BHR','EGY','TUR','MYS','THA','VNM','PHL',
-      'ESP','ITA','POL','CZE','DNK','NOR','AUT','BEL','PRT','EST',
-      'MEX','ARG','CHL','COL','ZAF','NGA','KEN',
+      'USA', 'CHN', 'JPN', 'DEU', 'KOR', 'GBR', 'IND', 'ISR', 'SGP', 'TWN',
+      'FRA', 'CAN', 'SWE', 'NLD', 'CHE', 'FIN', 'IRL', 'AUS', 'BRA', 'IDN',
+      'ARE', 'SAU', 'QAT', 'BHR', 'EGY', 'TUR', 'MYS', 'THA', 'VNM', 'PHL',
+      'ESP', 'ITA', 'POL', 'CZE', 'DNK', 'NOR', 'AUT', 'BEL', 'PRT', 'EST',
+      'MEX', 'ARG', 'CHL', 'COL', 'ZAF', 'NGA', 'KEN',
     ];
     const body = JSON.stringify({ indicators, defaultCountries });
     worldbankCache.set(cacheKey, { data: body, timestamp: Date.now() });
@@ -2002,11 +2187,11 @@ function handleWorldBankRequest(req, res) {
   const countries = wbParams.get('countries');
   const years = parseInt(wbParams.get('years') || '5', 10);
   let countryList = country || (countries ? countries.split(',').join(';') : [
-    'USA','CHN','JPN','DEU','KOR','GBR','IND','ISR','SGP','TWN',
-    'FRA','CAN','SWE','NLD','CHE','FIN','IRL','AUS','BRA','IDN',
-    'ARE','SAU','QAT','BHR','EGY','TUR','MYS','THA','VNM','PHL',
-    'ESP','ITA','POL','CZE','DNK','NOR','AUT','BEL','PRT','EST',
-    'MEX','ARG','CHL','COL','ZAF','NGA','KEN',
+    'USA', 'CHN', 'JPN', 'DEU', 'KOR', 'GBR', 'IND', 'ISR', 'SGP', 'TWN',
+    'FRA', 'CAN', 'SWE', 'NLD', 'CHE', 'FIN', 'IRL', 'AUS', 'BRA', 'IDN',
+    'ARE', 'SAU', 'QAT', 'BHR', 'EGY', 'TUR', 'MYS', 'THA', 'VNM', 'PHL',
+    'ESP', 'ITA', 'POL', 'CZE', 'DNK', 'NOR', 'AUT', 'BEL', 'PRT', 'EST',
+    'MEX', 'ARG', 'CHL', 'COL', 'ZAF', 'NGA', 'KEN',
   ].join(';'));
 
   const currentYear = new Date().getFullYear();
@@ -2470,7 +2655,7 @@ function handleYouTubeLiveRequest(req, res) {
             const json = JSON.stringify({ channelName: data.author_name || null, title: data.title || null, videoId: videoIdParam });
             ytLiveCache.set(cacheKey, { json, ts: Date.now() });
             return sendCompressed(req, res, 200, { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' }, json);
-          } catch {}
+          } catch { }
         }
         sendCompressed(req, res, 200, { 'Content-Type': 'application/json' },
           JSON.stringify({ channelName: null, title: null, videoId: videoIdParam }));
@@ -2719,8 +2904,12 @@ const server = http.createServer(async (req, res) => {
         enabled: OREF_ENABLED,
         alertCount: orefState.lastAlerts?.length || 0,
         historyCount24h: orefState.historyCount24h,
+        totalHistoryCount: orefState.totalHistoryCount,
+        historyWaves: orefState.history?.length || 0,
         lastPollAt: orefState.lastPollAt ? new Date(orefState.lastPollAt).toISOString() : null,
         hasError: !!orefState.lastError,
+        redisEnabled: UPSTASH_ENABLED,
+        bootstrapSource: orefState.bootstrapSource,
       },
       memory: {
         rss: `${(mem.rss / 1024 / 1024).toFixed(0)}MB`,
@@ -2982,128 +3171,128 @@ const server = http.createServer(async (req, res) => {
       logThrottled('log', `rss-miss:${feedUrl}`, '[Relay] RSS request (MISS):', feedUrl);
 
       const fetchPromise = new Promise((resolveInFlight, rejectInFlight) => {
-      let responseHandled = false;
+        let responseHandled = false;
 
-      const sendError = (statusCode, message) => {
-        if (responseHandled || res.headersSent) return;
-        responseHandled = true;
-        res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: message }));
-        rejectInFlight(new Error(message));
-      };
+        const sendError = (statusCode, message) => {
+          if (responseHandled || res.headersSent) return;
+          responseHandled = true;
+          res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: message }));
+          rejectInFlight(new Error(message));
+        };
 
-      const fetchWithRedirects = (url, redirectCount = 0) => {
-        if (redirectCount > 3) {
-          return sendError(502, 'Too many redirects');
-        }
-
-        const conditionalHeaders = {};
-        if (rssCached?.etag) conditionalHeaders['If-None-Match'] = rssCached.etag;
-        if (rssCached?.lastModified) conditionalHeaders['If-Modified-Since'] = rssCached.lastModified;
-
-        const protocol = url.startsWith('https') ? https : http;
-        const request = protocol.get(url, {
-          headers: {
-            'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.9',
-            ...conditionalHeaders,
-          },
-          timeout: 15000
-        }, (response) => {
-          if ([301, 302, 303, 307, 308].includes(response.statusCode) && response.headers.location) {
-            const redirectUrl = response.headers.location.startsWith('http')
-              ? response.headers.location
-              : new URL(response.headers.location, url).href;
-            logThrottled('log', `rss-redirect:${feedUrl}:${redirectUrl}`, `[Relay] Following redirect to: ${redirectUrl}`);
-            return fetchWithRedirects(redirectUrl, redirectCount + 1);
+        const fetchWithRedirects = (url, redirectCount = 0) => {
+          if (redirectCount > 3) {
+            return sendError(502, 'Too many redirects');
           }
 
-          if (response.statusCode === 304 && rssCached) {
-            responseHandled = true;
-            rssCached.timestamp = Date.now();
-            resolveInFlight();
-            logThrottled('log', `rss-revalidated:${feedUrl}`, '[Relay] RSS 304 revalidated:', feedUrl);
-            sendCompressed(req, res, 200, {
-              'Content-Type': rssCached.contentType || 'application/xml',
-              'Cache-Control': 'public, max-age=300',
-              'CDN-Cache-Control': 'public, max-age=600, stale-while-revalidate=300',
-              'X-Cache': 'REVALIDATED',
-            }, rssCached.data);
-            return;
-          }
+          const conditionalHeaders = {};
+          if (rssCached?.etag) conditionalHeaders['If-None-Match'] = rssCached.etag;
+          if (rssCached?.lastModified) conditionalHeaders['If-Modified-Since'] = rssCached.lastModified;
 
-          const encoding = response.headers['content-encoding'];
-          let stream = response;
-          if (encoding === 'gzip' || encoding === 'deflate') {
-            stream = encoding === 'gzip' ? response.pipe(zlib.createGunzip()) : response.pipe(zlib.createInflate());
-          }
-
-          const chunks = [];
-          stream.on('data', chunk => chunks.push(chunk));
-          stream.on('end', () => {
-            if (responseHandled || res.headersSent) return;
-            responseHandled = true;
-            const data = Buffer.concat(chunks);
-            // Cache all responses: 2xx with full TTL, non-2xx with short TTL (negative cache)
-            // FIFO eviction: drop oldest-inserted entry if at capacity
-            if (rssResponseCache.size >= RSS_CACHE_MAX_ENTRIES && !rssResponseCache.has(feedUrl)) {
-              const oldest = rssResponseCache.keys().next().value;
-              if (oldest) rssResponseCache.delete(oldest);
+          const protocol = url.startsWith('https') ? https : http;
+          const request = protocol.get(url, {
+            headers: {
+              'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept-Language': 'en-US,en;q=0.9',
+              ...conditionalHeaders,
+            },
+            timeout: 15000
+          }, (response) => {
+            if ([301, 302, 303, 307, 308].includes(response.statusCode) && response.headers.location) {
+              const redirectUrl = response.headers.location.startsWith('http')
+                ? response.headers.location
+                : new URL(response.headers.location, url).href;
+              logThrottled('log', `rss-redirect:${feedUrl}:${redirectUrl}`, `[Relay] Following redirect to: ${redirectUrl}`);
+              return fetchWithRedirects(redirectUrl, redirectCount + 1);
             }
-            rssResponseCache.set(feedUrl, {
-              data, contentType: 'application/xml', statusCode: response.statusCode, timestamp: Date.now(),
-              etag: response.headers['etag'] || null,
-              lastModified: response.headers['last-modified'] || null,
+
+            if (response.statusCode === 304 && rssCached) {
+              responseHandled = true;
+              rssCached.timestamp = Date.now();
+              resolveInFlight();
+              logThrottled('log', `rss-revalidated:${feedUrl}`, '[Relay] RSS 304 revalidated:', feedUrl);
+              sendCompressed(req, res, 200, {
+                'Content-Type': rssCached.contentType || 'application/xml',
+                'Cache-Control': 'public, max-age=300',
+                'CDN-Cache-Control': 'public, max-age=600, stale-while-revalidate=300',
+                'X-Cache': 'REVALIDATED',
+              }, rssCached.data);
+              return;
+            }
+
+            const encoding = response.headers['content-encoding'];
+            let stream = response;
+            if (encoding === 'gzip' || encoding === 'deflate') {
+              stream = encoding === 'gzip' ? response.pipe(zlib.createGunzip()) : response.pipe(zlib.createInflate());
+            }
+
+            const chunks = [];
+            stream.on('data', chunk => chunks.push(chunk));
+            stream.on('end', () => {
+              if (responseHandled || res.headersSent) return;
+              responseHandled = true;
+              const data = Buffer.concat(chunks);
+              // Cache all responses: 2xx with full TTL, non-2xx with short TTL (negative cache)
+              // FIFO eviction: drop oldest-inserted entry if at capacity
+              if (rssResponseCache.size >= RSS_CACHE_MAX_ENTRIES && !rssResponseCache.has(feedUrl)) {
+                const oldest = rssResponseCache.keys().next().value;
+                if (oldest) rssResponseCache.delete(oldest);
+              }
+              rssResponseCache.set(feedUrl, {
+                data, contentType: 'application/xml', statusCode: response.statusCode, timestamp: Date.now(),
+                etag: response.headers['etag'] || null,
+                lastModified: response.headers['last-modified'] || null,
+              });
+              if (response.statusCode < 200 || response.statusCode >= 300) {
+                logThrottled('warn', `rss-upstream:${feedUrl}:${response.statusCode}`, `[Relay] RSS upstream ${response.statusCode} for ${feedUrl}`);
+              }
+              resolveInFlight();
+              sendCompressed(req, res, response.statusCode, {
+                'Content-Type': 'application/xml',
+                'Cache-Control': response.statusCode >= 200 && response.statusCode < 300 ? 'public, max-age=300' : 'no-cache',
+                'CDN-Cache-Control': response.statusCode >= 200 && response.statusCode < 300 ? 'public, max-age=600, stale-while-revalidate=300' : 'no-store',
+                'X-Cache': 'MISS',
+              }, data);
             });
-            if (response.statusCode < 200 || response.statusCode >= 300) {
-              logThrottled('warn', `rss-upstream:${feedUrl}:${response.statusCode}`, `[Relay] RSS upstream ${response.statusCode} for ${feedUrl}`);
-            }
-            resolveInFlight();
-            sendCompressed(req, res, response.statusCode, {
-              'Content-Type': 'application/xml',
-              'Cache-Control': response.statusCode >= 200 && response.statusCode < 300 ? 'public, max-age=300' : 'no-cache',
-              'CDN-Cache-Control': response.statusCode >= 200 && response.statusCode < 300 ? 'public, max-age=600, stale-while-revalidate=300' : 'no-store',
-              'X-Cache': 'MISS',
-            }, data);
+            stream.on('error', (err) => {
+              logThrottled('error', `rss-decompress:${feedUrl}:${err.code || err.message}`, '[Relay] Decompression error:', err.message);
+              sendError(502, 'Decompression failed: ' + err.message);
+            });
           });
-          stream.on('error', (err) => {
-            logThrottled('error', `rss-decompress:${feedUrl}:${err.code || err.message}`, '[Relay] Decompression error:', err.message);
-            sendError(502, 'Decompression failed: ' + err.message);
-          });
-        });
 
-        request.on('error', (err) => {
-          logThrottled('error', `rss-error:${feedUrl}:${err.code || err.message}`, '[Relay] RSS error:', err.message);
-          // Serve stale on error
-          if (rssCached) {
-            if (!responseHandled && !res.headersSent) {
+          request.on('error', (err) => {
+            logThrottled('error', `rss-error:${feedUrl}:${err.code || err.message}`, '[Relay] RSS error:', err.message);
+            // Serve stale on error
+            if (rssCached) {
+              if (!responseHandled && !res.headersSent) {
+                responseHandled = true;
+                sendCompressed(req, res, 200, { 'Content-Type': 'application/xml', 'Cache-Control': 'no-store', 'CDN-Cache-Control': 'no-store', 'X-Cache': 'STALE' }, rssCached.data);
+              }
+              resolveInFlight();
+              return;
+            }
+            sendError(502, err.message);
+          });
+
+          request.on('timeout', () => {
+            request.destroy();
+            if (rssCached && !responseHandled && !res.headersSent) {
               responseHandled = true;
               sendCompressed(req, res, 200, { 'Content-Type': 'application/xml', 'Cache-Control': 'no-store', 'CDN-Cache-Control': 'no-store', 'X-Cache': 'STALE' }, rssCached.data);
+              resolveInFlight();
+              return;
             }
-            resolveInFlight();
-            return;
-          }
-          sendError(502, err.message);
-        });
+            sendError(504, 'Request timeout');
+          });
+        };
 
-        request.on('timeout', () => {
-          request.destroy();
-          if (rssCached && !responseHandled && !res.headersSent) {
-            responseHandled = true;
-            sendCompressed(req, res, 200, { 'Content-Type': 'application/xml', 'Cache-Control': 'no-store', 'CDN-Cache-Control': 'no-store', 'X-Cache': 'STALE' }, rssCached.data);
-            resolveInFlight();
-            return;
-          }
-          sendError(504, 'Request timeout');
-        });
-      };
-
-      fetchWithRedirects(feedUrl);
+        fetchWithRedirects(feedUrl);
       }); // end fetchPromise
 
       rssInFlight.set(feedUrl, fetchPromise);
-      fetchPromise.catch(() => {}).finally(() => rssInFlight.delete(feedUrl));
+      fetchPromise.catch(() => { }).finally(() => rssInFlight.delete(feedUrl));
     } catch (err) {
       if (feedUrl) rssInFlight.delete(feedUrl);
       if (!res.headersSent) {
@@ -3119,6 +3308,7 @@ const server = http.createServer(async (req, res) => {
       configured: OREF_ENABLED,
       alerts: orefState.lastAlerts || [],
       historyCount24h: orefState.historyCount24h,
+      totalHistoryCount: orefState.totalHistoryCount,
       timestamp: orefState.lastPollAt ? new Date(orefState.lastPollAt).toISOString() : new Date().toISOString(),
       ...(orefState.lastError ? { error: orefState.lastError } : {}),
     }));
@@ -3130,6 +3320,7 @@ const server = http.createServer(async (req, res) => {
       configured: OREF_ENABLED,
       history: orefState.history || [],
       historyCount24h: orefState.historyCount24h,
+      totalHistoryCount: orefState.totalHistoryCount,
       timestamp: orefState.lastPollAt ? new Date(orefState.lastPollAt).toISOString() : new Date().toISOString(),
     }));
   } else if (pathname.startsWith('/ucdp-events')) {
@@ -3153,7 +3344,7 @@ const server = http.createServer(async (req, res) => {
 function connectUpstream() {
   // Skip if already connected or connecting
   if (upstreamSocket?.readyState === WebSocket.OPEN ||
-      upstreamSocket?.readyState === WebSocket.CONNECTING) return;
+    upstreamSocket?.readyState === WebSocket.CONNECTING) return;
 
   console.log('[Relay] Connecting to aisstream.io...');
   const socket = new WebSocket(AISSTREAM_URL);
@@ -3179,8 +3370,8 @@ function connectUpstream() {
     let processed = 0;
 
     while (processed < UPSTREAM_DRAIN_BATCH &&
-           getUpstreamQueueSize() > 0 &&
-           Date.now() - startedAt < UPSTREAM_DRAIN_BUDGET_MS) {
+      getUpstreamQueueSize() > 0 &&
+      Date.now() - startedAt < UPSTREAM_DRAIN_BUDGET_MS) {
       const raw = dequeueUpstreamMessage();
       if (!raw) break;
       processRawUpstreamMessage(raw);
@@ -3318,11 +3509,11 @@ async function gracefulShutdown(signal) {
         telegramState.client.disconnect(),
         new Promise(r => setTimeout(r, 3000)),
       ]);
-    } catch {}
+    } catch { }
     telegramState.client = null;
   }
   if (upstreamSocket) {
-    try { upstreamSocket.close(); } catch {}
+    try { upstreamSocket.close(); } catch { }
   }
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 5000);

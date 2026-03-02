@@ -1,4 +1,5 @@
 import type { NewsItem } from '@/types';
+import type { OrefAlert } from '@/services/oref-alerts';
 import { getSourceTier } from '@/config/feeds';
 
 export interface BreakingAlert {
@@ -8,7 +9,7 @@ export interface BreakingAlert {
   link?: string;
   threatLevel: 'critical' | 'high';
   timestamp: Date;
-  origin: 'rss_alert' | 'keyword_spike' | 'hotspot_escalation' | 'military_surge';
+  origin: 'rss_alert' | 'keyword_spike' | 'hotspot_escalation' | 'military_surge' | 'oref_siren';
 }
 
 export interface AlertSettings {
@@ -71,7 +72,7 @@ export function getAlertSettings(): AlertSettings {
       cachedSettings = { ...DEFAULT_SETTINGS, ...parsed };
       return cachedSettings!;
     }
-  } catch {}
+  } catch { }
   cachedSettings = { ...DEFAULT_SETTINGS };
   return cachedSettings;
 }
@@ -82,7 +83,7 @@ export function updateAlertSettings(partial: Partial<AlertSettings>): void {
   cachedSettings = updated;
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated));
-  } catch {}
+  } catch { }
 }
 
 function isRecent(pubDate: Date): boolean {
@@ -157,6 +158,34 @@ export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
   }
 
   if (best && !isGlobalCooldown(best.threatLevel)) dispatchAlert(best);
+}
+
+export function dispatchOrefBreakingAlert(alerts: OrefAlert[]): void {
+  const settings = getAlertSettings();
+  if (!settings.enabled || !alerts.length) return;
+
+  const title = alerts[0]?.title || 'Siren alert';
+  const allLocations = alerts.flatMap(a => a.data);
+  const shown = allLocations.slice(0, 3);
+  const overflow = allLocations.length - shown.length;
+  const locationSuffix = shown.length
+    ? ' — ' + shown.join(', ') + (overflow > 0 ? ` +${overflow} areas` : '')
+    : '';
+  const headline = title + locationSuffix;
+
+  const keyParts = alerts.map(a => a.id || `${a.cat}|${a.title}|${a.alertDate}`).sort();
+  const dedupeKey = 'oref:' + simpleHash(keyParts.join(','));
+
+  if (isDuplicate(dedupeKey)) return;
+
+  dispatchAlert({
+    id: dedupeKey,
+    headline,
+    source: 'OREF Pikud HaOref',
+    threatLevel: 'critical',
+    timestamp: new Date(),
+    origin: 'oref_siren',
+  });
 }
 
 export function initBreakingNewsAlerts(): void {

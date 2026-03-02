@@ -22,9 +22,9 @@ const SOCIAL_IMAGE_UA =
 export default function middleware(request: Request) {
   const url = new URL(request.url);
 
-  if (url.hostname === 'api.worldmonitor.app') {
-    return;
-  }
+  // if (url.hostname === 'api.worldmonitor.app') {
+  //   return;
+  // }
 
   const ua = request.headers.get('user-agent') ?? '';
   const path = url.pathname;
