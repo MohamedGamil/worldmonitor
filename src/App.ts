@@ -7,6 +7,7 @@ import {
   MOBILE_DEFAULT_MAP_LAYERS,
   STORAGE_KEYS,
   SITE_VARIANT,
+  DOWNLOAD_BUTTON_ENABLED,
 } from '@/config';
 import { initDB, cleanOldSnapshots, isAisConfigured, initAisStream, isOutagesConfigured, disconnectAisStream } from '@/services';
 import { mlWorker } from '@/services/ml-worker';
@@ -230,11 +231,15 @@ export class App {
 
     const disabledSources = new Set(loadFromStorage<string[]>(STORAGE_KEYS.disabledFeeds, []));
 
+    // UI configuration
+    const downloadButtonEnabled = DOWNLOAD_BUTTON_ENABLED;
+
     // Build shared state object
     this.state = {
       map: null,
       isMobile,
       isDesktopApp,
+      downloadButtonEnabled,
       container: el,
       panels: {},
       newsPanels: {},

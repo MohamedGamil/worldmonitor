@@ -71,6 +71,7 @@ export interface AppContext {
   map: MapContainer | null;
   readonly isMobile: boolean;
   readonly isDesktopApp: boolean;
+  readonly downloadButtonEnabled: boolean;
   readonly container: HTMLElement;
 
   panels: Record<string, Panel>;

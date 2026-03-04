@@ -117,3 +117,6 @@ export {
 
 // Gulf FDI investment database
 export { GULF_INVESTMENTS } from './gulf-fdi';
+
+// UI configuration
+export { DOWNLOAD_BUTTON_ENABLED } from './ui';
