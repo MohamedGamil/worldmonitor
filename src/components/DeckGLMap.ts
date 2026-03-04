@@ -7,6 +7,7 @@ import { MapboxOverlay } from '@deck.gl/mapbox';
 import type { Layer, LayersList, PickingInfo } from '@deck.gl/core';
 import { GeoJsonLayer, ScatterplotLayer, PathLayer, IconLayer, TextLayer, PolygonLayer } from '@deck.gl/layers';
 import maplibregl from 'maplibre-gl';
+import Supercluster from 'supercluster';
 import type { GetClustersResult } from '@/workers/map-cluster.worker';
 import type {
   MapLayers,
@@ -20,6 +21,7 @@ import type {
   CableAdvisory,
   RepairShip,
   SocialUnrestEvent,
+  AIDataCenter,
   MilitaryFlight,
   MilitaryVessel,
   MilitaryFlightCluster,
@@ -65,6 +67,7 @@ import {
   SITE_VARIANT,
   STARTUP_HUBS,
   ACCELERATORS,
+  TECH_HQS,
   CLOUD_REGIONS,
   PORTS,
   SPACEPORTS,
@@ -273,6 +276,7 @@ const GEOPOLITICAL_BOUNDARIES_GEOJSON: GeoJSON.FeatureCollection = {
 };
 
 export class DeckGLMap {
+  private static readonly MAX_CLUSTER_LEAVES = 200;
   private static readonly MAX_FIRE_POINTS = 10_000;
 
   private container: HTMLElement;
@@ -1101,6 +1105,11 @@ export class DeckGLMap {
       // Conflict zones layer
       if (mapLayers.conflicts) {
         layers.push(this.createConflictZonesLayer());
+      }
+
+      // Geopolitical boundaries layer
+      if (mapLayers.geopoliticalBoundaries) {
+        layers.push(this.createGeopoliticalBoundariesLayer());
       }
 
     }
@@ -3006,7 +3015,7 @@ export class DeckGLMap {
       if (cluster.items.length === 0 && cluster._clusterId != null && this.protestSC) {
         try {
           const leaves = this.protestSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
-          cluster.items = leaves.map(l => this.protestSuperclusterSource[l.properties.index]).filter((x): x is SocialUnrestEvent => !!x);
+          cluster.items = leaves.map((l: any) => this.protestSuperclusterSource[l.properties.index]).filter((x: any): x is SocialUnrestEvent => !!x);
           cluster.sampled = cluster.items.length < cluster.count;
         } catch (e) {
           console.warn('[DeckGLMap] stale protest cluster', cluster._clusterId, e);
@@ -3039,7 +3048,7 @@ export class DeckGLMap {
       if (cluster.items.length === 0 && cluster._clusterId != null && this.techHQSC) {
         try {
           const leaves = this.techHQSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
-          cluster.items = leaves.map(l => TECH_HQS[l.properties.index]).filter(Boolean) as typeof TECH_HQS;
+          cluster.items = leaves.map((l: any) => TECH_HQS[l.properties.index]).filter(Boolean) as typeof TECH_HQS;
           cluster.sampled = cluster.items.length < cluster.count;
         } catch (e) {
           console.warn('[DeckGLMap] stale techHQ cluster', cluster._clusterId, e);
@@ -3072,7 +3081,7 @@ export class DeckGLMap {
       if (cluster.items.length === 0 && cluster._clusterId != null && this.techEventSC) {
         try {
           const leaves = this.techEventSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
-          cluster.items = leaves.map(l => this.techEvents[l.properties.index]).filter((x): x is TechEventMarker => !!x);
+          cluster.items = leaves.map((l: any) => this.techEvents[l.properties.index]).filter((x: any): x is TechEventMarker => !!x);
           cluster.sampled = cluster.items.length < cluster.count;
         } catch (e) {
           console.warn('[DeckGLMap] stale techEvent cluster', cluster._clusterId, e);
@@ -3103,7 +3112,7 @@ export class DeckGLMap {
       if (cluster.items.length === 0 && cluster._clusterId != null && this.datacenterSC) {
         try {
           const leaves = this.datacenterSC.getLeaves(cluster._clusterId, DeckGLMap.MAX_CLUSTER_LEAVES);
-          cluster.items = leaves.map(l => this.datacenterSCSource[l.properties.index]).filter((x): x is AIDataCenter => !!x);
+          cluster.items = leaves.map((l: any) => this.datacenterSCSource[l.properties.index]).filter((x: any): x is AIDataCenter => !!x);
           cluster.sampled = cluster.items.length < cluster.count;
         } catch (e) {
           console.warn('[DeckGLMap] stale datacenter cluster', cluster._clusterId, e);

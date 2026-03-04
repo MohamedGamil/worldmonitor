@@ -2,7 +2,7 @@ import type { CountryBriefSignals } from '@/app/app-context';
 import { getSourcePropagandaRisk, getSourceTier } from '@/config/feeds';
 import { getCountryCentroid, ME_STRIKE_BOUNDS } from '@/services/country-geometry';
 import type { CountryScore } from '@/services/country-instability';
-import { t } from '@/services/i18n';
+import { getLocalizedGeoName, t } from '@/services/i18n';
 import { getNearbyInfrastructure } from '@/services/related-assets';
 import type { PredictionMarket } from '@/services/prediction';
 import type { AssetType, NewsItem, RelatedAsset } from '@/types';
@@ -149,6 +149,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
   }
 
   public show(country: string, code: string, score: CountryScore | null, signals: CountryBriefSignals): void {
+    country = getLocalizedGeoName(code);
     this.abortController.abort();
     this.abortController = new AbortController();
     this.currentCode = code;
@@ -570,7 +571,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
         const orig = shareBtn.innerHTML;
         shareBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
         setTimeout(() => { shareBtn.innerHTML = orig; }, 1500);
-      }).catch(() => {});
+      }).catch(() => { });
     });
 
     const storyButton = this.el('button', 'cdp-action-btn', 'Story') as HTMLButtonElement;
@@ -671,7 +672,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     if (signals.travelAdvisories > 0 && signals.travelAdvisoryMaxLevel) {
       const advLabel = signals.travelAdvisoryMaxLevel === 'do-not-travel' ? t('countryBrief.chips.doNotTravel')
         : signals.travelAdvisoryMaxLevel === 'reconsider' ? t('countryBrief.chips.reconsiderTravel')
-        : t('countryBrief.chips.exerciseCaution');
+          : t('countryBrief.chips.exerciseCaution');
       chips.append(this.makeSignalChip(`⚠️ ${signals.travelAdvisories} ${t('countryBrief.chips.advisory')}: ${advLabel}`, 'advisory'));
     }
     this.addSignalChip(chips, signals.orefSirens, t('countryBrief.chips.activeSirens'), '🚨', 'conflict');
@@ -720,8 +721,8 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       const pct = Math.min(100, Math.max(0, item.value));
       const color = pct >= 70 ? getCSSColor('--semantic-critical')
         : pct >= 50 ? getCSSColor('--semantic-high')
-        : pct >= 30 ? getCSSColor('--semantic-elevated')
-        : getCSSColor('--semantic-normal');
+          : pct >= 30 ? getCSSColor('--semantic-elevated')
+            : getCSSColor('--semantic-normal');
       const barFill = this.el('div', 'cdp-comp-fill');
       barFill.style.width = `${pct}%`;
       barFill.style.background = color;
