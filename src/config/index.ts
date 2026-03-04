@@ -120,3 +120,6 @@ export { GULF_INVESTMENTS } from './gulf-fdi';
 
 // UI configuration
 export { DOWNLOAD_BUTTON_ENABLED } from './ui';
+
+// Live News Channels
+export { FULL_LIVE_CHANNELS_GLOBAL, TECH_LIVE_CHANNELS_GLOBAL, LIVE_CHANNELS_LIST } from './live-channels';
