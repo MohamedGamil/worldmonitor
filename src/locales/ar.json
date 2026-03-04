@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "التنظيم المالي",
     "sourceRegionGulfMena": "الخليج والشرق الأوسط",
     "filterPanels": "تصفية اللوحات...",
+    "resetLayout": "إعادة تعيين التخطيط",
     "panelCatCore": "أساسي",
     "panelCatIntelligence": "استخبارات",
     "panelCatRegionalNews": "أخبار إقليمية",
@@ -183,6 +184,7 @@
     "macroSignals": "رادار السوق",
     "etfFlows": "متتبع BTC ETF",
     "stablecoins": "العملات المستقرة",
+    "deduction": "استنتاج الوضع",
     "ucdpEvents": "أحداث نزاع UCDP",
     "displacement": "نزوح UNHCR",
     "climate": "شذوذات مناخية",
@@ -218,6 +220,100 @@
     "gulfCurrencies": "عملات الخليج",
     "gulfOil": "نفط الخليج"
   },
+  "commands": {
+    "prefixes": {
+      "map": "خريطة",
+      "panel": "لوحة",
+      "brief": "موجز"
+    },
+    "categories": {
+      "navigate": "تنقل",
+      "layers": "طبقات",
+      "panels": "لوحات",
+      "view": "عرض",
+      "actions": "إجراءات",
+      "country": "دولة"
+    },
+    "regions": {
+      "global": "عرض عالمي",
+      "mena": "الشرق الأوسط وشمال أفريقيا",
+      "eu": "أوروبا",
+      "asia": "آسيا والمحيط الهادئ",
+      "america": "الأمريكتان",
+      "africa": "أفريقيا",
+      "latam": "أمريكا اللاتينية",
+      "oceania": "أوقيانوسيا"
+    },
+    "tips": {
+      "map": "اكتب اسم دولة للانتقال إليها على الخريطة",
+      "panel": "اكتب اسم لوحة للتمرير إليها",
+      "brief": "اكتب اسم دولة للحصول على ملخص استخباراتي",
+      "layers": "اكتب \"عسكري\" أو \"مالي\" لتحميل طبقات مسبقة",
+      "time": "اكتب \"1h\" أو \"24h\" أو \"7d\" للتصفية حسب الوقت",
+      "settings": "اكتب \"وضع داكن\" أو \"إعدادات\" أو \"ملء الشاشة\"",
+      "mapExample": "إيران",
+      "panelExample": "أخبار",
+      "briefExample": "موجز الصين",
+      "layersExample": "طبقات عسكرية",
+      "timeExample": "24h",
+      "settingsExample": "وضع داكن"
+    },
+    "keywords": {
+      "military": "عسكري",
+      "finance": "مالي",
+      "infrastructure": "بنية تحتية",
+      "intelligence": "استخبارات",
+      "news": "أخبار",
+      "dark": "داكن",
+      "light": "فاتح",
+      "settings": "إعدادات",
+      "fullscreen": "ملء الشاشة",
+      "refresh": "تحديث"
+    },
+    "labels": {
+      "layers": {
+        "military": "عرض الطبقات العسكرية",
+        "finance": "عرض الطبقات المالية",
+        "infra": "عرض طبقات البنية التحتية",
+        "intel": "عرض طبقات الاستخبارات",
+        "all": "تفعيل جميع الطبقات",
+        "none": "إخفاء جميع الطبقات",
+        "minimal": "طبقات مبسطة (نزاعات + بؤر ساخنة)"
+      },
+      "layer": {
+        "ais": "تبديل تتبع السفن AIS",
+        "flights": "تبديل الرحلات العسكرية",
+        "conflicts": "تبديل مناطق النزاع",
+        "hotspots": "تبديل البؤر الاستخباراتية",
+        "protests": "تبديل الاحتجاجات والاضطرابات",
+        "cables": "تبديل الكابلات البحرية",
+        "pipelines": "تبديل خطوط الأنابيب",
+        "nuclear": "تبديل المنشآت النووية",
+        "bases": "تبديل القواعد العسكرية",
+        "fires": "تبديل الحرائق الفضائية",
+        "weather": "تبديل طبقة الطقس",
+        "cyber": "تبديل التهديدات السيبرانية",
+        "displacement": "تبديل تدفقات النزوح",
+        "climate": "تبديل الشذوذ المناخي",
+        "outages": "تبديل انقطاعات الإنترنت",
+        "tradeRoutes": "تبديل طرق التجارة"
+      },
+      "view": {
+        "dark": "التبديل إلى الوضع الداكن",
+        "light": "التبديل إلى الوضع الفاتح",
+        "fullscreen": "تبديل ملء الشاشة",
+        "settings": "فتح الإعدادات",
+        "refresh": "تحديث جميع البيانات"
+      },
+      "time": {
+        "1h": "عرض أحداث الساعة الأخيرة",
+        "6h": "عرض أحداث آخر 6 ساعات",
+        "24h": "عرض أحداث آخر 24 ساعة",
+        "48h": "عرض أحداث آخر 48 ساعة",
+        "7d": "عرض أحداث آخر 7 أيام"
+      }
+    }
+  },
   "modals": {
     "search": {
       "placeholder": "ابحث أو اكتب أمرًا...",
@@ -229,6 +325,8 @@
       "recent": "عمليات البحث الأخيرة",
       "empty": "ابحث في البيانات أو نفّذ أوامر",
       "noResults": "لا توجد نتائج",
+      "commands": "أوامر",
+      "results": "نتائج",
       "navigate": "تنقّل",
       "select": "اختيار",
       "close": "إغلاق",
@@ -663,7 +761,12 @@
     "playback": {
       "toggleMode": "تبديل وضع التشغيل",
       "live": "مباشر",
-      "historicalPlayback": "تشغيل تاريخي"
+      "historicalPlayback": "تشغيل تاريخي",
+      "close": "إغلاق",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "pizzint": {
       "title": "مؤشر بيتزا البنتاغون",
@@ -849,7 +952,8 @@
         "tradeRoutes": "طرق التجارة",
         "gpsJamming": "التشويش على GPS",
         "iranAttacks": "هجمات إيران",
-        "dayNight": "نهار/ليل"
+        "dayNight": "نهار/ليل",
+        "geopoliticalBoundaries": "الحدود الجيوسياسية"
       },
       "tooltip": {
         "earthquake": "زلزال",
@@ -953,7 +1057,8 @@
           "mineralsFull": "رواسب المعادن الاستراتيجية ومواقع التعدين",
           "techCyberThreats": "هجمات سيبرانية وأحداث أمنية",
           "techEvents": "مؤتمرات وفعاليات تقنية كبرى",
-          "techFires": "حرائق غابات نشطة بالقرب من البنية التحتية التقنية"
+          "techFires": "حرائق غابات نشطة بالقرب من البنية التحتية التقنية",
+          "geoBoundaries": "مناطق منزوعة السلاح وخطوط الهدنة والحدود المتنازع عليها"
         },
         "notes": {
           "timeAffects": "يؤثر على: الزلازل، الطقس، الاحتجاجات، الانقطاعات"
@@ -1308,8 +1413,8 @@
         "regime": "النظام",
         "btcTrend": "اتجاه BTC",
         "hashRate": "Hash Rate",
-        "mining": "التعدين",
-        "fearGreed": "الخوف &amp; الجشع"
+        "fearGreed": "الخوف &amp; الجشع",
+        "momentum": "Momentum"
       }
     },
     "panel": {
@@ -1367,7 +1472,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "لا يمكن تشغيل {{name}} هنا — قد يكون مقيدًا في منطقتك (خطأ {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "إدارة القنوات",
       "addChannel": "إضافة قناة",
@@ -1384,6 +1489,7 @@
       "restoreDefaults": "استعادة القنوات الافتراضية",
       "availableChannels": "القنوات المتاحة",
       "customChannel": "قناة مخصصة",
+      "regionAll": "الكل",
       "regionNorthAmerica": "أمريكا الشمالية",
       "regionEurope": "أوروبا",
       "regionLatinAmerica": "أمريكا اللاتينية",
@@ -1953,6 +2059,19 @@
       "uae_ecsr": "الإمارات/ECSR",
       "venezuela_crisis": "أزمة فنزويلا",
       "yemen_houthis": "اليمن/الحوثيون"
+    },
+    "geopoliticalBoundary": {
+      "title": "الحدود الجيوسياسية",
+      "established": "تاريخ التأسيس",
+      "dimensions": "الأبعاد",
+      "legalBasis": "الأساس القانوني",
+      "parties": "الأطراف الموقعة",
+      "types": {
+        "demilitarized": "منطقة منزوعة السلاح",
+        "ceasefire": "خط وقف إطلاق النار",
+        "disputed": "حدود متنازع عليها",
+        "armistice": "خط الهدنة"
+      }
     }
   },
   "signals": {

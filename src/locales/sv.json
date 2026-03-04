@@ -48,6 +48,7 @@
     "regulation": "AI-regleringspanel",
     "serviceStatus": "Servicestatus",
     "stablecoins": "Stablecoins",
+    "deduction": "Bedöm situation",
     "events": "Tekniska evenemang",
     "techHubs": "Teknikhubbar",
     "techReadiness": "Teknikberedskapsindex",
@@ -72,6 +73,39 @@
     "gulfIndices": "Gulfindex",
     "gulfCurrencies": "Gulfvalutor",
     "gulfOil": "Gulfolja"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "Karta",
+      "panel": "Panel",
+      "brief": "Sammanfattning"
+    },
+    "categories": {
+      "navigate": "Navigera",
+      "layers": "Lager",
+      "panels": "Paneler",
+      "view": "Vy",
+      "actions": "Åtgärder",
+      "country": "Land"
+    },
+    "regions": {
+      "global": "Global vy",
+      "mena": "Mellanöstern & Nordafrika",
+      "eu": "Europa",
+      "asia": "Asien-Stillahavsområdet",
+      "america": "Amerika",
+      "africa": "Afrika",
+      "latam": "Latinamerika",
+      "oceania": "Oceanien"
+    },
+    "tips": {
+      "map": "Skriv ett landsnamn för att flyga dit på kartan",
+      "panel": "Skriv ett panelnamn för att scrolla dit",
+      "brief": "Skriv ett landsnamn för en underrättelserapport",
+      "layers": "Skriv \"military\" eller \"finance\" för lagerförinställningar",
+      "time": "Skriv \"1h\", \"24h\" eller \"7d\" för att filtrera efter tid",
+      "settings": "Skriv \"dark mode\", \"settings\" eller \"fullscreen\""
+    }
   },
   "modals": {
     "search": {
@@ -385,7 +419,12 @@
     "playback": {
       "live": "LIVE",
       "toggleMode": "Växla uppspelningsläge",
-      "historicalPlayback": "Historisk uppspelning"
+      "historicalPlayback": "Historisk uppspelning",
+      "close": "Nära",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "deckgl": {
       "views": {
@@ -458,7 +497,8 @@
         "tradeRoutes": "Handelsrutter",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "Dag/Natt",
-        "iranAttacks": "Iran-attacker"
+        "iranAttacks": "Iran-attacker",
+        "geopoliticalBoundaries": "Geopolitiska Gränser"
       },
       "layersTitle": "Lager",
       "layerGuide": "Lagerguide",
@@ -564,7 +604,8 @@
           "mineralsFull": "Strategiska mineralfyndigheter och gruvplatser",
           "techCyberThreats": "Cyberattacker och säkerhetshändelser",
           "techEvents": "Stora teknikkonferenser och evenemang",
-          "techFires": "Aktiva skogsbränder nära teknikinfrastruktur"
+          "techFires": "Aktiva skogsbränder nära teknikinfrastruktur",
+          "geoBoundaries": "Demilitariserade zoner, eldupphörslinjer och omtvistade gränser"
         },
         "notes": {
           "timeAffects": "Påverkar: Jordbävningar, väder, protester, avbrott"
@@ -1142,8 +1183,8 @@
         "regime": "Regim",
         "btcTrend": "BTC-trend",
         "hashRate": "Hash Rate",
-        "mining": "Utvinning",
-        "fearGreed": "Rädsla &amp; Girighet"
+        "fearGreed": "Rädsla &amp; Girighet",
+        "momentum": "Momentum"
       }
     },
     "export": {
@@ -1207,7 +1248,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} kan inte spelas här — kan vara begränsat i din region (fel {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "Hantera kanaler",
       "addChannel": "Lägg till kanal",
@@ -1224,6 +1265,7 @@
       "restoreDefaults": "Återställ standardkanaler",
       "availableChannels": "Tillgängliga kanaler",
       "customChannel": "Anpassad kanal",
+      "regionAll": "Alla",
       "regionNorthAmerica": "Nordamerika",
       "regionEurope": "Europa",
       "regionLatinAmerica": "Latinamerika",
@@ -1791,6 +1833,19 @@
     },
     "iranEvent": {
       "relatedEvents": "Relaterade händelser"
+    },
+    "geopoliticalBoundary": {
+      "title": "GEOPOLITISK GRÄNS",
+      "established": "UPPRÄTTAD",
+      "dimensions": "DIMENSIONER",
+      "legalBasis": "RÄTTSLIG GRUND",
+      "parties": "UNDERTECKNARE",
+      "types": {
+        "demilitarized": "DEMILITARISERAD ZON",
+        "ceasefire": "ELDUPPHÖRSLINJE",
+        "disputed": "OMTVISTAD GRÄNS",
+        "armistice": "VAPENSTILLESTÅNDSLINJE"
+      }
     }
   },
   "signals": {
@@ -2021,6 +2076,7 @@
     "sourceRegionFinRegulation": "Financial Regulation",
     "sourceRegionGulfMena": "Gulfen & MENA",
     "filterPanels": "Filtrera paneler...",
+    "resetLayout": "Återställ layout",
     "panelCatCore": "Kärna",
     "panelCatIntelligence": "Underrättelser",
     "panelCatRegionalNews": "Regionala Nyheter",

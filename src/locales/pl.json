@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "Financial Regulation",
     "sourceRegionGulfMena": "Zatoka & MENA",
     "filterPanels": "Filtruj panele...",
+    "resetLayout": "Resetuj układ",
     "panelCatCore": "Główne",
     "panelCatIntelligence": "Wywiad",
     "panelCatRegionalNews": "Wiadomości Regionalne",
@@ -182,6 +183,7 @@
     "macroSignals": "Radar rynkowy",
     "etfFlows": "Śledzenie ETF BTC",
     "stablecoins": "Stablecoiny",
+    "deduction": "Dedukcja sytuacji",
     "ucdpEvents": "Wydarzenia konfliktowe UCDP",
     "displacement": "Przesiedlenia UNHCR",
     "climate": "Anomalie klimatyczne",
@@ -217,6 +219,39 @@
     "gulfIndices": "Indeksy Zatoki",
     "gulfCurrencies": "Waluty Zatoki",
     "gulfOil": "Ropa Zatoki"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "Mapa",
+      "panel": "Panel",
+      "brief": "Podsumowanie"
+    },
+    "categories": {
+      "navigate": "Nawigacja",
+      "layers": "Warstwy",
+      "panels": "Panele",
+      "view": "Widok",
+      "actions": "Akcje",
+      "country": "Kraj"
+    },
+    "regions": {
+      "global": "Widok globalny",
+      "mena": "Bliski Wschód i Afryka Północna",
+      "eu": "Europa",
+      "asia": "Azja i Pacyfik",
+      "america": "Ameryka",
+      "africa": "Afryka",
+      "latam": "Ameryka Łacińska",
+      "oceania": "Oceania"
+    },
+    "tips": {
+      "map": "Wpisz nazwę kraju, aby przenieść się tam na mapie",
+      "panel": "Wpisz nazwę panelu, aby do niego przewinąć",
+      "brief": "Wpisz nazwę kraju, aby uzyskać raport wywiadowczy",
+      "layers": "Wpisz \"military\" lub \"finance\", aby zastosować predefiniowane warstwy",
+      "time": "Wpisz \"1h\", \"24h\" lub \"7d\", aby filtrować według czasu",
+      "settings": "Wpisz \"dark mode\", \"settings\" lub \"fullscreen\""
+    }
   },
   "modals": {
     "search": {
@@ -698,7 +733,8 @@
         "tradeRoutes": "Szlaki Handlowe",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "Dzień/Noc",
-        "iranAttacks": "Ataki Iranu"
+        "iranAttacks": "Ataki Iranu",
+        "geopoliticalBoundaries": "Granice Geopolityczne"
       },
       "layersTitle": "Warstwy",
       "layerGuide": "Przewodnik po warstwach",
@@ -804,7 +840,8 @@
           "mineralsFull": "Złoża minerałów strategicznych i kopalnie",
           "techCyberThreats": "Cyberataki i zdarzenia bezpieczeństwa",
           "techEvents": "Główne konferencje i wydarzenia technologiczne",
-          "techFires": "Aktywne pożary w pobliżu infrastruktury technologicznej"
+          "techFires": "Aktywne pożary w pobliżu infrastruktury technologicznej",
+          "geoBoundaries": "Strefy zdemilitaryzowane, linie zawieszenia broni i sporne granice"
         },
         "notes": {
           "timeAffects": "Wpływ na: Trzęsienia ziemi, Pogoda, Protesty, Przestoje"
@@ -882,7 +919,12 @@
     "playback": {
       "toggleMode": "Przełącz tryb odtwarzania",
       "historicalPlayback": "Odtwarzanie historyczne",
-      "live": "NA ŻYWO"
+      "live": "NA ŻYWO",
+      "close": "Zamknąć",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "stablecoins": {
       "pegHealth": "Stabilność powiązania",
@@ -1287,8 +1329,8 @@
         "regime": "Reżim",
         "btcTrend": "Trend BTC",
         "hashRate": "Hash Rate",
-        "mining": "Wydobycie",
-        "fearGreed": "Strach &amp; Chciwość"
+        "fearGreed": "Strach &amp; Chciwość",
+        "momentum": "Momentum"
       }
     },
     "export": {
@@ -1352,7 +1394,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} nie może być odtworzony tutaj — może być ograniczony w Twoim regionie (błąd {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "Zarządzaj kanałami",
       "addChannel": "Dodaj kanał",
@@ -1369,6 +1411,7 @@
       "restoreDefaults": "Przywróć domyślne kanały",
       "availableChannels": "Dostępne kanały",
       "customChannel": "Kanał niestandardowy",
+      "regionAll": "Wszystkie",
       "regionNorthAmerica": "Ameryka Północna",
       "regionEurope": "Europa",
       "regionLatinAmerica": "Ameryka Łacińska",
@@ -1936,6 +1979,19 @@
     },
     "iranEvent": {
       "relatedEvents": "Powiązane wydarzenia"
+    },
+    "geopoliticalBoundary": {
+      "title": "GRANICA GEOPOLITYCZNA",
+      "established": "USTANOWIONO",
+      "dimensions": "WYMIARY",
+      "legalBasis": "PODSTAWA PRAWNA",
+      "parties": "SYGNATARIUSZE",
+      "types": {
+        "demilitarized": "STREFA ZDEMILITARYZOWANA",
+        "ceasefire": "LINIA ZAWIESZENIA BRONI",
+        "disputed": "SPORNA GRANICA",
+        "armistice": "LINIA ROZEJMU"
+      }
     }
   },
   "signals": {

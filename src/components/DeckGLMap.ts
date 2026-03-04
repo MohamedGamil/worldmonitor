@@ -52,6 +52,7 @@ import { debounce, rafSchedule, getCurrentTheme } from '@/utils/index';
 import {
   INTEL_HOTSPOTS,
   CONFLICT_ZONES,
+  GEOPOLITICAL_BOUNDARIES,
   MILITARY_BASES,
   UNDERSEA_CABLES,
   NUCLEAR_FACILITIES,
@@ -262,14 +263,27 @@ const CONFLICT_ZONES_GEOJSON: GeoJSON.FeatureCollection = {
   })),
 };
 
+const GEOPOLITICAL_BOUNDARIES_GEOJSON: GeoJSON.FeatureCollection = {
+  type: 'FeatureCollection',
+  features: GEOPOLITICAL_BOUNDARIES.map(b => ({
+    type: 'Feature' as const,
+    properties: { id: b.id, name: b.name, boundaryType: b.boundaryType },
+    geometry: { type: 'Polygon' as const, coordinates: [b.coords] },
+  })),
+};
+
 export class DeckGLMap {
   private static readonly MAX_FIRE_POINTS = 10_000;
 
   private container: HTMLElement;
   private deckOverlay: MapboxOverlay | null = null;
   private maplibreMap: maplibregl.Map | null = null;
+  private resizeObserver: ResizeObserver | null = null;
   private state: DeckMapState;
   private popup: MapPopup;
+  private isResizing = false;
+  private savedTopLat: number | null = null;
+  private correctingCenter = false;
 
   // Data stores
   private hotspots: HotspotWithBreaking[];
@@ -339,7 +353,7 @@ export class DeckGLMap {
   private renderPaused = false;
   private renderPending = false;
   private webglLost = false;
-  private resizeObserver: ResizeObserver | null = null;
+
 
   // --- Optimization: dirty-flag layer rebuilds (spec 06, §1.1) ---
   private dirtyLayers: Set<string> = new Set();
@@ -376,9 +390,9 @@ export class DeckGLMap {
   private lastCableHighlightSignature = '';
   private lastCableHealthSignature = '';
   private lastPipelineHighlightSignature = '';
-  private debouncedRebuildLayers: () => void;
-  private debouncedFetchBases: () => void;
-  private rafUpdateLayers: () => void;
+  private debouncedRebuildLayers: (() => void) & { cancel(): void };
+  private debouncedFetchBases: (() => void) & { cancel(): void };
+  private rafUpdateLayers: (() => void) & { cancel(): void };
   private moveTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(container: HTMLElement, initialState: DeckMapState) {
@@ -410,6 +424,7 @@ export class DeckGLMap {
     });
 
     this.initMapLibre();
+    this.setupResizeObserver();
 
     this.mapClusterWorker = new Worker(new URL('@/workers/map-cluster.worker.ts', import.meta.url), { type: 'module' });
     this.mapClusterWorker.onmessage = (e: MessageEvent<any>) => {
@@ -449,8 +464,6 @@ export class DeckGLMap {
       };
       requestAnimationFrame(tick);
     });
-
-    this.setupResizeObserver();
 
     this.createControls();
     this.createTimeSlider();
@@ -543,6 +556,27 @@ export class DeckGLMap {
       console.info('[DeckGLMap] WebGL context restored');
       this.maplibreMap?.triggerRepaint();
     });
+
+    // Pin top edge during drag-resize: correct center shift synchronously
+    // inside MapLibre's own resize() call (before it renders the frame).
+    this.maplibreMap.on('move', () => {
+      if (this.correctingCenter || !this.isResizing || !this.maplibreMap) return;
+      if (this.savedTopLat === null) return;
+
+      const w = this.maplibreMap.getCanvas().clientWidth;
+      if (w <= 0) return;
+      const currentTop = this.maplibreMap.unproject([w / 2, 0]).lat;
+      const delta = this.savedTopLat - currentTop;
+
+      if (Math.abs(delta) > 1e-6) {
+        this.correctingCenter = true;
+        const c = this.maplibreMap.getCenter();
+        this.maplibreMap.jumpTo({ center: [c.lng, c.lat + delta] });
+        this.correctingCenter = false;
+        // Do NOT update savedTopLat — keep the original mousedown position
+        // so every frame targets the exact same geographic anchor.
+      }
+    });
   }
 
   private initDeck(): void {
@@ -619,7 +653,6 @@ export class DeckGLMap {
       this.onStateChange?.(this.state);
     });
   }
-
 
   private applyMapLanguage(): void {
     if (!this.maplibreMap) return;
@@ -795,6 +828,18 @@ export class DeckGLMap {
     this.resizeObserver.observe(this.container);
   }
 
+  public setIsResizing(value: boolean): void {
+    this.isResizing = value;
+    if (value && this.maplibreMap) {
+      const w = this.maplibreMap.getCanvas().clientWidth;
+      if (w > 0) {
+        this.savedTopLat = this.maplibreMap.unproject([w / 2, 0]).lat;
+      }
+    } else {
+      this.savedTopLat = null;
+    }
+  }
+
   // --- Optimization helpers (spec 06) ---
 
   /** Mark specific layer groups as needing rebuild on next render */
@@ -866,6 +911,10 @@ export class DeckGLMap {
       const lon = getLon(d);
       return lat >= south && lat <= north && lon >= west && lon <= east;
     });
+  }
+
+  public resize(): void {
+    this.maplibreMap?.resize();
   }
 
   private getSetSignature(set: Set<string>): string {
@@ -1415,6 +1464,24 @@ export class DeckGLMap {
       pickable: true,
     });
     return layer;
+  }
+
+  private createGeopoliticalBoundariesLayer(): GeoJsonLayer {
+    return new GeoJsonLayer({
+      id: 'geopolitical-boundaries-layer',
+      data: GEOPOLITICAL_BOUNDARIES_GEOJSON,
+      filled: true,
+      stroked: true,
+      getFillColor: () => getCurrentTheme() === 'light'
+        ? [0, 100, 200, 40] as [number, number, number, number]
+        : [0, 150, 255, 50] as [number, number, number, number],
+      getLineColor: () => getCurrentTheme() === 'light'
+        ? [0, 120, 220, 150] as [number, number, number, number]
+        : [0, 150, 255, 180] as [number, number, number, number],
+      getLineWidth: 2,
+      lineWidthMinPixels: 1,
+      pickable: true,
+    });
   }
 
   private getBasesData(): MilitaryBaseEnriched[] {
@@ -2789,6 +2856,10 @@ export class DeckGLMap {
         const props = obj.properties || obj;
         return { html: `<div class="deckgl-tooltip"><strong>${text(props.name)}</strong><br/>${t('components.deckgl.tooltip.conflictZone')}</div>` };
       }
+      case 'geopolitical-boundaries-layer': {
+        const props = obj.properties || obj;
+        return { html: `<div class="deckgl-tooltip"><strong>${text(props.name)}</strong><br/>${t('popups.geopoliticalBoundary.title')}</div>` };
+      }
       case 'natural-events-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.title)}</strong><br/>${text(obj.category || t('components.deckgl.tooltip.naturalEvent'))}</div>` };
       case 'ais-density-layer':
@@ -3065,6 +3136,7 @@ export class DeckGLMap {
     // Map layer IDs to popup types
     const layerToPopupType: Record<string, PopupType> = {
       'conflict-zones-layer': 'conflict',
+      'geopolitical-boundaries-layer': 'geopoliticalBoundary',
       'bases-layer': 'base',
       'nuclear-layer': 'nuclear',
       'irradiators-layer': 'irradiator',
@@ -3114,6 +3186,11 @@ export class DeckGLMap {
       const conflictId = info.object.properties.id;
       const fullConflict = CONFLICT_ZONES.find(c => c.id === conflictId);
       if (fullConflict) data = fullConflict;
+    }
+    if (layerId === 'geopolitical-boundaries-layer' && info.object.properties) {
+      const boundaryId = info.object.properties.id;
+      const fullBoundary = GEOPOLITICAL_BOUNDARIES.find(b => b.id === boundaryId);
+      if (fullBoundary) data = fullBoundary;
     }
 
     // Enrich iran events with related events from same location
@@ -3276,6 +3353,7 @@ export class DeckGLMap {
             { key: 'iranAttacks', label: t('components.deckgl.layers.iranAttacks'), icon: '&#127919;' },
             { key: 'hotspots', label: t('components.deckgl.layers.intelHotspots'), icon: '&#127919;' },
             { key: 'conflicts', label: t('components.deckgl.layers.conflictZones'), icon: '&#9876;' },
+            { key: 'geopoliticalBoundaries', label: t('components.deckgl.layers.geopoliticalBoundaries'), icon: '&#9878;' },
             { key: 'bases', label: t('components.deckgl.layers.militaryBases'), icon: '&#127963;' },
             { key: 'nuclear', label: t('components.deckgl.layers.nuclearSites'), icon: '&#9762;' },
             { key: 'irradiators', label: t('components.deckgl.layers.gammaIrradiators'), icon: '&#9888;' },
@@ -3382,7 +3460,7 @@ export class DeckGLMap {
     const helpHeader = `
       <div class="layer-help-header">
         <span>${t('components.deckgl.layerHelp.title')}</span>
-        <button class="layer-help-close">×</button>
+        <button class="layer-help-close" aria-label="Close">×</button>
       </div>
     `;
 
@@ -3447,6 +3525,7 @@ export class DeckGLMap {
     ], 'timeAffects')}
         ${helpSection('geopolitical', [
       helpItem(label('conflictZones'), 'geoConflicts'),
+      helpItem(label('geopoliticalBoundaries'), 'geoBoundaries'),
       helpItem(label('intelHotspots'), 'geoHotspots'),
       helpItem(staticLabel('sanctions'), 'geoSanctions'),
       helpItem(label('protests'), 'geoProtests'),
@@ -3617,6 +3696,18 @@ export class DeckGLMap {
     const elapsed = performance.now() - startTime;
     if (import.meta.env.DEV && elapsed > 16) {
       console.warn(`[DeckGLMap] updateLayers took ${elapsed.toFixed(2)}ms (>16ms budget)`);
+    }
+    this.updateZoomHints();
+  }
+
+  private updateZoomHints(): void {
+    const toggleList = this.container.querySelector('.deckgl-layer-toggles .toggle-list');
+    if (!toggleList) return;
+    for (const [key, enabled] of Object.entries(this.state.layers)) {
+      const toggle = toggleList.querySelector(`.layer-toggle[data-layer="${key}"]`) as HTMLElement | null;
+      if (!toggle) continue;
+      const zoomHidden = !!enabled && !this.isLayerVisible(key as keyof MapLayers);
+      toggle.classList.toggle('zoom-hidden', zoomHidden);
     }
   }
 
@@ -4213,7 +4304,9 @@ export class DeckGLMap {
 
     if (assets) {
       assets.forEach(asset => {
-        this.highlightedAssets[asset.type].add(asset.id);
+        if (asset?.type && this.highlightedAssets[asset.type]) {
+          this.highlightedAssets[asset.type].add(asset.id);
+        }
       });
     }
 
@@ -4284,12 +4377,12 @@ export class DeckGLMap {
   }
 
   public flashAssets(assetType: AssetType, ids: string[]): void {
-    // Temporarily highlight assets
+    if (!this.highlightedAssets[assetType]) return;
     ids.forEach(id => this.highlightedAssets[assetType].add(id));
     this.render();
 
     setTimeout(() => {
-      ids.forEach(id => this.highlightedAssets[assetType].delete(id));
+      ids.forEach(id => this.highlightedAssets[assetType]?.delete(id));
       this.render();
     }, 3000);
   }
@@ -4632,6 +4725,10 @@ export class DeckGLMap {
   }
 
   public destroy(): void {
+    this.debouncedRebuildLayers.cancel();
+    this.debouncedFetchBases.cancel();
+    this.rafUpdateLayers.cancel();
+
     if (this.moveTimeoutId) {
       clearTimeout(this.moveTimeoutId);
       this.moveTimeoutId = null;

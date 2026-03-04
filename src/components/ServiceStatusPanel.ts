@@ -55,6 +55,7 @@ export class ServiceStatusPanel extends Panel {
 
     try {
       const data = await fetchServiceStatuses();
+      if (!this.element?.isConnected) return false;
       if (!data.success) throw new Error('Failed to load status');
 
       const fingerprint = data.services.map(s => `${s.name}:${s.status}`).join(',');
@@ -65,13 +66,14 @@ export class ServiceStatusPanel extends Panel {
       return changed;
     } catch (err) {
       if (this.isAbortError(err)) return false;
+      if (!this.element?.isConnected) return false;
       this.error = err instanceof Error ? err.message : 'Failed to fetch';
       console.error('[ServiceStatus] Fetch error:', err);
       return true; // Errors always imply a change to display
     } finally {
       this.loading = false;
       // Only rebuild the DOM if the data actually changed or we transitioned states
-      if (changed || wasLoading || hadError !== (this.error !== null)) {
+      if (this.element?.isConnected && (changed || wasLoading || hadError !== (this.error !== null))) {
         this.render();
       }
     }

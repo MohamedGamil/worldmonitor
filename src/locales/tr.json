@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "Financial Regulation",
     "sourceRegionGulfMena": "Körfez & MENA",
     "filterPanels": "Panelleri filtrele...",
+    "resetLayout": "Düzeni sıfırla",
     "panelCatCore": "Temel",
     "panelCatIntelligence": "İstihbarat",
     "panelCatRegionalNews": "Bölgesel Haberler",
@@ -183,6 +184,7 @@
     "macroSignals": "Piyasa Radari",
     "etfFlows": "BTC ETF Takibi",
     "stablecoins": "Stablecoin'ler",
+    "deduction": "Durum çıkarımı",
     "ucdpEvents": "UCDP Catisma Olaylari",
     "displacement": "UNHCR Yerinden Edilme",
     "climate": "Iklim Anomalileri",
@@ -217,6 +219,39 @@
     "gulfIndices": "Körfez Endeksleri",
     "gulfCurrencies": "Körfez Para Birimleri",
     "gulfOil": "Körfez Petrolü"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "Harita",
+      "panel": "Panel",
+      "brief": "Özet"
+    },
+    "categories": {
+      "navigate": "Gezinme",
+      "layers": "Katmanlar",
+      "panels": "Paneller",
+      "view": "Görünüm",
+      "actions": "Eylemler",
+      "country": "Ülke"
+    },
+    "regions": {
+      "global": "Küresel görünüm",
+      "mena": "Orta Doğu ve Kuzey Afrika",
+      "eu": "Avrupa",
+      "asia": "Asya-Pasifik",
+      "america": "Amerika",
+      "africa": "Afrika",
+      "latam": "Latin Amerika",
+      "oceania": "Okyanusya"
+    },
+    "tips": {
+      "map": "Haritada o konuma uçmak için bir ülke adı yazın",
+      "panel": "Bir panel adı yazarak o panele gidin",
+      "brief": "Bir ülke adı yazarak istihbarat özeti alın",
+      "layers": "Katman ön ayarları için \"military\" veya \"finance\" yazın",
+      "time": "Zamana göre filtrelemek için \"1h\", \"24h\" veya \"7d\" yazın",
+      "settings": "\"dark mode\", \"settings\" veya \"fullscreen\" yazın"
+    }
   },
   "modals": {
     "search": {
@@ -648,7 +683,12 @@
     "playback": {
       "toggleMode": "Oynatma Modunu Degistir",
       "live": "CANLI",
-      "historicalPlayback": "Gecmis Kayit Oynatma"
+      "historicalPlayback": "Gecmis Kayit Oynatma",
+      "close": "Kapat",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "pizzint": {
       "title": "Pentagon Pizza Endeksi",
@@ -834,7 +874,8 @@
         "tradeRoutes": "Ticaret Rotaları",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "Gündüz/Gece",
-        "iranAttacks": "İran Saldırıları"
+        "iranAttacks": "İran Saldırıları",
+        "geopoliticalBoundaries": "Jeopolitik Sınırlar"
       },
       "tooltip": {
         "earthquake": "Deprem",
@@ -938,7 +979,8 @@
           "mineralsFull": "Stratejik mineral yatakları ve madencilik alanları",
           "techCyberThreats": "Siber saldırılar ve güvenlik olayları",
           "techEvents": "Büyük teknoloji konferansları ve etkinlikleri",
-          "techFires": "Teknoloji altyapısına yakın aktif orman yangınları"
+          "techFires": "Teknoloji altyapısına yakın aktif orman yangınları",
+          "geoBoundaries": "Silahsızlandırılmış bölgeler, ateşkes hatları ve tartışmalı sınırlar"
         },
         "notes": {
           "timeAffects": "Etkiler: Depremler, Hava Durumu, Protestolar, Kesintiler"
@@ -1293,8 +1335,8 @@
         "regime": "Rejim",
         "btcTrend": "BTC Egilimi",
         "hashRate": "Hash Rate",
-        "mining": "Madencilik",
-        "fearGreed": "Korku &amp; Acgozluluk"
+        "fearGreed": "Korku &amp; Acgozluluk",
+        "momentum": "Momentum"
       }
     },
     "panel": {
@@ -1352,7 +1394,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} burada oynatılamıyor — bölgenizde kısıtlanmış olabilir (hata {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "Kanalları yönet",
       "addChannel": "Kanal ekle",
@@ -1369,6 +1411,7 @@
       "restoreDefaults": "Varsayılan kanalları geri yükle",
       "availableChannels": "Mevcut kanallar",
       "customChannel": "Özel kanal",
+      "regionAll": "Tümü",
       "regionNorthAmerica": "Kuzey Amerika",
       "regionEurope": "Avrupa",
       "regionLatinAmerica": "Latin Amerika",
@@ -1936,6 +1979,19 @@
     },
     "iranEvent": {
       "relatedEvents": "İlgili Olaylar"
+    },
+    "geopoliticalBoundary": {
+      "title": "JEOPOLİTİK SINIR",
+      "established": "KURULDU",
+      "dimensions": "BOYUTLAR",
+      "legalBasis": "HUKUKİ DAYANAK",
+      "parties": "İMZACILAR",
+      "types": {
+        "demilitarized": "ASKERSİZ BÖLGE",
+        "ceasefire": "ATEŞKES HATTI",
+        "disputed": "TARTIŞMALI SINIR",
+        "armistice": "MÜTAREKEHATTİ"
+      }
     }
   },
   "signals": {

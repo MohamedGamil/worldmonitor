@@ -13,6 +13,7 @@ import type { GeoHubActivity } from '@/services/geo-activity';
 import { getNaturalEventIcon } from '@/services/eonet';
 import type { WeatherAlert } from '@/services/weather';
 import { getSeverityColor } from '@/services/weather';
+import { startSmartPollLoop, type SmartPollLoopHandle } from '@/services/runtime';
 import {
   MAP_URLS,
   INTEL_HOTSPOTS,
@@ -112,6 +113,7 @@ export class MapComponent {
   private state: MapState;
   private worldData: WorldTopology | null = null;
   private countryFeatures: Feature<Geometry>[] | null = null;
+  private isResizing = false;
   private baseLayerGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private dynamicLayerGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private baseRendered = false;
@@ -159,7 +161,7 @@ export class MapComponent {
   private renderScheduled = false;
   private lastRenderTime = 0;
   private readonly MIN_RENDER_INTERVAL_MS = 100;
-  private healthCheckIntervalId: ReturnType<typeof setInterval> | null = null;
+  private healthCheckLoop: SmartPollLoopHandle | null = null;
 
   constructor(container: HTMLElement, initialState: MapState) {
     this.container = container;
@@ -190,7 +192,13 @@ export class MapComponent {
     container.appendChild(this.createTimeSlider());
     container.appendChild(this.createLayerToggles());
     container.appendChild(this.createLegend());
-    this.healthCheckIntervalId = setInterval(() => this.runHealthCheck(), 30000);
+    this.healthCheckLoop = startSmartPollLoop(() => { this.runHealthCheck(); }, {
+      intervalMs: 30_000,
+      pauseWhenHidden: true,
+      refreshOnVisible: false,
+      runImmediately: false,
+      jitterFraction: 0,
+    });
 
     this.svg = d3.select(svgElement);
     this.baseLayerGroup = this.svg.append('g').attr('class', 'map-base');
@@ -213,6 +221,7 @@ export class MapComponent {
     let lastHeight = 0;
     const resizeObserver = new ResizeObserver((entries) => {
       if (document.hidden) return;
+      if (this.isResizing) return;
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
         if (width > 0 && height > 0 && (width !== lastWidth || height !== lastHeight)) {
@@ -233,11 +242,23 @@ export class MapComponent {
     document.addEventListener('visibilitychange', this.boundVisibilityHandler);
   }
 
+  public setIsResizing(value: boolean): void {
+    const wasResizing = this.isResizing;
+    this.isResizing = value;
+    if (wasResizing && !value) {
+      requestAnimationFrame(() => this.render());
+    }
+  }
+
+  public resize(): void {
+    requestAnimationFrame(() => this.render());
+  }
+
   public destroy(): void {
     document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
-    if (this.healthCheckIntervalId) {
-      clearInterval(this.healthCheckIntervalId);
-      this.healthCheckIntervalId = null;
+    if (this.healthCheckLoop) {
+      this.healthCheckLoop.stop();
+      this.healthCheckLoop = null;
     }
   }
 
@@ -245,9 +266,9 @@ export class MapComponent {
     const controls = document.createElement('div');
     controls.className = 'map-controls';
     controls.innerHTML = `
-      <button class="map-control-btn" data-action="zoom-in">+</button>
-      <button class="map-control-btn" data-action="zoom-out">−</button>
-      <button class="map-control-btn" data-action="reset">⟲</button>
+      <button class="map-control-btn" data-action="zoom-in" aria-label="Zoom in">+</button>
+      <button class="map-control-btn" data-action="zoom-out" aria-label="Zoom out">−</button>
+      <button class="map-control-btn" data-action="reset" aria-label="Reset rotation">⟲</button>
     `;
 
     controls.addEventListener('click', (e) => {
@@ -414,6 +435,7 @@ export class MapComponent {
     helpBtn.className = 'layer-help-btn';
     helpBtn.textContent = '?';
     helpBtn.title = t('components.deckgl.layerGuide');
+    helpBtn.setAttribute('aria-label', t('components.deckgl.layerGuide'));
     helpBtn.addEventListener('click', () => this.showLayerHelp());
     toggles.appendChild(helpBtn);
 
@@ -444,7 +466,7 @@ export class MapComponent {
     const helpHeader = `
       <div class="layer-help-header">
         <span>${t('components.deckgl.layerHelp.title')}</span>
-        <button class="layer-help-close">×</button>
+        <button class="layer-help-close" aria-label="Close">×</button>
       </div>
     `;
 
@@ -615,9 +637,6 @@ export class MapComponent {
   }
 
   private runHealthCheck(): void {
-    // Skip if page is hidden (no need to check while user isn't looking)
-    if (document.hidden) return;
-
     const svgNode = this.svg.node();
     if (!svgNode) return;
 
@@ -3268,7 +3287,9 @@ export class MapComponent {
 
     if (assets) {
       assets.forEach((asset) => {
-        this.highlightedAssets[asset.type].add(asset.id);
+        if (asset?.type && this.highlightedAssets[asset.type]) {
+          this.highlightedAssets[asset.type].add(asset.id);
+        }
       });
     }
 

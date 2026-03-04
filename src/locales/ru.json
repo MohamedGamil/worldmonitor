@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "Финансовое регулирование",
     "sourceRegionGulfMena": "Залив и БВСА",
     "filterPanels": "Фильтр панелей...",
+    "resetLayout": "Сбросить макет",
     "panelCatCore": "Основные",
     "panelCatIntelligence": "Разведка",
     "panelCatRegionalNews": "Региональные новости",
@@ -183,6 +184,7 @@
     "macroSignals": "Рыночный радар",
     "etfFlows": "Трекер BTC ETF",
     "stablecoins": "Стейблкоины",
+    "deduction": "Оценка ситуации",
     "ucdpEvents": "Конфликтные события UCDP",
     "displacement": "Перемещение населения UNHCR",
     "climate": "Климатические аномалии",
@@ -217,6 +219,39 @@
     "gulfIndices": "Индексы Залива",
     "gulfCurrencies": "Валюты Залива",
     "gulfOil": "Нефть Залива"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "Карта",
+      "panel": "Панель",
+      "brief": "Сводка"
+    },
+    "categories": {
+      "navigate": "Навигация",
+      "layers": "Слои",
+      "panels": "Панели",
+      "view": "Вид",
+      "actions": "Действия",
+      "country": "Страна"
+    },
+    "regions": {
+      "global": "Глобальный обзор",
+      "mena": "Ближний Восток и Северная Африка",
+      "eu": "Европа",
+      "asia": "Азиатско-Тихоокеанский регион",
+      "america": "Америка",
+      "africa": "Африка",
+      "latam": "Латинская Америка",
+      "oceania": "Океания"
+    },
+    "tips": {
+      "map": "Введите название страны, чтобы перелететь к ней на карте",
+      "panel": "Введите название панели, чтобы прокрутить к ней",
+      "brief": "Введите название страны для разведывательной сводки",
+      "layers": "Введите \"military\" или \"finance\" для пресетов слоёв",
+      "time": "Введите \"1h\", \"24h\" или \"7d\" для фильтрации по времени",
+      "settings": "Введите \"dark mode\", \"settings\" или \"fullscreen\""
+    }
   },
   "modals": {
     "search": {
@@ -648,7 +683,12 @@
     "playback": {
       "toggleMode": "Переключить режим воспроизведения",
       "live": "ПРЯМОЙ ЭФИР",
-      "historicalPlayback": "Историческое воспроизведение"
+      "historicalPlayback": "Историческое воспроизведение",
+      "close": "Закрыть",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "pizzint": {
       "title": "Индекс пиццерий Пентагона",
@@ -834,7 +874,8 @@
         "tradeRoutes": "Торговые маршруты",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "День/Ночь",
-        "iranAttacks": "Атаки Ирана"
+        "iranAttacks": "Атаки Ирана",
+        "geopoliticalBoundaries": "Геополитические Границы"
       },
       "tooltip": {
         "earthquake": "Землетрясение",
@@ -938,7 +979,8 @@
           "mineralsFull": "Месторождения стратегических минералов и горнодобывающие объекты",
           "techCyberThreats": "Кибератаки и события безопасности",
           "techEvents": "Крупные технологические конференции и мероприятия",
-          "techFires": "Активные пожары вблизи технологической инфраструктуры"
+          "techFires": "Активные пожары вблизи технологической инфраструктуры",
+          "geoBoundaries": "Демилитаризованные зоны, линии прекращения огня и спорные границы"
         },
         "notes": {
           "timeAffects": "Влияет на: Землетрясения, Погода, Протесты, Сбои"
@@ -1190,8 +1232,8 @@
         "regime": "Режим",
         "btcTrend": "Тренд BTC",
         "hashRate": "Hash Rate",
-        "mining": "Майнинг",
-        "fearGreed": "Страх &amp; Жадность"
+        "fearGreed": "Страх &amp; Жадность",
+        "momentum": "Momentum"
       }
     },
     "export": {
@@ -1352,7 +1394,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} не может быть воспроизведён здесь — возможно, ограничено в вашем регионе (ошибка {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "Управление каналами",
       "addChannel": "Добавить канал",
@@ -1369,6 +1411,7 @@
       "restoreDefaults": "Восстановить каналы по умолчанию",
       "availableChannels": "Доступные каналы",
       "customChannel": "Пользовательский канал",
+      "regionAll": "Все",
       "regionNorthAmerica": "Северная Америка",
       "regionEurope": "Европа",
       "regionLatinAmerica": "Латинская Америка",
@@ -1936,6 +1979,19 @@
     },
     "iranEvent": {
       "relatedEvents": "Связанные события"
+    },
+    "geopoliticalBoundary": {
+      "title": "ГЕОПОЛИТИЧЕСКАЯ ГРАНИЦА",
+      "established": "УЧРЕЖДЕНА",
+      "dimensions": "РАЗМЕРЫ",
+      "legalBasis": "ПРАВОВАЯ ОСНОВА",
+      "parties": "ПОДПИСАНТЫ",
+      "types": {
+        "demilitarized": "ДЕМИЛИТАРИЗОВАННАЯ ЗОНА",
+        "ceasefire": "ЛИНИЯ ПРЕКРАЩЕНИЯ ОГНЯ",
+        "disputed": "СПОРНАЯ ГРАНИЦА",
+        "armistice": "ЛИНИЯ ПЕРЕМИРИЯ"
+      }
     }
   },
   "signals": {

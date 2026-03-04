@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "金融监管",
     "sourceRegionGulfMena": "海湾与中东",
     "filterPanels": "筛选面板...",
+    "resetLayout": "重置布局",
     "panelCatCore": "核心",
     "panelCatIntelligence": "情报",
     "panelCatRegionalNews": "地区新闻",
@@ -183,6 +184,7 @@
     "macroSignals": "市场雷达",
     "etfFlows": "BTC ETF追踪",
     "stablecoins": "稳定币",
+    "deduction": "推断局势",
     "ucdpEvents": "UCDP冲突事件",
     "displacement": "UNHCR流离失所",
     "climate": "气候异常",
@@ -217,6 +219,39 @@
     "gulfIndices": "海湾指数",
     "gulfCurrencies": "海湾货币",
     "gulfOil": "海湾石油"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "地图",
+      "panel": "面板",
+      "brief": "简报"
+    },
+    "categories": {
+      "navigate": "导航",
+      "layers": "图层",
+      "panels": "面板",
+      "view": "视图",
+      "actions": "操作",
+      "country": "国家"
+    },
+    "regions": {
+      "global": "全球视图",
+      "mena": "中东和北非",
+      "eu": "欧洲",
+      "asia": "亚太地区",
+      "america": "美洲",
+      "africa": "非洲",
+      "latam": "拉丁美洲",
+      "oceania": "大洋洲"
+    },
+    "tips": {
+      "map": "输入国家名称以在地图上飞往该位置",
+      "panel": "输入面板名称以滚动到该面板",
+      "brief": "输入国家名称以获取情报简报",
+      "layers": "输入 \"military\" 或 \"finance\" 以应用图层预设",
+      "time": "输入 \"1h\"、\"24h\" 或 \"7d\" 按时间筛选",
+      "settings": "输入 \"dark mode\"、\"settings\" 或 \"fullscreen\""
+    }
   },
   "modals": {
     "search": {
@@ -648,7 +683,12 @@
     "playback": {
       "toggleMode": "切换回放模式",
       "live": "实时",
-      "historicalPlayback": "历史回放"
+      "historicalPlayback": "历史回放",
+      "close": "关闭",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "pizzint": {
       "title": "五角大楼披萨指数",
@@ -834,7 +874,8 @@
         "tradeRoutes": "贸易航线",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "昼/夜",
-        "iranAttacks": "伊朗袭击"
+        "iranAttacks": "伊朗袭击",
+        "geopoliticalBoundaries": "地缘政治边界"
       },
       "tooltip": {
         "earthquake": "地震",
@@ -938,7 +979,8 @@
           "mineralsFull": "战略矿产资源矿床和采矿点",
           "techCyberThreats": "网络攻击和安全事件",
           "techEvents": "主要科技会议和活动",
-          "techFires": "科技基础设施附近的活跃野火"
+          "techFires": "科技基础设施附近的活跃野火",
+          "geoBoundaries": "非军事区、停火线和争议边界"
         },
         "notes": {
           "timeAffects": "影响范围：地震、天气、抗议、中断"
@@ -1293,8 +1335,8 @@
         "regime": "市场环境",
         "btcTrend": "BTC趋势",
         "hashRate": "Hash Rate",
-        "mining": "挖矿",
-        "fearGreed": "恐惧 &amp; 贪婪"
+        "fearGreed": "恐惧 &amp; 贪婪",
+        "momentum": "Momentum"
       }
     },
     "panel": {
@@ -1352,7 +1394,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} 无法在此播放 — 可能在您所在的地区受到限制（错误 {{code}}）",
       "openOnYouTube": "Open on YouTube",
       "manage": "管理频道",
       "addChannel": "添加频道",
@@ -1369,6 +1411,7 @@
       "restoreDefaults": "恢复默认频道",
       "availableChannels": "可用频道",
       "customChannel": "自定义频道",
+      "regionAll": "全部",
       "regionNorthAmerica": "北美",
       "regionEurope": "欧洲",
       "regionLatinAmerica": "拉丁美洲",
@@ -1936,6 +1979,19 @@
     },
     "iranEvent": {
       "relatedEvents": "相关事件"
+    },
+    "geopoliticalBoundary": {
+      "title": "地缘政治边界",
+      "established": "建立时间",
+      "dimensions": "规模",
+      "legalBasis": "法律依据",
+      "parties": "签署方",
+      "types": {
+        "demilitarized": "非军事区",
+        "ceasefire": "停火线",
+        "disputed": "争议边界",
+        "armistice": "停战线"
+      }
     }
   },
   "signals": {

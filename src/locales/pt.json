@@ -48,6 +48,7 @@
     "regulation": "Painel de regulamentação de IA",
     "serviceStatus": "Status do serviço",
     "stablecoins": "Moedas estáveis",
+    "deduction": "Deduzir situação",
     "events": "Eventos tecnológicos",
     "techHubs": "Centros de tecnologia importantes",
     "techReadiness": "Índice de prontidão tecnológica",
@@ -72,6 +73,39 @@
     "gulfIndices": "Índices do Golfo",
     "gulfCurrencies": "Moedas do Golfo",
     "gulfOil": "Petróleo do Golfo"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "Mapa",
+      "panel": "Painel",
+      "brief": "Resumo"
+    },
+    "categories": {
+      "navigate": "Navegar",
+      "layers": "Camadas",
+      "panels": "Painéis",
+      "view": "Vista",
+      "actions": "Ações",
+      "country": "País"
+    },
+    "regions": {
+      "global": "Vista global",
+      "mena": "Médio Oriente e Norte de África",
+      "eu": "Europa",
+      "asia": "Ásia-Pacífico",
+      "america": "Américas",
+      "africa": "África",
+      "latam": "América Latina",
+      "oceania": "Oceânia"
+    },
+    "tips": {
+      "map": "Digite o nome de um país para voar até lá no mapa",
+      "panel": "Digite o nome de um painel para rolar até ele",
+      "brief": "Digite o nome de um país para um resumo de inteligência",
+      "layers": "Digite \"military\" ou \"finance\" para predefinições de camadas",
+      "time": "Digite \"1h\", \"24h\" ou \"7d\" para filtrar por tempo",
+      "settings": "Digite \"dark mode\", \"settings\" ou \"fullscreen\""
+    }
   },
   "modals": {
     "search": {
@@ -385,7 +419,12 @@
     "playback": {
       "live": "Live",
       "toggleMode": "Alternar modo de reprodução",
-      "historicalPlayback": "Reprodução Histórica"
+      "historicalPlayback": "Reprodução Histórica",
+      "close": "Fechar",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "deckgl": {
       "views": {
@@ -458,7 +497,8 @@
         "tradeRoutes": "Rotas Comerciais",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "Dia/Noite",
-        "iranAttacks": "Ataques iranianos"
+        "iranAttacks": "Ataques iranianos",
+        "geopoliticalBoundaries": "Fronteiras Geopolíticas"
       },
       "layersTitle": "Camadas",
       "layerGuide": "Guia de camadas",
@@ -564,7 +604,8 @@
           "mineralsFull": "Depósitos de minerais estratégicos e locais de mineração",
           "techCyberThreats": "Ataques cibernéticos e eventos de segurança",
           "techEvents": "Grandes conferências e eventos de tecnologia",
-          "techFires": "Incêndios ativos perto de infraestrutura tecnológica"
+          "techFires": "Incêndios ativos perto de infraestrutura tecnológica",
+          "geoBoundaries": "Zonas desmilitarizadas, linhas de cessar-fogo e fronteiras disputadas"
         },
         "notes": {
           "timeAffects": "Afeta: terremotos, clima, protestos, interrupções"
@@ -1142,8 +1183,8 @@
         "regime": "Regime",
         "btcTrend": "BTC Trend",
         "hashRate": "Hash Rate",
-        "mining": "Mining",
-        "fearGreed": "Fear &amp; Greed"
+        "fearGreed": "Fear &amp; Greed",
+        "momentum": "Momentum"
       }
     },
     "export": {
@@ -1207,7 +1248,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} não pode ser reproduzido aqui — pode estar restrito na sua região (erro {{code}})",
       "openOnYouTube": "Open on YouTube",
       "manage": "Gerir canais",
       "addChannel": "Adicionar canal",
@@ -1224,6 +1265,7 @@
       "restoreDefaults": "Restaurar canais padrão",
       "availableChannels": "Canais disponíveis",
       "customChannel": "Canal personalizado",
+      "regionAll": "Todos",
       "regionNorthAmerica": "América do Norte",
       "regionEurope": "Europa",
       "regionLatinAmerica": "América Latina",
@@ -1791,6 +1833,19 @@
     },
     "iranEvent": {
       "relatedEvents": "Eventos relacionados"
+    },
+    "geopoliticalBoundary": {
+      "title": "FRONTEIRA GEOPOLÍTICA",
+      "established": "ESTABELECIDA",
+      "dimensions": "DIMENSÕES",
+      "legalBasis": "BASE LEGAL",
+      "parties": "SIGNATÁRIOS",
+      "types": {
+        "demilitarized": "ZONA DESMILITARIZADA",
+        "ceasefire": "LINHA DE CESSAR-FOGO",
+        "disputed": "FRONTEIRA DISPUTADA",
+        "armistice": "LINHA DE ARMISTÍCIO"
+      }
     }
   },
   "signals": {
@@ -2021,6 +2076,7 @@
     "sourceRegionFinRegulation": "Financial Regulation",
     "sourceRegionGulfMena": "Golfo & MENA",
     "filterPanels": "Filtrar painéis...",
+    "resetLayout": "Redefinir layout",
     "panelCatCore": "Principal",
     "panelCatIntelligence": "Inteligência",
     "panelCatRegionalNews": "Notícias Regionais",

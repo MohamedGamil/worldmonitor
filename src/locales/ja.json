@@ -126,6 +126,7 @@
     "sourceRegionFinRegulation": "金融規制",
     "sourceRegionGulfMena": "湾岸・中東",
     "filterPanels": "パネルを絞り込む...",
+    "resetLayout": "レイアウトをリセット",
     "panelCatCore": "コア",
     "panelCatIntelligence": "インテリジェンス",
     "panelCatRegionalNews": "地域ニュース",
@@ -183,6 +184,7 @@
     "macroSignals": "マーケットレーダー",
     "etfFlows": "BTC ETFトラッカー",
     "stablecoins": "ステーブルコイン",
+    "deduction": "状況推定",
     "ucdpEvents": "UCDP紛争イベント",
     "displacement": "UNHCR避難民",
     "climate": "気候異常",
@@ -217,6 +219,39 @@
     "gulfIndices": "湾岸指数",
     "gulfCurrencies": "湾岸通貨",
     "gulfOil": "湾岸石油"
+  },
+  "commands": {
+    "prefixes": {
+      "map": "マップ",
+      "panel": "パネル",
+      "brief": "概要"
+    },
+    "categories": {
+      "navigate": "ナビゲート",
+      "layers": "レイヤー",
+      "panels": "パネル",
+      "view": "ビュー",
+      "actions": "アクション",
+      "country": "国"
+    },
+    "regions": {
+      "global": "グローバルビュー",
+      "mena": "中東・北アフリカ",
+      "eu": "ヨーロッパ",
+      "asia": "アジア太平洋",
+      "america": "アメリカ大陸",
+      "africa": "アフリカ",
+      "latam": "ラテンアメリカ",
+      "oceania": "オセアニア"
+    },
+    "tips": {
+      "map": "国名を入力して地図上でその場所に移動",
+      "panel": "パネル名を入力してスクロール",
+      "brief": "国名を入力してインテリジェンスブリーフを表示",
+      "layers": "\"military\" または \"finance\" と入力してレイヤープリセットを適用",
+      "time": "\"1h\"、\"24h\"、\"7d\" と入力して時間でフィルター",
+      "settings": "\"dark mode\"、\"settings\"、\"fullscreen\" と入力"
+    }
   },
   "modals": {
     "search": {
@@ -648,7 +683,12 @@
     "playback": {
       "toggleMode": "再生モード切替",
       "live": "LIVE",
-      "historicalPlayback": "ヒストリカル再生"
+      "historicalPlayback": "ヒストリカル再生",
+      "close": "閉じる",
+      "skipToStart": "Skip to start",
+      "previous": "Previous",
+      "next": "Next",
+      "skipToEnd": "Skip to end"
     },
     "pizzint": {
       "title": "ペンタゴンピザ指数",
@@ -834,7 +874,8 @@
         "tradeRoutes": "貿易ルート",
         "gpsJamming": "GPS JAMMING",
         "dayNight": "昼/夜",
-        "iranAttacks": "イラン攻撃"
+        "iranAttacks": "イラン攻撃",
+        "geopoliticalBoundaries": "地政学的境界"
       },
       "tooltip": {
         "earthquake": "地震",
@@ -938,7 +979,8 @@
           "mineralsFull": "戦略的鉱物資源の鉱床と採掘拠点",
           "techCyberThreats": "サイバー攻撃およびセキュリティイベント",
           "techEvents": "主要テックカンファレンスとイベント",
-          "techFires": "テックインフラ付近の活動中の山火事"
+          "techFires": "テックインフラ付近の活動中の山火事",
+          "geoBoundaries": "非武装地帯、停戦ライン、係争境界線"
         },
         "notes": {
           "timeAffects": "影響: 地震、気象、抗議活動、障害"
@@ -1293,8 +1335,8 @@
         "regime": "市場環境",
         "btcTrend": "BTCトレンド",
         "hashRate": "Hash Rate",
-        "mining": "マイニング",
-        "fearGreed": "恐怖 &amp; 貪欲"
+        "fearGreed": "恐怖 &amp; 貪欲",
+        "momentum": "Momentum"
       }
     },
     "panel": {
@@ -1352,7 +1394,7 @@
     "liveNews": {
       "retry": "Retry",
       "notLive": "{{name}} is not currently live",
-      "cannotEmbed": "{{name}} cannot be embedded in this app (YouTube {{code}})",
+      "cannotEmbed": "{{name}} をここで再生できません — お住まいの地域で制限されている可能性があります（エラー {{code}}）",
       "openOnYouTube": "Open on YouTube",
       "manage": "チャンネル管理",
       "addChannel": "チャンネルを追加",
@@ -1369,6 +1411,7 @@
       "restoreDefaults": "デフォルトのチャンネルを復元",
       "availableChannels": "利用可能なチャンネル",
       "customChannel": "カスタムチャンネル",
+      "regionAll": "すべて",
       "regionNorthAmerica": "北米",
       "regionEurope": "ヨーロッパ",
       "regionLatinAmerica": "中南米",
@@ -1936,6 +1979,19 @@
     },
     "iranEvent": {
       "relatedEvents": "関連イベント"
+    },
+    "geopoliticalBoundary": {
+      "title": "地政学的境界",
+      "established": "設定日",
+      "dimensions": "規模",
+      "legalBasis": "法的根拠",
+      "parties": "署名国",
+      "types": {
+        "demilitarized": "非武装地帯",
+        "ceasefire": "停戦ライン",
+        "disputed": "係争境界",
+        "armistice": "休戦ライン"
+      }
     }
   },
   "signals": {
