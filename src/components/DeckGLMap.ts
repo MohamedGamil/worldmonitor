@@ -3490,9 +3490,10 @@ export class DeckGLMap {
       </div>
     `;
 
+    const copyrightYear = new Date().getFullYear();
     const authorBadge = document.createElement('div');
     authorBadge.className = 'map-author-badge';
-    authorBadge.textContent = '© Elie Habib · Someone™';
+    authorBadge.textContent = `© Marsd ${copyrightYear}`;
     toggles.appendChild(authorBadge);
 
     this.container.appendChild(toggles);
