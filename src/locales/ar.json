@@ -622,8 +622,8 @@
   "components": {
     "webcams": {
       "regions": {
-        "iran": "IRAN ATTACKS",
         "all": "الكل",
+        "iran": "إيران",
         "mideast": "الشرق الأوسط",
         "europe": "أوروبا",
         "americas": "الأمريكتان",
@@ -1470,7 +1470,7 @@
       }
     },
     "liveNews": {
-      "retry": "Retry",
+      "retry": "حاول مرة أخرى",
       "notLive": "{{name}} is not currently live",
       "cannotEmbed": "لا يمكن تشغيل {{name}} هنا — قد يكون مقيدًا في منطقتك (خطأ {{code}})",
       "openOnYouTube": "Open on YouTube",
@@ -1501,7 +1501,10 @@
       "botCheck": "يطلب YouTube تسجيل الدخول لتشغيل {{name}}",
       "channelNotFound": "لم يتم العثور على قناة YouTube",
       "invalidHandle": "أدخل معرّف YouTube صالح (مثال: @ChannelName)",
-      "signInToYouTube": "تسجيل الدخول إلى YouTube"
+      "signInToYouTube": "تسجيل الدخول إلى YouTube",
+      "togglePlayback": "إيقاف/تشغيل البث",
+      "live": "مباشر",
+      "paused": "متوقف"
     },
     "securityAdvisories": {
       "loading": "جاري جلب التحذيرات الأمنية...",

@@ -134,8 +134,8 @@ export class LiveWebcamsPanel extends Panel {
     regionGroup.className = 'webcam-toolbar-group';
 
     const regions: { key: RegionFilter; label: string }[] = [
-      { key: 'iran', label: t('components.webcams.regions.iran') },
       { key: 'all', label: t('components.webcams.regions.all') },
+      { key: 'iran', label: t('components.webcams.regions.iran') },
       { key: 'middle-east', label: t('components.webcams.regions.mideast') },
       { key: 'europe', label: t('components.webcams.regions.europe') },
       { key: 'americas', label: t('components.webcams.regions.americas') },

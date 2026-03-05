@@ -509,7 +509,7 @@ export class LiveNewsPanel extends Panel {
   private createLiveButton(): void {
     this.liveBtn = document.createElement('button');
     this.liveBtn.className = 'live-indicator-btn';
-    this.liveBtn.title = 'Toggle playback';
+    this.liveBtn.title = t('components.liveNews.togglePlayback');
     this.updateLiveIndicator();
     this.liveBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -522,9 +522,14 @@ export class LiveNewsPanel extends Panel {
 
   private updateLiveIndicator(): void {
     if (!this.liveBtn) return;
+
+    const live$ = t('components.liveNews.live');
+    const paused$ = t('components.liveNews.paused');
+
     this.liveBtn.innerHTML = this.isPlaying
-      ? '<span class="live-dot"></span>Live'
-      : '<span class="live-dot paused"></span>Paused';
+      ? `<span class="live-dot"></span>${live$}`
+      : `<span class="live-dot paused"></span>${paused$}`;
+
     this.liveBtn.classList.toggle('paused', !this.isPlaying);
   }
 

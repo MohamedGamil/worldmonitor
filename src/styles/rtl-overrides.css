@@ -7,6 +7,10 @@ body.dir-rtl {
   /* Slight scale up for Arabic characters legibility */
 }
 
+[dir="rtl"] button {
+  font-family: var(--font-ar);
+}
+
 /* Language selector: flip arrow and margins */
 [dir="rtl"] .lang-select,
 [dir="rtl"] .header-lang-select {

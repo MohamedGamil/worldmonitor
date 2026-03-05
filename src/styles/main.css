@@ -1,3 +1,4 @@
+@import './style-overrides.css';
 @import './rtl-overrides.css';
 @import './panels.css';
 
@@ -57,6 +58,9 @@
   --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Fira Code', 'DejaVu Sans Mono', 'Liberation Mono', monospace;
   --font-ar: 'Cairo', 'Tajawal', 'Geeza Pro', 'SF Arabic', 'Tahoma', system-ui, sans-serif;
   --font-body: var(--font-mono);
+
+  /* Styles */
+  --button-corner-radius: 4px;
 }
 
 [dir="rtl"] {
