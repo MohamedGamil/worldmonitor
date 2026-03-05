@@ -63,8 +63,10 @@ function rebuildProtestSupercluster(source: SocialUnrestEvent[]): void {
             country: p.country,
             severity: p.severity,
             eventType: p.eventType,
+            sourceType: p.sourceType,
             validated: Boolean(p.validated),
             fatalities: Number.isFinite(p.fatalities) ? Number(p.fatalities) : 0,
+            timeMs: p.time.getTime(),
         },
     }));
     protestSC = new Supercluster({
@@ -78,6 +80,7 @@ function rebuildProtestSupercluster(source: SocialUnrestEvent[]): void {
             highSeverityCount: props.severity === 'high' ? 1 : 0,
             verifiedCount: props.validated ? 1 : 0,
             totalFatalities: Number(props.fatalities ?? 0) || 0,
+            riotTimeMs: props.eventType === 'riot' && props.sourceType !== 'gdelt' && Number.isFinite(Number(props.timeMs)) ? Number(props.timeMs) : 0,
         }),
         reduce: (acc: Record<string, unknown>, props: Record<string, unknown>) => {
             acc.maxSeverityRank = Math.max(Number(acc.maxSeverityRank ?? 0), Number(props.maxSeverityRank ?? 0));
@@ -85,6 +88,9 @@ function rebuildProtestSupercluster(source: SocialUnrestEvent[]): void {
             acc.highSeverityCount = Number(acc.highSeverityCount ?? 0) + Number(props.highSeverityCount ?? 0);
             acc.verifiedCount = Number(acc.verifiedCount ?? 0) + Number(props.verifiedCount ?? 0);
             acc.totalFatalities = Number(acc.totalFatalities ?? 0) + Number(props.totalFatalities ?? 0);
+            const accRiot = Number(acc.riotTimeMs ?? 0);
+            const propRiot = Number(props.riotTimeMs ?? 0);
+            acc.riotTimeMs = Number.isFinite(propRiot) ? Math.max(accRiot, propRiot) : accRiot;
             if (!acc.country && props.country) acc.country = props.country;
         },
     });
@@ -242,11 +248,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
                         const verifiedCount = Number(props.verifiedCount ?? 0);
                         const totalFatalities = Number(props.totalFatalities ?? 0);
                         const clusterCount = Number(f.properties.point_count ?? items.length);
-                        const latestRiotEventTimeMs = items.reduce((max, it) => {
-                            if (it.eventType !== 'riot' || it.sourceType === 'gdelt') return max;
-                            const ts = it.time.getTime();
-                            return Number.isFinite(ts) ? Math.max(max, ts) : max;
-                        }, 0);
+                        const riotTimeMs = Number(props.riotTimeMs ?? 0);
                         return {
                             id: `pc-${f.properties.cluster_id}`,
                             lat: coords[1], lon: coords[0],
@@ -255,7 +257,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
                             country: String(props.country ?? items[0]?.country ?? ''),
                             maxSeverity: maxSev as 'low' | 'medium' | 'high',
                             hasRiot: riotCount > 0,
-                            latestRiotEventTimeMs: latestRiotEventTimeMs || undefined,
+                            latestRiotEventTimeMs: riotTimeMs || undefined,
                             totalFatalities,
                             riotCount,
                             highSeverityCount,

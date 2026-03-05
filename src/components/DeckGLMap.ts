@@ -1244,6 +1244,11 @@ export class DeckGLMap {
         layers.push(this.createFlightDelaysLayer(filteredFlightDelays));
       }
 
+      // Aircraft positions layer (live tracking, under flights toggle)
+      if (mapLayers.flights && this.aircraftPositions.length > 0) {
+        layers.push(this.createAircraftPositionsLayer());
+      }
+
     }
 
     // === Step 5: Intel, Cyber, and Misc ===
@@ -1370,6 +1375,11 @@ export class DeckGLMap {
       if (mapLayers.happiness) {
         const choropleth = this.createHappinessChoroplethLayer();
         if (choropleth) layers.push(choropleth);
+      }
+      // CII choropleth (country instability heat-map)
+      if (mapLayers.ciiChoropleth) {
+        const ciiLayer = this.createCIIChoroplethLayer();
+        if (ciiLayer) layers.push(ciiLayer);
       }
       // Phase 8: Species recovery zones
       if (mapLayers.speciesRecovery && this.speciesRecoveryZones.length > 0) {
