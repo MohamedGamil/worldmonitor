@@ -37,6 +37,7 @@ export class CountryTimeline {
   private resizeObserver: ResizeObserver | null = null;
   private currentEvents: TimelineEvent[] = [];
   private boundVisibilityHandler!: () => void;
+  private handleThemeChange: () => void;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -54,7 +55,7 @@ export class CountryTimeline {
     };
     document.addEventListener('visibilitychange', this.boundVisibilityHandler);
 
-    window.addEventListener('theme-changed', () => {
+    this.handleThemeChange = () => {
       // Re-create tooltip with new theme colors
       if (this.tooltip) {
         this.tooltip.remove();
@@ -63,7 +64,8 @@ export class CountryTimeline {
       this.createTooltip();
       // Re-render chart with new colors
       if (this.currentEvents.length > 0) this.render(this.currentEvents);
-    });
+    };
+    window.addEventListener('theme-changed', this.handleThemeChange);
   }
 
   private createTooltip(): void {
@@ -278,6 +280,7 @@ export class CountryTimeline {
 
   destroy(): void {
     document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+    window.removeEventListener('theme-changed', this.handleThemeChange);
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;

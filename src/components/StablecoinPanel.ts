@@ -35,6 +35,15 @@ export class StablecoinPanel extends Panel {
   }
 
   public async fetchData(): Promise<void> {
+    const hydrated = getHydratedData('stablecoinMarkets') as StablecoinResult | undefined;
+    if (hydrated?.stablecoins?.length) {
+      this.data = hydrated;
+      this.error = null;
+      this.loading = false;
+      this.renderPanel();
+      return;
+    }
+
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         const client = new MarketServiceClient('', { fetch: (...args) => globalThis.fetch(...args) });

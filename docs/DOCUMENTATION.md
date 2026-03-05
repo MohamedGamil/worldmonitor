@@ -4,10 +4,7 @@ AI-powered real-time global intelligence dashboard aggregating news, markets, ge
 
 🌐 **[Live Demo: marsd.app](https://marsd.app)** | 💻 **[Tech Variant: tech.marsd.app](https://tech.marsd.app)**
 
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
-![D3.js](https://img.shields.io/badge/D3.js-F9A03C?style=flat&logo=d3.js&logoColor=white)
-![Version](https://img.shields.io/badge/version-2.5.1-blue)
+## Documentation Index
 
 ![Marsd Dashboard](../new-marsd.png)
 
