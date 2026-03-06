@@ -78,19 +78,19 @@ export async function initI18n(): Promise<void> {
   await i18next
     .use(LanguageDetector)
     .init({
-      lng: I18N_CONFIG.DEFAULT_LANGUAGE,
+      // Remove hardcoded lng so LanguageDetector can work
       resources: {
         en: { translation: enTranslation as TranslationDictionary },
       },
       supportedLngs: [...SUPPORTED_LANGUAGES],
       nonExplicitSupportedLngs: true,
-      fallbackLng: I18N_CONFIG.FALLBACK_LANGUAGE,
+      fallbackLng: I18N_CONFIG.DEFAULT_LANGUAGE, // default to AR if no detection matches
       debug: import.meta.env.DEV,
       interpolation: {
         escapeValue: false, // not needed for these simple strings
       },
       detection: {
-        order: ['localStorage'],
+        order: ['localStorage', 'navigator'],
         caches: ['localStorage'],
       },
     });
