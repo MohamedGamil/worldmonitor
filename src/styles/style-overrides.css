@@ -14,3 +14,7 @@ button {
     margin-top: 4px;
     direction: ltr !important;
 }
+
+.panel[data-panel="live-news"] .panel-header .panel-header-left {
+    display: none !important;
+}

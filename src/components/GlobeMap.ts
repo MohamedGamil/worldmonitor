@@ -400,7 +400,7 @@ export class GlobeMap {
     this.currentView = initialState.view;
 
     this.container.classList.add('globe-mode');
-    this.container.style.cssText = 'width:100%;height:100%;background:#000;position:relative;';
+    this.container.style.cssText = 'width:100%;height:100%;background:#000;position:relative;direction:ltr;';
 
     // Initialize worker to prepare static datasets off the main thread
     this.globeDataWorker = new Worker(
