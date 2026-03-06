@@ -17,7 +17,7 @@
 import Globe from 'globe.gl';
 import { isDesktopRuntime } from '@/services/runtime';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
-import { INTEL_HOTSPOTS, CONFLICT_ZONES } from '@/config/geo';
+import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES } from '@/config/geo';
 import { t } from '@/services/i18n';
 import { SITE_VARIANT } from '@/config/variant';
 import { getGlobeRenderScale, resolveGlobePixelRatio, resolvePerformanceProfile, subscribeGlobeRenderScaleChange, getGlobeTexture, GLOBE_TEXTURE_URLS, subscribeGlobeTextureChange, type GlobeRenderScale, type GlobePerformanceProfile } from '@/services/globe-render-settings';
@@ -39,6 +39,7 @@ import type { IranEvent } from '@/services/conflict';
 import type { DisplacementFlow } from '@/services/displacement';
 import type { ClimateAnomaly } from '@/services/climate';
 import type { GpsJamHex } from '@/services/gps-interference';
+import { MapPopup } from './MapPopup';
 
 // ─── Marker discriminated union ─────────────────────────────────────────────
 interface BaseMarker {
@@ -354,6 +355,9 @@ export class GlobeMap {
   private hotspots: HotspotMarker[] = [];
   private flights: FlightMarker[] = [];
   private vessels: VesselMarker[] = [];
+  /** Full source objects, keyed by id — used to supply complete data to MapPopup */
+  private flightDataMap = new Map<string, MilitaryFlight>();
+  private vesselDataMap = new Map<string, MilitaryVessel>();
   private weatherMarkers: WeatherMarker[] = [];
   private naturalMarkers: NaturalMarker[] = [];
   private iranMarkers: IranMarker[] = [];
@@ -405,7 +409,8 @@ export class GlobeMap {
 
   // Overlay UI elements
   private layerTogglesEl: HTMLElement | null = null;
-  private tooltipEl: HTMLElement | null = null;
+  private popup!: MapPopup;
+  private hoverTooltipEl: HTMLElement | null = null;
 
   // Callbacks
   private onLayerChangeCb: ((layer: keyof MapLayers, enabled: boolean, source: 'user' | 'programmatic') => void) | null = null;
@@ -418,6 +423,7 @@ export class GlobeMap {
 
     this.container.classList.add('globe-mode');
     this.container.style.cssText = 'width:100%;height:100%;background:#000;position:relative;direction:ltr;';
+    this.popup = new MapPopup(this.container);
 
     // Initialize worker to prepare static datasets off the main thread
     this.globeDataWorker = new Worker(
@@ -1010,15 +1016,21 @@ export class GlobeMap {
         </div>`;
     }
 
+    if (d._kind !== 'flash') {
+      el.addEventListener('mouseenter', () => this.showHoverTooltip(d, el));
+      el.addEventListener('mouseleave', () => this.hideHoverTooltip());
+    }
+
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.handleMarkerClick(d, el);
+      this.hideHoverTooltip();
+      this.handleMarkerClick(d, el, e as MouseEvent);
     });
 
     return el;
   }
 
-  private handleMarkerClick(d: GlobeMarker, anchor: HTMLElement): void {
+  private handleMarkerClick(d: GlobeMarker, _anchor: HTMLElement, e: MouseEvent): void {
     if (d._kind === 'hotspot' && this.onHotspotClickCb) {
       this.onHotspotClickCb({
         id: d.id,
@@ -1029,14 +1041,160 @@ export class GlobeMap {
         escalationScore: d.escalationScore as Hotspot['escalationScore'],
       });
     }
-    this.showMarkerTooltip(d, anchor);
+    this.showMarkerPopup(d, e);
   }
 
-  private showMarkerTooltip(d: GlobeMarker, anchor: HTMLElement): void {
-    this.hideTooltip();
+  private showMarkerPopup(d: GlobeMarker, e: MouseEvent): void {
+    if (d._kind === 'flash') return;
+
+    const cr = this.container.getBoundingClientRect();
+    // Use the raw click-event viewport coordinates (same approach as DeckGL's info.x/y)
+    const x = e.clientX - cr.left;
+    const y = e.clientY - cr.top;
+
+    switch (d._kind) {
+      case 'conflict': {
+        const zone = CONFLICT_ZONES.find(z => z.id === d.id);
+        if (zone) {
+          this.popup.show({ type: 'conflict', data: zone as any, x, y });
+        } else {
+          this.popup.show({ type: 'conflict', data: { id: d.id, name: d.location, intensity: d.eventType as any, center: [d._lng, d._lat] as [number, number], startDate: '', parties: [], keyDevelopments: [] } as any, x, y });
+        }
+        break;
+      }
+      case 'hotspot': {
+        const hs = INTEL_HOTSPOTS.find(h => h.id === d.id);
+        const hotspot = (hs ?? d) as any;
+        this.popup.show({ type: 'hotspot', data: hotspot, x, y });
+        if (hs) void this.popup.loadHotspotGdeltContext(hs);
+        break;
+      }
+      case 'conflictZone': {
+        const zone = CONFLICT_ZONES.find(z => z.id === d.id);
+        if (zone) {
+          this.popup.show({ type: 'conflict', data: zone as any, x, y });
+        } else {
+          this.popup.show({ type: 'conflict', data: { id: d.id, name: d.name, intensity: d.intensity as any, center: [d._lng, d._lat] as [number, number], startDate: '', parties: d.parties, keyDevelopments: [], casualties: d.casualties } as any, x, y });
+        }
+        break;
+      }
+      case 'flight': {
+        const fullFlight = this.flightDataMap.get(d.id);
+        this.popup.show({ type: 'militaryFlight', data: (fullFlight ?? {
+          id: d.id, callsign: d.callsign, hexCode: '', aircraftType: d.type as any,
+          operator: 'other' as any, operatorCountry: '', lat: d._lat, lon: d._lng,
+          altitude: 0, heading: d.heading, speed: 0, onGround: false,
+          lastSeen: new Date(), confidence: 'low' as const,
+        }) as any, x, y });
+        break;
+      }
+      case 'vessel': {
+        const fullVessel = this.vesselDataMap.get(d.id);
+        this.popup.show({ type: 'militaryVessel', data: (fullVessel ?? {
+          id: d.id, mmsi: '', name: d.name, vesselType: d.type as any,
+          operator: 'other' as any, operatorCountry: '', lat: d._lat, lon: d._lng,
+          heading: 0, speed: 0, lastAisUpdate: new Date(), confidence: 'low' as const,
+        }) as any, x, y });
+        break;
+      }
+      case 'milbase': {
+        const base = (MILITARY_BASES as any[]).find(b => b.id === d.id);
+        this.popup.show({ type: 'base', data: (base ?? {
+          id: d.id, name: d.name, lat: d._lat, lon: d._lng, type: d.type, country: d.country,
+        }) as any, x, y });
+        break;
+      }
+      case 'nuclearSite': {
+        const facility = (NUCLEAR_FACILITIES as any[]).find(f => f.id === d.id);
+        this.popup.show({ type: 'nuclear', data: (facility ?? {
+          id: d.id, name: d.name, lat: d._lat, lon: d._lng, type: d.type, status: d.status,
+        }) as any, x, y });
+        break;
+      }
+      case 'irradiator':    this.popup.show({ type: 'irradiator', data: d as any, x, y }); break;
+      case 'spaceport':     this.popup.show({ type: 'spaceport', data: d as any, x, y }); break;
+      case 'flightDelay':   this.popup.show({ type: 'flight', data: d as any, x, y }); break;
+      case 'cableAdvisory': this.popup.show({ type: 'cable-advisory', data: d as any, x, y }); break;
+      case 'repairShip':    this.popup.show({ type: 'repair-ship', data: d as any, x, y }); break;
+      case 'aisDisruption': this.popup.show({ type: 'ais', data: d as any, x, y }); break;
+      case 'gpsjam':        this.popup.show({ type: 'gpsJamming', data: { h3: d.id, lat: d._lat, lon: d._lng, level: d.level, pct: d.pct, good: 0, bad: 0, total: 0 } as any, x, y }); break;
+      case 'tech':          this.popup.show({ type: 'techEvent', data: d as any, x, y }); break;
+      case 'aircraftPos':   this.popup.show({ type: 'aircraft', data: d as any, x, y }); break;
+      // Types without a dedicated PopupType — use minimal fallback tooltip
+      default:              this.showFallbackTooltip(d, e); break;
+    }
+  }
+
+  /** Lightweight hover tooltip that appears when the user mouses over a globe marker. */
+  private showHoverTooltip(d: GlobeMarker, anchor: HTMLElement): void {
+    if (d._kind === 'flash') return;
+    const text = anchor.title;
+    if (!text) return;
+
+    this.hideHoverTooltip();
     const el = document.createElement('div');
     el.style.cssText = [
-      'position:absolute',
+      'position:fixed',
+      'background:rgba(10,12,16,0.92)',
+      'border:1px solid rgba(60,120,60,0.5)',
+      'padding:5px 10px',
+      'border-radius:3px',
+      'font-size:11px',
+      'font-family:monospace',
+      'color:#d4d4d4',
+      'max-width:260px',
+      'z-index:1001',
+      'pointer-events:none',
+      'line-height:1.5',
+      'white-space:pre-line',
+      'word-break:break-word',
+    ].join(';');
+    el.textContent = text;
+
+    const ar = anchor.getBoundingClientRect();
+    const left = Math.min(ar.right + 8, window.innerWidth - 270);
+    const top = Math.max(4, ar.top - 4);
+    el.style.left = left + 'px';
+    el.style.top = top + 'px';
+    document.body.appendChild(el);
+    this.hoverTooltipEl = el;
+  }
+
+  private hideHoverTooltip(): void {
+    this.hoverTooltipEl?.remove();
+    this.hoverTooltipEl = null;
+  }
+
+  /** Minimal inline tooltip for marker kinds that lack a MapPopup template (fire, ucdp, displacement, climate, newsLocation). */
+  private showFallbackTooltip(d: GlobeMarker, e: MouseEvent): void {
+    let html = '';
+    if (d._kind === 'fire') {
+      html = `<span style="color:#ff6600;font-weight:bold;">🔥 Wildfire</span>` +
+        `<br><span style="opacity:.7;">${escapeHtml(d.region)}</span>` +
+        `<br><span style="opacity:.5;">Brightness: ${d.brightness.toFixed(0)} K</span>`;
+    } else if (d._kind === 'ucdp') {
+      html = `<span style="color:#ff6400;font-weight:bold;">⚔ ${escapeHtml(d.country)}</span>` +
+        `<br><span style="opacity:.7;">${escapeHtml(d.sideA)} vs ${escapeHtml(d.sideB)}</span>` +
+        (d.deaths ? `<br><span style="opacity:.5;">Deaths: ${d.deaths}</span>` : '');
+    } else if (d._kind === 'displacement') {
+      html = `<span style="color:#88bbff;font-weight:bold;">👥 Displacement</span>` +
+        `<br><span style="opacity:.7;">${escapeHtml(d.origin)} → ${escapeHtml(d.asylum)}</span>` +
+        `<br><span style="opacity:.5;">Refugees: ${d.refugees.toLocaleString()}</span>`;
+    } else if (d._kind === 'climate') {
+      const tc = d.type === 'warm' ? '#ff4400' : d.type === 'cold' ? '#44aaff' : '#88ff88';
+      html = `<span style="color:${tc};font-weight:bold;">🌡 ${escapeHtml(d.type.toUpperCase())}</span>` +
+        `<br><span style="opacity:.7;">${escapeHtml(d.zone)}</span>` +
+        `<br><span style="opacity:.5;">ΔT: ${d.tempDelta > 0 ? '+' : ''}${d.tempDelta.toFixed(1)}°C · ${escapeHtml(d.severity)}</span>`;
+    } else if (d._kind === 'newsLocation') {
+      const tc = d.threatLevel === 'critical' ? '#ff2020' : d.threatLevel === 'high' ? '#ff6600' : d.threatLevel === 'elevated' ? '#ffaa00' : '#44aaff';
+      html = `<span style="color:${tc};font-weight:bold;">📰 ${escapeHtml(d.title.slice(0, 60))}</span>` +
+        `<br><span style="opacity:.5;">${escapeHtml(d.threatLevel)}</span>`;
+    }
+    if (!html) return;
+
+    const el = document.createElement('div');
+    el.style.cssText = [
+      'position:fixed',
       'background:rgba(10,12,16,0.95)',
       'border:1px solid rgba(60,120,60,0.6)',
       'padding:8px 12px',
@@ -1045,183 +1203,17 @@ export class GlobeMap {
       'font-family:monospace',
       'color:#d4d4d4',
       'max-width:240px',
-      'z-index:1000',
+      'z-index:1001',
       'pointer-events:none',
       'line-height:1.5',
     ].join(';');
-
-    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-    let html = '';
-    if (d._kind === 'conflict') {
-      html = `<span style="color:#ff5050;font-weight:bold;">⚔ ${esc(d.location)}</span>` +
-        (d.fatalities ? `<br><span style="opacity:.7;">Casualties: ${d.fatalities}</span>` : '');
-    } else if (d._kind === 'hotspot') {
-      const sc = ['', '#88ff44', '#ffdd00', '#ffaa00', '#ff6600', '#ff2020'][d.escalationScore] ?? '#ffaa00';
-      html = `<span style="color:${sc};font-weight:bold;">🎯 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">Escalation: ${d.escalationScore}/5</span>`;
-    } else if (d._kind === 'flight') {
-      html = `<span style="font-weight:bold;">✈ ${esc(d.callsign)}</span><br><span style="opacity:.7;">${esc(d.type)}</span>`;
-    } else if (d._kind === 'vessel') {
-      html = `<span style="font-weight:bold;">⛴ ${esc(d.name)}</span><br><span style="opacity:.7;">${esc(d.type)}</span>`;
-    } else if (d._kind === 'weather') {
-      const wc = d.severity === 'Extreme' ? '#ff0044' : d.severity === 'Severe' ? '#ff6600' : '#88aaff';
-      html = `<span style="color:${wc};font-weight:bold;">⚡ ${esc(d.severity)}</span>` +
-        `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.headline.slice(0, 90))}</span>`;
-    } else if (d._kind === 'natural') {
-      html = `<span style="font-weight:bold;">${esc(d.title.slice(0, 60))}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.category)}</span>`;
-    } else if (d._kind === 'iran') {
-      const sc = (d.severity === 'high' || d.severity === 'critical') ? '#ff3030' : d.severity === 'medium' ? '#ff8800' : '#ffcc00';
-      html = `<span style="color:${sc};font-weight:bold;">🎯 ${esc(d.title.slice(0, 60))}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.category)}${d.location ? ' · ' + esc(d.location) : ''}</span>`;
-    } else if (d._kind === 'outage') {
-      const sc = d.severity === 'total' ? '#ff2020' : d.severity === 'major' ? '#ff8800' : '#ffcc00';
-      html = `<span style="color:${sc};font-weight:bold;">📡 ${d.severity.toUpperCase()} Outage</span>` +
-        `<br><span style="opacity:.7;">${esc(d.country)}</span>` +
-        `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.title.slice(0, 70))}</span>`;
-    } else if (d._kind === 'cyber') {
-      const sc = d.severity === 'critical' ? '#ff0044' : d.severity === 'high' ? '#ff4400' : '#ffaa00';
-      html = `<span style="color:${sc};font-weight:bold;">🛡 ${d.severity.toUpperCase()}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.type)}</span>` +
-        `<br><span style="opacity:.5;font-size:10px;">${esc(d.indicator.slice(0, 40))}</span>`;
-    } else if (d._kind === 'fire') {
-      html = `<span style="color:#ff6600;font-weight:bold;">🔥 Wildfire</span>` +
-        `<br><span style="opacity:.7;">${esc(d.region)}</span>` +
-        `<br><span style="opacity:.5;">Brightness: ${d.brightness.toFixed(0)} K</span>`;
-    } else if (d._kind === 'protest') {
-      const typeColors: Record<string, string> = { riot: '#ff3030', strike: '#44aaff', protest: '#ffaa00' };
-      const c = typeColors[d.eventType] ?? '#ffaa00';
-      html = `<span style="color:${c};font-weight:bold;">📢 ${esc(d.eventType)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.country)}</span>` +
-        `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.title.slice(0, 70))}</span>`;
-    } else if (d._kind === 'ucdp') {
-      html = `<span style="color:#ff6400;font-weight:bold;">⚔ ${esc(d.country)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.sideA)} vs ${esc(d.sideB)}</span>` +
-        (d.deaths ? `<br><span style="opacity:.5;">Deaths: ${d.deaths}</span>` : '');
-    } else if (d._kind === 'displacement') {
-      html = `<span style="color:#88bbff;font-weight:bold;">👥 Displacement</span>` +
-        `<br><span style="opacity:.7;">${esc(d.origin)} → ${esc(d.asylum)}</span>` +
-        `<br><span style="opacity:.5;">Refugees: ${d.refugees.toLocaleString()}</span>`;
-    } else if (d._kind === 'climate') {
-      const tc = d.type === 'warm' ? '#ff4400' : d.type === 'cold' ? '#44aaff' : '#88ff88';
-      html = `<span style="color:${tc};font-weight:bold;">🌡 ${esc(d.type.toUpperCase())}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.zone)}</span>` +
-        `<br><span style="opacity:.5;">ΔT: ${d.tempDelta > 0 ? '+' : ''}${d.tempDelta.toFixed(1)}°C · ${esc(d.severity)}</span>`;
-    } else if (d._kind === 'gpsjam') {
-      const gc = d.level === 'high' ? '#ff2020' : '#ff8800';
-      html = `<span style="color:${gc};font-weight:bold;">📡 GPS Jamming</span>` +
-        `<br><span style="opacity:.7;">Level: ${esc(d.level)}</span>` +
-        `<br><span style="opacity:.5;">${d.pct.toFixed(0)}% affected</span>`;
-    } else if (d._kind === 'tech') {
-      html = `<span style="color:#44aaff;font-weight:bold;">💻 ${esc(d.title.slice(0, 50))}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.country)}</span>` +
-        (d.daysUntil >= 0 ? `<br><span style="opacity:.5;">In ${d.daysUntil} days</span>` : '');
-    } else if (d._kind === 'conflictZone') {
-      const ic = d.intensity === 'high' ? '#ff3030' : d.intensity === 'medium' ? '#ff8800' : '#ffcc00';
-      html = `<span style="color:${ic};font-weight:bold;">⚔ ${esc(d.name)}</span>` +
-        (d.parties.length ? `<br><span style="opacity:.7;">${d.parties.map(esc).join(', ')}</span>` : '') +
-        (d.casualties ? `<br><span style="opacity:.5;">Casualties: ${esc(d.casualties)}</span>` : '');
-    } else if (d._kind === 'milbase') {
-      html = `<span style="color:#4488ff;font-weight:bold;">🏛 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.type)}${d.country ? ' · ' + esc(d.country) : ''}</span>`;
-    } else if (d._kind === 'nuclearSite') {
-      const nc = d.status === 'active' ? '#ffd700' : d.status === 'construction' ? '#ff8800' : '#888888';
-      html = `<span style="color:${nc};font-weight:bold;">☢ ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.type)} · ${esc(d.status)}</span>`;
-    } else if (d._kind === 'irradiator') {
-      html = `<span style="color:#ff8800;font-weight:bold;">⚠ Gamma Irradiator</span>` +
-        `<br><span style="opacity:.7;">${esc(d.city)}, ${esc(d.country)}</span>`;
-    } else if (d._kind === 'spaceport') {
-      const lc = d.launches === 'High' ? '#88ddff' : d.launches === 'Medium' ? '#44aaff' : '#aaaaaa';
-      html = `<span style="color:${lc};font-weight:bold;">🚀 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.operator)} · ${esc(d.country)}</span>` +
-        `<br><span style="opacity:.5;">Launch frequency: ${esc(d.launches)}</span>`;
-    } else if (d._kind === 'earthquake') {
-      const mc = d.magnitude >= 6 ? '#ff3030' : d.magnitude >= 4 ? '#ff8800' : '#ffcc00';
-      html = `<span style="color:${mc};font-weight:bold;">🌍 M${d.magnitude.toFixed(1)}</span>` +
-        `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.place.slice(0, 70))}</span>`;
-    } else if (d._kind === 'economic') {
-      const ec = d.type === 'exchange' ? '#ffd700' : d.type === 'central-bank' ? '#4488ff' : '#44cc88';
-      html = `<span style="color:${ec};font-weight:bold;">💰 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.type)} · ${esc(d.country)}</span>` +
-        (d.description ? `<br><span style="opacity:.5;white-space:normal;display:block;">${esc(d.description.slice(0, 70))}</span>` : '');
-    } else if (d._kind === 'datacenter') {
-      html = `<span style="color:#88aaff;font-weight:bold;">🖥 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.owner)} · ${esc(d.country)}</span>` +
-        `<br><span style="opacity:.5;">${esc(d.chipType)}</span>`;
-    } else if (d._kind === 'waterway') {
-      html = `<span style="color:#44aadd;font-weight:bold;">⚓ ${esc(d.name)}</span>` +
-        (d.description ? `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.description.slice(0, 80))}</span>` : '');
-    } else if (d._kind === 'mineral') {
-      const mc2 = d.status === 'producing' ? '#cc88ff' : '#8866bb';
-      html = `<span style="color:${mc2};font-weight:bold;">💎 ${esc(d.mineral)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.name)} · ${esc(d.country)}</span>` +
-        `<br><span style="opacity:.5;">${esc(d.status)}</span>`;
-    } else if (d._kind === 'flightDelay') {
-      const sc = d.severity === 'severe' ? '#ff3030' : d.severity === 'major' ? '#ff6600' : d.severity === 'moderate' ? '#ffaa00' : '#ffee44';
-      html = `<span style="color:${sc};font-weight:bold;">✈ ${esc(d.iata)} — ${esc(d.severity.toUpperCase())}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.name)}, ${esc(d.country)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.delayType.replace(/_/g, ' '))}` +
-        (d.avgDelayMinutes > 0 ? ` · avg ${d.avgDelayMinutes}min` : '') + `</span>` +
-        (d.reason ? `<br><span style="opacity:.5;white-space:normal;display:block;">${esc(d.reason.slice(0, 70))}</span>` : '');
-    } else if (d._kind === 'cableAdvisory') {
-      const sc = d.severity === 'fault' ? '#ff2020' : '#ff8800';
-      html = `<span style="color:${sc};font-weight:bold;">🔌 ${esc(d.severity.toUpperCase())} — ${esc(d.title.slice(0, 50))}</span>` +
-        (d.impact ? `<br><span style="opacity:.7;white-space:normal;display:block;">${esc(d.impact.slice(0, 70))}</span>` : '') +
-        (d.repairEta ? `<br><span style="opacity:.5;">ETA: ${esc(d.repairEta)}</span>` : '');
-    } else if (d._kind === 'repairShip') {
-      const sc = d.status === 'on-station' ? '#44ff88' : '#44aaff';
-      html = `<span style="color:${sc};font-weight:bold;">🚢 ${esc(d.name)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.status.replace(/-/g, ' '))}${d.operator ? ' · ' + esc(d.operator) : ''}</span>` +
-        (d.eta ? `<br><span style="opacity:.5;">ETA: ${esc(d.eta)}</span>` : '');
-    } else if (d._kind === 'aisDisruption') {
-      const sc = d.severity === 'high' ? '#ff2020' : d.severity === 'elevated' ? '#ff8800' : '#44aaff';
-      const typeLabel = d.type === 'gap_spike' ? 'Gap Spike' : 'Chokepoint Congestion';
-      html = `<span style="color:${sc};font-weight:bold;">⛴ ${esc(typeLabel)}</span>` +
-        `<br><span style="opacity:.7;">${esc(d.name)}</span>` +
-        `<br><span style="opacity:.5;">${esc(d.severity)} · ${esc(d.description.slice(0, 60))}</span>`;
-    } else if (d._kind === 'newsLocation') {
-      const tc = d.threatLevel === 'critical' ? '#ff2020' : d.threatLevel === 'high' ? '#ff6600' : d.threatLevel === 'elevated' ? '#ffaa00' : '#44aaff';
-      html = `<span style="color:${tc};font-weight:bold;">📰 ${esc(d.title.slice(0, 60))}</span>` +
-        `<br><span style="opacity:.5;">${esc(d.threatLevel)}</span>`;
-    } else if (d._kind === 'aircraftPos') {
-      const acC = d.onGround ? '#888888' : '#a064ff';
-      const altStr = d.altitudeFt > 100
-        ? `FL${Math.round(d.altitudeFt / 100)} · ${d.altitudeFt.toLocaleString()} ft`
-        : 'On ground';
-      const speedStr = d.groundSpeedKts > 5 ? ` · ${Math.round(d.groundSpeedKts)} kts` : '';
-      const hdgStr = d.groundSpeedKts > 5 ? ` · ${Math.round(d.trackDeg)}°` : '';
-      const vrStr = d.verticalRate && Math.abs(d.verticalRate) > 0.5
-        ? (d.verticalRate > 0 ? ` ↑ +${d.verticalRate.toFixed(1)} m/s` : ` ↓ ${d.verticalRate.toFixed(1)} m/s`)
-        : '';
-      const srcLabel = d.source.replace('POSITION_SOURCE_', '').toLowerCase();
-      const isSimulated = srcLabel.includes('simulated');
-      html = `<span style="color:${acC};font-weight:bold;">&#9992; ${esc(d.callsign || d.icao24)}</span>` +
-        (d.callsign && d.icao24 !== d.callsign ? `<br><span style="opacity:.6;">ICAO24: ${esc(d.icao24)}</span>` : '') +
-        `<br><span style="opacity:.8;">${altStr}${speedStr}${hdgStr}${vrStr}</span>` +
-        `<br><span style="opacity:.5;font-size:10px;">${isSimulated ? '⚠ simulated' : `src: ${esc(srcLabel)}`}</span>`;
-    }
     el.innerHTML = html;
-
-    // Position relative to container
-    const ar = anchor.getBoundingClientRect();
-    const cr = this.container.getBoundingClientRect();
-    let left = ar.left - cr.left + (anchor.offsetWidth ?? 14) + 6;
-    let top = ar.top - cr.top - 8;
-    left = Math.max(4, Math.min(left, cr.width - 248));
-    top = Math.max(4, Math.min(top, cr.height - 80));
+    const left = Math.min(e.clientX + 14, window.innerWidth - 248);
+    const top = Math.max(4, Math.min(e.clientY - 8, window.innerHeight - 80));
     el.style.left = left + 'px';
     el.style.top = top + 'px';
-
-    this.container.appendChild(el);
-    this.tooltipEl = el;
-    setTimeout(() => this.hideTooltip(), 3500);
-  }
-
-  private hideTooltip(): void {
-    this.tooltipEl?.remove();
-    this.tooltipEl = null;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
   }
 
   // ─── Overlay UI: zoom controls & layer panel ─────────────────────────────
@@ -1522,27 +1514,35 @@ export class GlobeMap {
   // initStaticLayers() removed — data preparation offloaded to globe-data.worker.ts
 
   public setMilitaryFlights(flights: MilitaryFlight[]): void {
-    this.flights = flights.map(f => ({
-      _kind: 'flight' as const,
-      _lat: f.lat,
-      _lng: f.lon,
-      id: f.id,
-      callsign: f.callsign ?? '',
-      type: (f as any).aircraftType ?? (f as any).type ?? 'fighter',
-      heading: (f as any).heading ?? 0,
-    }));
+    this.flightDataMap.clear();
+    this.flights = flights.map(f => {
+      this.flightDataMap.set(f.id, f);
+      return {
+        _kind: 'flight' as const,
+        _lat: f.lat,
+        _lng: f.lon,
+        id: f.id,
+        callsign: f.callsign ?? '',
+        type: (f as any).aircraftType ?? (f as any).type ?? 'fighter',
+        heading: (f as any).heading ?? 0,
+      };
+    });
     this.flushMarkers();
   }
 
   public setMilitaryVessels(vessels: MilitaryVessel[]): void {
-    this.vessels = vessels.map(v => ({
-      _kind: 'vessel' as const,
-      _lat: v.lat,
-      _lng: v.lon,
-      id: v.id,
-      name: (v as any).name ?? 'vessel',
-      type: (v as any).vesselType ?? 'destroyer',
-    }));
+    this.vesselDataMap.clear();
+    this.vessels = vessels.map(v => {
+      this.vesselDataMap.set(v.id, v);
+      return {
+        _kind: 'vessel' as const,
+        _lat: v.lat,
+        _lng: v.lon,
+        id: v.id,
+        name: (v as any).name ?? 'vessel',
+        type: (v as any).vesselType ?? 'destroyer',
+      };
+    });
     this.flushMarkers();
   }
 
@@ -2208,7 +2208,10 @@ export class GlobeMap {
       this.globeDataWorker = null;
     }
     this.reversedRingCache.clear();
-    this.hideTooltip();
+    this.flightDataMap.clear();
+    this.vesselDataMap.clear();
+    this.popup.hide();
+    this.hideHoverTooltip();
     this.controls = null;
     this.controlsAutoRotateBeforePause = null;
     this.controlsDampingBeforePause = null;
