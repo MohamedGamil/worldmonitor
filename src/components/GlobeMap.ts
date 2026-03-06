@@ -1233,9 +1233,11 @@ export class GlobeMap {
             <span class="toggle-label">${label}</span>
           </label>`).join('')}
       </div>`;
+
+    const copyrightYear = new Date().getFullYear();
     const authorBadge = document.createElement('div');
     authorBadge.className = 'map-author-badge';
-    authorBadge.textContent = '© Elie Habib · Someone™';
+    authorBadge.textContent = `© Marsd ${copyrightYear}`;
     el.appendChild(authorBadge);
     this.container.appendChild(el);
 
