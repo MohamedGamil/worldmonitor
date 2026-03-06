@@ -1491,6 +1491,7 @@ export class DeckGLMap {
 
     const health = this.healthByCableId;
     const layer = new PathLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: cacheKey,
       data: UNDERSEA_CABLES,
       getPath: (d) => d.points,
@@ -1528,6 +1529,7 @@ export class DeckGLMap {
     if (cached && highlightSignature === this.lastPipelineHighlightSignature) return cached;
 
     const layer = new PathLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: cacheKey,
       data: PIPELINES,
       getPath: (d) => d.points,
@@ -1555,6 +1557,7 @@ export class DeckGLMap {
     const cacheKey = 'conflict-zones-layer';
 
     const layer = new GeoJsonLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: cacheKey,
       data: CONFLICT_ZONES_GEOJSON,
       filled: true,
@@ -1596,6 +1599,7 @@ export class DeckGLMap {
     const data = this.getBasesData();
 
     return new IconLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'bases-layer',
       data,
       getPosition: (d) => [d.lon, d.lat],
@@ -1623,6 +1627,7 @@ export class DeckGLMap {
     const a = Math.round(180 * Math.max(0.3, alphaScale));
 
     const scatterLayer = new ScatterplotLayer<ServerBaseCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'bases-cluster-layer',
       data: this.serverBaseClusters,
       getPosition: (d) => [d.longitude, d.latitude],
@@ -1634,6 +1639,7 @@ export class DeckGLMap {
     });
 
     const textLayer = new TextLayer<ServerBaseCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'bases-cluster-text',
       data: this.serverBaseClusters,
       getPosition: (d) => [d.longitude, d.latitude],
@@ -1654,6 +1660,7 @@ export class DeckGLMap {
 
     // Nuclear: HEXAGON icons - yellow/orange color, semi-transparent
     return new IconLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'nuclear-layer',
       data,
       getPosition: (d) => [d.lon, d.lat],
@@ -1679,6 +1686,7 @@ export class DeckGLMap {
 
   private createIrradiatorsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'irradiators-layer',
       data: GAMMA_IRRADIATORS,
       getPosition: (d) => [d.lon, d.lat],
@@ -1692,6 +1700,7 @@ export class DeckGLMap {
 
   private createSpaceportsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'spaceports-layer',
       data: SPACEPORTS,
       getPosition: (d) => [d.lon, d.lat],
@@ -1705,6 +1714,7 @@ export class DeckGLMap {
 
   private createPortsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'ports-layer',
       data: PORTS,
       getPosition: (d) => [d.lon, d.lat],
@@ -1729,6 +1739,7 @@ export class DeckGLMap {
 
   private createFlightDelaysLayer(delays: AirportDelayAlert[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'flight-delays-layer',
       data: delays,
       getPosition: (d) => [d.lon, d.lat],
@@ -1752,6 +1763,7 @@ export class DeckGLMap {
 
   private createAircraftPositionsLayer(): IconLayer<PositionSample> {
     return new IconLayer<PositionSample>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'aircraft-positions-layer',
       data: this.aircraftPositions,
       getPosition: (d) => [d.lon, d.lat],
@@ -1774,6 +1786,7 @@ export class DeckGLMap {
 
   private createGhostLayer<T>(id: string, data: T[], getPosition: (d: T) => [number, number], opts: { radiusMinPixels?: number } = {}): ScatterplotLayer<T> {
     return new ScatterplotLayer<T>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: `${id}-ghost`,
       data,
       getPosition,
@@ -1786,7 +1799,8 @@ export class DeckGLMap {
 
   /** Empty sentinel layer — keeps a stable layer ID for deck.gl interleaved mode without rendering anything. */
   private createEmptyGhost(id: string): ScatterplotLayer {
-    return new ScatterplotLayer({ id: `${id}-ghost`, data: [], getPosition: () => [0, 0], visible: false });
+    return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false }, id: `${id}-ghost`, data: [], getPosition: () => [0, 0], visible: false });
   }
 
 
@@ -1796,6 +1810,7 @@ export class DeckGLMap {
 
     // Datacenters: SQUARE icons - purple color, semi-transparent for layering
     return new IconLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'datacenters-layer',
       data,
       getPosition: (d) => [d.lon, d.lat],
@@ -1821,6 +1836,7 @@ export class DeckGLMap {
 
   private createEarthquakesLayer(earthquakes: Earthquake[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'earthquakes-layer',
       data: earthquakes,
       getPosition: (d) => [d.location?.longitude ?? 0, d.location?.latitude ?? 0],
@@ -1839,6 +1855,7 @@ export class DeckGLMap {
 
   private createNaturalEventsLayer(events: NaturalEvent[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'natural-events-layer',
       data: events,
       getPosition: (d: NaturalEvent) => [d.lon, d.lat],
@@ -1863,6 +1880,7 @@ export class DeckGLMap {
     );
 
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'fires-layer',
       data: viewPortFires,
       getPosition: (d: (typeof this.firmsFireData)[0]) => [d.lon, d.lat],
@@ -1880,6 +1898,7 @@ export class DeckGLMap {
 
   private createIranEventsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'iran-events-layer',
       data: this.iranEvents,
       getPosition: (d: IranEvent) => [d.longitude, d.latitude],
@@ -1900,6 +1919,7 @@ export class DeckGLMap {
     const alertsWithCoords = alerts.filter(a => a.centroid && a.centroid.length === 2);
 
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'weather-layer',
       data: alertsWithCoords,
       getPosition: (d) => d.centroid as [number, number], // centroid is [lon, lat]
@@ -1918,6 +1938,7 @@ export class DeckGLMap {
 
   private createOutagesLayer(outages: InternetOutage[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'outages-layer',
       data: outages,
       getPosition: (d) => [d.lon, d.lat],
@@ -1931,6 +1952,7 @@ export class DeckGLMap {
 
   private createCyberThreatsLayer(): ScatterplotLayer<CyberThreat> {
     return new ScatterplotLayer<CyberThreat>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'cyber-threats-layer',
       data: this.cyberThreats,
       getPosition: (d) => [d.lon, d.lat],
@@ -1961,6 +1983,7 @@ export class DeckGLMap {
 
   private createAisDensityLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'ais-density-layer',
       data: this.aisDensity,
       getPosition: (d) => [d.lon, d.lat],
@@ -1983,6 +2006,7 @@ export class DeckGLMap {
 
   private createGpsJammingLayer(): H3HexagonLayer {
     return new H3HexagonLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'gps-jamming-layer',
       data: this.gpsJammingHexes,
       getHexagon: (d: GpsJamHex) => d.h3,
@@ -2004,6 +2028,7 @@ export class DeckGLMap {
   private createAisDisruptionsLayer(): ScatterplotLayer {
     // AIS spoofing/jamming events
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'ais-disruptions-layer',
       data: this.aisDisruptions,
       getPosition: (d) => [d.lon, d.lat],
@@ -2030,6 +2055,7 @@ export class DeckGLMap {
   private createCableAdvisoriesLayer(advisories: CableAdvisory[]): ScatterplotLayer {
     // Cable fault/maintenance advisories
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'cable-advisories-layer',
       data: advisories,
       getPosition: (d) => [d.lon, d.lat],
@@ -2052,6 +2078,7 @@ export class DeckGLMap {
   private createRepairShipsLayer(): ScatterplotLayer {
     // Cable repair ships
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'repair-ships-layer',
       data: this.repairShips,
       getPosition: (d) => [d.lon, d.lat],
@@ -2065,6 +2092,7 @@ export class DeckGLMap {
 
   private createMilitaryVesselsLayer(vessels: MilitaryVessel[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'military-vessels-layer',
       data: vessels,
       getPosition: (d) => [d.lon, d.lat],
@@ -2087,6 +2115,7 @@ export class DeckGLMap {
 
   private createMilitaryVesselClustersLayer(clusters: MilitaryVesselCluster[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'military-vessel-clusters-layer',
       data: clusters,
       getPosition: (d) => [d.lon, d.lat],
@@ -2106,6 +2135,7 @@ export class DeckGLMap {
 
   private createMilitaryFlightsLayer(flights: MilitaryFlight[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'military-flights-layer',
       data: flights,
       getPosition: (d) => [d.lon, d.lat],
@@ -2119,6 +2149,7 @@ export class DeckGLMap {
 
   private createMilitaryFlightClustersLayer(clusters: MilitaryFlightCluster[]): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'military-flight-clusters-layer',
       data: clusters,
       getPosition: (d) => [d.lon, d.lat],
@@ -2137,6 +2168,7 @@ export class DeckGLMap {
 
   private createWaterwaysLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'waterways-layer',
       data: STRATEGIC_WATERWAYS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2150,6 +2182,7 @@ export class DeckGLMap {
 
   private createEconomicCentersLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'economic-centers-layer',
       data: ECONOMIC_CENTERS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2163,6 +2196,7 @@ export class DeckGLMap {
 
   private createStockExchangesLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'stock-exchanges-layer',
       data: STOCK_EXCHANGES,
       getPosition: (d) => [d.lon, d.lat],
@@ -2180,6 +2214,7 @@ export class DeckGLMap {
 
   private createFinancialCentersLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'financial-centers-layer',
       data: FINANCIAL_CENTERS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2197,6 +2232,7 @@ export class DeckGLMap {
 
   private createCentralBanksLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'central-banks-layer',
       data: CENTRAL_BANKS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2214,6 +2250,7 @@ export class DeckGLMap {
 
   private createCommodityHubsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'commodity-hubs-layer',
       data: COMMODITY_HUBS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2233,6 +2270,7 @@ export class DeckGLMap {
     // APT Groups - cyber threat actor markers (geopolitical variant only)
     // Made subtle to avoid visual clutter - small orange dots
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'apt-groups-layer',
       data: APT_GROUPS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2248,6 +2286,7 @@ export class DeckGLMap {
   private createMineralsLayer(): ScatterplotLayer {
     // Critical minerals projects
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'minerals-layer',
       data: CRITICAL_MINERALS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2271,6 +2310,7 @@ export class DeckGLMap {
   // Tech variant layers
   private createStartupHubsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'startup-hubs-layer',
       data: STARTUP_HUBS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2284,6 +2324,7 @@ export class DeckGLMap {
 
   private createAcceleratorsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'accelerators-layer',
       data: ACCELERATORS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2297,6 +2338,7 @@ export class DeckGLMap {
 
   private createCloudRegionsLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'cloud-regions-layer',
       data: CLOUD_REGIONS,
       getPosition: (d) => [d.lon, d.lat],
@@ -2313,6 +2355,7 @@ export class DeckGLMap {
     const layers: Layer[] = [];
 
     layers.push(new ScatterplotLayer<MapProtestCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'protest-clusters-layer',
       data: this.protestClusters,
       getPosition: d => [d.lon, d.lat],
@@ -2332,6 +2375,7 @@ export class DeckGLMap {
     const multiClusters = this.protestClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapProtestCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'protest-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2352,6 +2396,7 @@ export class DeckGLMap {
     if (pulseClusters.length > 0) {
       const pulse = 1.0 + 0.8 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 400));
       layers.push(new ScatterplotLayer<MapProtestCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'protest-clusters-pulse',
         data: pulseClusters,
         getPosition: d => [d.lon, d.lat],
@@ -2378,6 +2423,7 @@ export class DeckGLMap {
     const zoom = this.maplibreMap?.getZoom() || 2;
 
     layers.push(new ScatterplotLayer<MapTechHQCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'tech-hq-clusters-layer',
       data: this.techHQClusters,
       getPosition: d => [d.lon, d.lat],
@@ -2396,6 +2442,7 @@ export class DeckGLMap {
     const multiClusters = this.techHQClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapTechHQCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'tech-hq-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2416,6 +2463,7 @@ export class DeckGLMap {
       const singles = this.techHQClusters.filter(c => c.count === 1);
       if (singles.length > 0) {
         layers.push(new TextLayer<MapTechHQCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
           id: 'tech-hq-clusters-label',
           data: singles,
           getText: d => d.items[0]?.company ?? '',
@@ -2438,6 +2486,7 @@ export class DeckGLMap {
     const layers: Layer[] = [];
 
     layers.push(new ScatterplotLayer<MapTechEventCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'tech-event-clusters-layer',
       data: this.techEventClusters,
       getPosition: d => [d.lon, d.lat],
@@ -2455,6 +2504,7 @@ export class DeckGLMap {
     const multiClusters = this.techEventClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapTechEventCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'tech-event-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2480,6 +2530,7 @@ export class DeckGLMap {
     const layers: Layer[] = [];
 
     layers.push(new ScatterplotLayer<MapDatacenterCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'datacenter-clusters-layer',
       data: this.datacenterClusters,
       getPosition: d => [d.lon, d.lat],
@@ -2497,6 +2548,7 @@ export class DeckGLMap {
     const multiClusters = this.datacenterClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapDatacenterCluster>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'datacenter-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2525,6 +2577,7 @@ export class DeckGLMap {
     const layers: Layer[] = [];
 
     layers.push(new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'hotspots-layer',
       data: this.hotspots,
       getPosition: (d) => [d.lon, d.lat],
@@ -2552,6 +2605,7 @@ export class DeckGLMap {
     if (highHotspots.length > 0) {
       const pulse = 1.0 + 0.8 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 400));
       layers.push(new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'hotspots-pulse',
         data: highHotspots,
         getPosition: (d) => [d.lon, d.lat],
@@ -2581,6 +2635,7 @@ export class DeckGLMap {
 
   private createGulfInvestmentsLayer(): ScatterplotLayer {
     return new ScatterplotLayer<GulfInvestment>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'gulf-investments-layer',
       data: GULF_INVESTMENTS,
       getPosition: (d: GulfInvestment) => [d.lon, d.lat],
@@ -2690,6 +2745,7 @@ export class DeckGLMap {
 
     const layers: ScatterplotLayer[] = [
       new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'news-locations-layer',
         data: filteredNewsLocations,
         getPosition: (d) => [d.lon, d.lat],
@@ -2714,6 +2770,7 @@ export class DeckGLMap {
       const pulse = 1.0 + 1.5 * (0.5 + 0.5 * Math.sin(now / 318));
 
       layers.push(new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'news-pulse-layer',
         data: recentNews,
         getPosition: (d) => [d.lon, d.lat],
@@ -2761,6 +2818,7 @@ export class DeckGLMap {
 
     // Dot layer (tooltip on hover via getTooltip)
     layers.push(new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'positive-events-layer',
       data: this.positiveEvents,
       getPosition: (d: PositiveGeoEvent) => [d.lon, d.lat],
@@ -2776,6 +2834,7 @@ export class DeckGLMap {
     if (significantEvents.length > 0) {
       const pulse = 1.0 + 0.4 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 800));
       layers.push(new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'positive-events-pulse',
         data: significantEvents,
         getPosition: (d: PositiveGeoEvent) => [d.lon, d.lat],
@@ -2801,6 +2860,7 @@ export class DeckGLMap {
 
     // Dot layer (tooltip on hover via getTooltip)
     layers.push(new ScatterplotLayer<KindnessPoint>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'kindness-layer',
       data: this.kindnessPoints,
       getPosition: (d: KindnessPoint) => [d.lon, d.lat],
@@ -2814,6 +2874,7 @@ export class DeckGLMap {
     // Pulse for real events
     const pulse = 1.0 + 0.4 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 800));
     layers.push(new ScatterplotLayer<KindnessPoint>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'kindness-pulse',
       data: this.kindnessPoints,
       getPosition: (d: KindnessPoint) => [d.lon, d.lat],
@@ -2836,6 +2897,7 @@ export class DeckGLMap {
     if (!this.countriesGeoJsonData || this.happinessScores.size === 0) return null;
     const scores = this.happinessScores;
     return new GeoJsonLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'happiness-choropleth-layer',
       data: this.countriesGeoJsonData,
       filled: true,
@@ -2877,6 +2939,7 @@ export class DeckGLMap {
     const scores = this.ciiScoresMap;
     const colors = DeckGLMap.CII_LEVEL_COLORS;
     return new GeoJsonLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'cii-choropleth-layer',
       data: this.countriesGeoJsonData,
       filled: true,
@@ -2896,6 +2959,7 @@ export class DeckGLMap {
 
   private createSpeciesRecoveryLayer(): ScatterplotLayer {
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'species-recovery-layer',
       data: this.speciesRecoveryZones,
       getPosition: (d: (typeof this.speciesRecoveryZones)[number]) => [d.recoveryZone.lon, d.recoveryZone.lat],
@@ -2924,6 +2988,7 @@ export class DeckGLMap {
       geothermal: [255, 150, 80, 255],
     };
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'renewable-installations-layer',
       data: this.renewableInstallations,
       getPosition: (d: RenewableInstallation) => [d.lon, d.lat],
@@ -3941,6 +4006,7 @@ export class DeckGLMap {
 
   private createUcdpEventsLayer(events: UcdpGeoEvent[]): ScatterplotLayer<UcdpGeoEvent> {
     return new ScatterplotLayer<UcdpGeoEvent>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'ucdp-events-layer',
       data: events,
       getPosition: (d) => [d.longitude, d.latitude],
@@ -3964,6 +4030,7 @@ export class DeckGLMap {
     const top50 = withCoords.slice(0, 50);
     const maxCount = Math.max(1, ...top50.map(f => f.refugees));
     return new ArcLayer<DisplacementFlow>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'displacement-arcs-layer',
       data: top50,
       getSourcePosition: (d) => [d.originLon!, d.originLat!],
@@ -3979,6 +4046,7 @@ export class DeckGLMap {
 
   private createClimateHeatmapLayer(): HeatmapLayer<ClimateAnomaly> {
     return new HeatmapLayer<ClimateAnomaly>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'climate-heatmap-layer',
       data: this.climateAnomalies,
       getPosition: (d) => [d.lon, d.lat],
@@ -4007,6 +4075,7 @@ export class DeckGLMap {
       status === 'disrupted' ? disrupted : status === 'high_risk' ? highRisk : active;
 
     return new ArcLayer<TradeRouteSegment>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'trade-routes-layer',
       data: this.tradeRouteSegments,
       getSourcePosition: (d) => d.sourcePosition,
@@ -4031,6 +4100,7 @@ export class DeckGLMap {
     const isLight = getCurrentTheme() === 'light';
 
     return new ScatterplotLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'trade-chokepoints-layer',
       data: chokepoints,
       getPosition: (d: { lon: number; lat: number }) => [d.lon, d.lat],
@@ -4114,6 +4184,7 @@ export class DeckGLMap {
     const isLight = getCurrentTheme() === 'light';
 
     return new PolygonLayer({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'day-night-layer',
       data: [{ polygon: nightPolygon }],
       getPolygon: (d: { polygon: [number, number][] }) => d.polygon,

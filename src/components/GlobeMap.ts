@@ -17,19 +17,17 @@
 import Globe from 'globe.gl';
 import { isDesktopRuntime } from '@/services/runtime';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
-import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES, SPACEPORTS, ECONOMIC_CENTERS, STRATEGIC_WATERWAYS, CRITICAL_MINERALS, UNDERSEA_CABLES } from '@/config/geo';
-import { PIPELINES } from '@/config/pipelines';
+import { INTEL_HOTSPOTS, CONFLICT_ZONES } from '@/config/geo';
 import { t } from '@/services/i18n';
 import { SITE_VARIANT } from '@/config/variant';
 import { getGlobeRenderScale, resolveGlobePixelRatio, resolvePerformanceProfile, subscribeGlobeRenderScaleChange, getGlobeTexture, GLOBE_TEXTURE_URLS, subscribeGlobeTextureChange, type GlobeRenderScale, type GlobePerformanceProfile } from '@/services/globe-render-settings';
 import { getLayersForVariant, resolveLayerLabel, type MapVariant } from '@/config/map-layer-definitions';
-import { resolveTradeRouteSegments, type TradeRouteSegment } from '@/config/trade-routes';
-import { GAMMA_IRRADIATORS } from '@/config/irradiators';
-import { AI_DATA_CENTERS } from '@/config/ai-datacenters';
+import type { TradeRouteSegment } from '@/config/trade-routes';
+import type { GlobeStaticReadyMessage } from '@/workers/globe-data.worker';
 import { getCountryBbox, getCountriesGeoJson } from '@/services/country-geometry';
 import { escapeHtml } from '@/utils/sanitize';
 import type { FeatureCollection, Geometry } from 'geojson';
-import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, MilitaryBase, GammaIrradiator, Spaceport, EconomicCenter, StrategicWaterway, CriticalMineralProject, AIDataCenter, UnderseaCable, Pipeline, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
+import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
 import type { AirportDelayAlert } from '@/services/aviation';
 import type { MapContainerState, MapView, TimeRange } from './MapContainer';
@@ -326,6 +324,8 @@ export class GlobeMap {
   private cyanLight: any = null;
   private extrasAnimFrameId: number | null = null;
   private pendingFlushWhilePaused = false;
+  private globeDataWorker: Worker | null = null;
+  private workerStaticReady = false;
   private controlsAutoRotateBeforePause: boolean | null = null;
   private controlsDampingBeforePause: boolean | null = null;
 
@@ -401,6 +401,35 @@ export class GlobeMap {
 
     this.container.classList.add('globe-mode');
     this.container.style.cssText = 'width:100%;height:100%;background:#000;position:relative;';
+
+    // Initialize worker to prepare static datasets off the main thread
+    this.globeDataWorker = new Worker(
+      new URL('@/workers/globe-data.worker.ts', import.meta.url),
+      { type: 'module' },
+    );
+    this.globeDataWorker.onmessage = (e: MessageEvent<GlobeStaticReadyMessage>) => {
+      if (e.data.type === 'static-ready' && !this.destroyed) {
+        this.milBaseMarkers = e.data.milBaseMarkers;
+        this.nuclearSiteMarkers = e.data.nuclearSiteMarkers;
+        this.irradiatorSiteMarkers = e.data.irradiatorSiteMarkers;
+        this.spaceportSiteMarkers = e.data.spaceportSiteMarkers;
+        this.economicMarkers = e.data.economicMarkers;
+        this.datacenterMarkers = e.data.datacenterMarkers;
+        this.waterwayMarkers = e.data.waterwayMarkers;
+        this.mineralMarkers = e.data.mineralMarkers;
+        this.tradeRouteSegments = e.data.tradeRouteSegments;
+        this.globePaths = e.data.globePaths;
+        this.workerStaticReady = true;
+        // Only flush if globe is already initialized;
+        // otherwise initGlobe() will flush after it finishes.
+        if (this.initialized) {
+          this.flushMarkers();
+          this.flushArcs();
+          this.flushPaths();
+        }
+      }
+    };
+    this.globeDataWorker.postMessage({ type: 'init' });
 
     this.initGlobe().catch(err => {
       console.error('[GlobeMap] Init failed:', err);
@@ -688,9 +717,9 @@ export class GlobeMap {
     this.createControls();
     this.createLayerToggles();
 
-    // Load static datasets
+    // Load static datasets (hotspots + conflict zones loaded synchronously;
+    // remaining static layers arrive asynchronously from globe-data.worker)
     this.setHotspots(INTEL_HOTSPOTS);
-    this.initStaticLayers();
     this.setConflictZones();
 
     // Navigate to initial view
@@ -703,6 +732,13 @@ export class GlobeMap {
     this.flushArcs();
     this.flushPaths();
     this.flushPolygons();
+
+    // If worker static data already arrived during init, ensure it's flushed now
+    if (this.workerStaticReady) {
+      this.flushMarkers();
+      this.flushArcs();
+      this.flushPaths();
+    }
 
     // Load countries GeoJSON for CII choropleth
     getCountriesGeoJson().then(geojson => {
@@ -1425,107 +1461,7 @@ export class GlobeMap {
     this.flushMarkers();
   }
 
-  private initStaticLayers(): void {
-    this.milBaseMarkers = (MILITARY_BASES as MilitaryBase[]).map(b => ({
-      _kind: 'milbase' as const,
-      _lat: b.lat,
-      _lng: b.lon,
-      id: b.id,
-      name: b.name,
-      type: b.type,
-      country: b.country ?? '',
-    }));
-    this.nuclearSiteMarkers = NUCLEAR_FACILITIES
-      .filter(f => f.status !== 'decommissioned')
-      .map(f => ({
-        _kind: 'nuclearSite' as const,
-        _lat: f.lat,
-        _lng: f.lon,
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        status: f.status,
-      }));
-    this.irradiatorSiteMarkers = (GAMMA_IRRADIATORS as GammaIrradiator[]).map(g => ({
-      _kind: 'irradiator' as const,
-      _lat: g.lat,
-      _lng: g.lon,
-      id: g.id,
-      city: g.city,
-      country: g.country,
-    }));
-    this.spaceportSiteMarkers = (SPACEPORTS as Spaceport[])
-      .filter(s => s.status === 'active')
-      .map(s => ({
-        _kind: 'spaceport' as const,
-        _lat: s.lat,
-        _lng: s.lon,
-        id: s.id,
-        name: s.name,
-        country: s.country,
-        operator: s.operator,
-        launches: s.launches,
-      }));
-    this.economicMarkers = (ECONOMIC_CENTERS as EconomicCenter[]).map(c => ({
-      _kind: 'economic' as const,
-      _lat: c.lat,
-      _lng: c.lon,
-      id: c.id,
-      name: c.name,
-      type: c.type,
-      country: c.country,
-      description: c.description ?? '',
-    }));
-    this.datacenterMarkers = (AI_DATA_CENTERS as AIDataCenter[])
-      .filter(d => d.status !== 'decommissioned')
-      .map(d => ({
-        _kind: 'datacenter' as const,
-        _lat: d.lat,
-        _lng: d.lon,
-        id: d.id,
-        name: d.name,
-        owner: d.owner,
-        country: d.country,
-        chipType: d.chipType,
-      }));
-    this.waterwayMarkers = (STRATEGIC_WATERWAYS as StrategicWaterway[]).map(w => ({
-      _kind: 'waterway' as const,
-      _lat: w.lat,
-      _lng: w.lon,
-      id: w.id,
-      name: w.name,
-      description: w.description ?? '',
-    }));
-    this.mineralMarkers = (CRITICAL_MINERALS as CriticalMineralProject[])
-      .filter(m => m.status === 'producing' || m.status === 'development')
-      .map(m => ({
-        _kind: 'mineral' as const,
-        _lat: m.lat,
-        _lng: m.lon,
-        id: m.id,
-        name: m.name,
-        mineral: m.mineral,
-        country: m.country,
-        status: m.status,
-      }));
-    this.tradeRouteSegments = resolveTradeRouteSegments();
-    this.globePaths = [
-      ...(UNDERSEA_CABLES as UnderseaCable[]).map(c => ({
-        id: c.id,
-        name: c.name,
-        points: c.points,
-        pathType: 'cable' as const,
-        status: 'ok',
-      })),
-      ...(PIPELINES as Pipeline[]).map(p => ({
-        id: p.id,
-        name: p.name,
-        points: p.points,
-        pathType: p.type,
-        status: p.status,
-      })),
-    ];
-  }
+  // initStaticLayers() removed — data preparation offloaded to globe-data.worker.ts
 
   public setMilitaryFlights(flights: MilitaryFlight[]): void {
     this.flights = flights.map(f => ({
@@ -2133,6 +2069,10 @@ export class GlobeMap {
     if (this.flushTimer) { clearTimeout(this.flushTimer); this.flushTimer = null; }
     if (this.flushMaxTimer) { clearTimeout(this.flushMaxTimer); this.flushMaxTimer = null; }
     if (this.autoRotateTimer) clearTimeout(this.autoRotateTimer);
+    if (this.globeDataWorker) {
+      this.globeDataWorker.terminate();
+      this.globeDataWorker = null;
+    }
     this.reversedRingCache.clear();
     this.hideTooltip();
     this.controls = null;
