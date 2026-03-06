@@ -73,7 +73,10 @@ export async function listMilitaryFlights(
   req: ListMilitaryFlightsRequest,
 ): Promise<ListMilitaryFlightsResponse> {
   try {
-    if (!req.neLat && !req.neLon && !req.swLat && !req.swLon) return { flights: [], clusters: [], pagination: undefined };
+    // Reject truly unset requests (all proto3 defaults = 0) — but also allow
+    // genuine bbox values that happen to straddle zero (e.g. neLat=1, swLat=-1).
+    const hasBounds = req.neLat !== 0 || req.neLon !== 0 || req.swLat !== 0 || req.swLon !== 0;
+    if (!hasBounds) return { flights: [], clusters: [], pagination: undefined };
     const requestBounds = normalizeBounds(req);
 
     // Quantize bbox to a 1° grid so nearby map views share cache entries.
@@ -97,11 +100,13 @@ export async function listMilitaryFlights(
 
         if (!baseUrl) return null;
 
+        // Clamp fetch bbox to valid coordinate ranges to avoid relay rejecting
+        // boundary values (e.g. swLon=-180 → lomin=-180.5 is out of range).
         const fetchBB = {
-          lamin: quantize(req.swLat, BBOX_GRID_STEP) - BBOX_GRID_STEP / 2,
-          lamax: quantize(req.neLat, BBOX_GRID_STEP) + BBOX_GRID_STEP / 2,
-          lomin: quantize(req.swLon, BBOX_GRID_STEP) - BBOX_GRID_STEP / 2,
-          lomax: quantize(req.neLon, BBOX_GRID_STEP) + BBOX_GRID_STEP / 2,
+          lamin: Math.max(-90, quantize(req.swLat, BBOX_GRID_STEP) - BBOX_GRID_STEP / 2),
+          lamax: Math.min(90, quantize(req.neLat, BBOX_GRID_STEP) + BBOX_GRID_STEP / 2),
+          lomin: Math.max(-180, quantize(req.swLon, BBOX_GRID_STEP) - BBOX_GRID_STEP / 2),
+          lomax: Math.min(180, quantize(req.neLon, BBOX_GRID_STEP) + BBOX_GRID_STEP / 2),
         };
         const params = new URLSearchParams();
         params.set('lamin', String(fetchBB.lamin));

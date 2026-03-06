@@ -43,9 +43,29 @@ interface FetchAcledOptions {
  * Cache key is derived from query parameters so identical queries across
  * different handlers share the same cached result.
  */
+
+// Detect and warn about expired JWT at startup (once per process)
+let _acledTokenChecked = false;
+function checkAcledToken(token: string): boolean {
+  if (_acledTokenChecked) return true;
+  _acledTokenChecked = true;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return true;
+    const payload = JSON.parse(Buffer.from(parts[1]!, 'base64').toString('utf8')) as { exp?: number };
+    if (payload.exp && payload.exp < Date.now() / 1000) {
+      console.warn(`[ACLED] ⚠️  Token expired at ${new Date(payload.exp * 1000).toISOString()} — requests will return 401. Renew ACLED_ACCESS_TOKEN in .env.local.`);
+      return false;
+    }
+  } catch { /* ignore */ }
+  return true;
+}
+
 export async function fetchAcledCached(opts: FetchAcledOptions): Promise<AcledRawEvent[]> {
   const token = process.env.ACLED_ACCESS_TOKEN;
   if (!token) return [];
+
+  checkAcledToken(token);
 
   const cacheKey = `acled:shared:${opts.eventTypes}:${opts.startDate}:${opts.endDate}:${opts.country || 'all'}:${opts.limit || 500}`;
   const result = await cachedFetchJson<AcledRawEvent[]>(cacheKey, ACLED_CACHE_TTL, async () => {

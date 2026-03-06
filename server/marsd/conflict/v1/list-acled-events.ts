@@ -24,8 +24,9 @@ const fallbackAcledCache = new Map<string, { data: ListAcledEventsResponse; ts: 
 async function fetchAcledConflicts(req: ListAcledEventsRequest): Promise<AcledConflictEvent[]> {
   try {
     const now = Date.now();
-    const startMs = req.start ?? (now - 30 * 24 * 60 * 60 * 1000);
-    const endMs = req.end ?? now;
+    // proto3 default for int64 is 0 (epoch) — treat 0 as "not provided"
+    const startMs = req.start && req.start > 0 ? req.start : (now - 30 * 24 * 60 * 60 * 1000);
+    const endMs = req.end && req.end > 0 ? req.end : now;
     const startDate = new Date(startMs).toISOString().split('T')[0]!;
     const endDate = new Date(endMs).toISOString().split('T')[0]!;
 
