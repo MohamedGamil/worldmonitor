@@ -890,10 +890,10 @@ export class DeckGLMap {
           const currentFonts = layer.layout['text-font'] as string[];
           if (Array.isArray(currentFonts)) {
             const newFonts = [...currentFonts];
-            if (!newFonts.includes('Noto Sans Arabic Regular')) newFonts.push('Noto Sans Arabic Regular');
-            if (!newFonts.includes('Cairo')) newFonts.push('Cairo');
-            if (!newFonts.includes('Tajawal')) newFonts.push('Tajawal');
-            if (!newFonts.includes('Arial Unicode MS Regular')) newFonts.push('Arial Unicode MS Regular');
+            // if (!newFonts.includes('Noto Sans Arabic Regular')) newFonts.push('Noto Sans Arabic Regular');
+            // if (!newFonts.includes('Cairo')) newFonts.push('Cairo');
+            // if (!newFonts.includes('Tajawal')) newFonts.push('Tajawal');
+            // if (!newFonts.includes('Arial Unicode MS Regular')) newFonts.push('Arial Unicode MS Regular');
 
             if (JSON.stringify(newFonts) !== JSON.stringify(currentFonts)) {
               this.maplibreMap?.setLayoutProperty(layer.id, 'text-font', newFonts);
