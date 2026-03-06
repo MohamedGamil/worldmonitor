@@ -2,9 +2,10 @@
 
 /* Font and Typography Overrides */
 body.dir-rtl {
+  --font-body: var(--font-ar);
   font-family: var(--font-ar);
-  font-size: 1.05rem;
   /* Slight scale up for Arabic characters legibility */
+  font-size: 1.05rem;
 }
 
 [dir="rtl"] button {
@@ -141,5 +142,10 @@ body.dir-rtl {
 }
 
 [dir="rtl"] .header-clock {
+  font-family: var(--font-ar);
+}
+
+/* PizzaInt */
+[dir="rtl"] .pizzint-indicator {
   font-family: var(--font-ar);
 }

@@ -127,12 +127,14 @@ export class PizzIntIndicator {
   }
 
   private getStatusLabel(loc: { is_closed_now: boolean; is_spike: boolean; current_popularity: number }): string {
+    const currentPopularity = ~~loc.current_popularity;
+
     if (loc.is_closed_now) return t('components.pizzint.statusClosed');
-    if (loc.is_spike) return `${t('components.pizzint.statusSpike')} ${loc.current_popularity}%`;
-    if (loc.current_popularity >= 70) return `${t('components.pizzint.statusHigh')} ${loc.current_popularity}%`;
-    if (loc.current_popularity >= 40) return `${t('components.pizzint.statusElevated')} ${loc.current_popularity}%`;
-    if (loc.current_popularity >= 15) return `${t('components.pizzint.statusNominal')} ${loc.current_popularity}%`;
-    return `${t('components.pizzint.statusQuiet')} ${loc.current_popularity}%`;
+    if (loc.is_spike) return `${t('components.pizzint.statusSpike')} ${currentPopularity}%`;
+    if (currentPopularity >= 70) return `${t('components.pizzint.statusHigh')} ${currentPopularity}%`;
+    if (currentPopularity >= 40) return `${t('components.pizzint.statusElevated')} ${currentPopularity}%`;
+    if (currentPopularity >= 15) return `${t('components.pizzint.statusNominal')} ${currentPopularity}%`;
+    return `${t('components.pizzint.statusQuiet')} ${currentPopularity}%`;
   }
 
   private formatTimeAgo(date: Date): string {
