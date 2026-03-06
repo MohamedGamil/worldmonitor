@@ -31,21 +31,66 @@ function isFresh(data: ServerInsights): boolean {
   return age < MAX_AGE_MS;
 }
 
-export function getServerInsights(): ServerInsights | null {
-  if (cached && isFresh(cached)) {
-    return cached;
+function isValid(data: ServerInsights): boolean {
+  return (
+    Array.isArray(data.topStories) &&
+    data.topStories.length > 0 &&
+    typeof data.generatedAt === 'string'
+  );
+}
+
+/**
+ * Re-fetch insights from the bootstrap API when the in-memory cache expires.
+ * The one-shot hydration cache (getHydratedData) is consumed at page load and
+ * deleted after first read, so subsequent cache misses must go back to the API.
+ */
+async function fetchInsightsFromApi(): Promise<ServerInsights | null> {
+  try {
+    const resp = await fetch('/api/bootstrap?keys=insights', {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!resp.ok) return null;
+    const { data } = (await resp.json()) as { data: Record<string, unknown> };
+    const raw = data.insights;
+    if (!raw || typeof raw !== 'object') return null;
+    const insights = raw as ServerInsights;
+    if (!isValid(insights) || !isFresh(insights)) return null;
+    return insights;
+  } catch {
+    return null;
   }
+}
+
+/** Synchronous read from in-memory cache only. */
+export function getServerInsights(): ServerInsights | null {
+  return cached && isFresh(cached) ? cached : null;
+}
+
+/**
+ * Async loader: returns cached insights if still fresh, otherwise
+ * reads the one-shot bootstrap hydration (page-load data), and finally
+ * falls back to a live re-fetch from /api/bootstrap?keys=insights.
+ * This ensures the panel keeps working after the initial 15-minute cache window.
+ */
+export async function loadServerInsights(): Promise<ServerInsights | null> {
+  // 1. In-memory cache (fast path)
+  if (cached && isFresh(cached)) return cached;
   cached = null;
 
+  // 2. One-shot bootstrap hydration (consumed at page load, deleted after first read)
   const raw = getHydratedData('insights');
-  if (!raw || typeof raw !== 'object') return null;
-  const data = raw as ServerInsights;
-  if (!Array.isArray(data.topStories) || data.topStories.length === 0) return null;
-  if (typeof data.generatedAt !== 'string') return null;
-  if (!isFresh(data)) return null;
+  if (raw && typeof raw === 'object') {
+    const data = raw as ServerInsights;
+    if (isValid(data) && isFresh(data)) {
+      cached = data;
+      return data;
+    }
+  }
 
-  cached = data;
-  return data;
+  // 3. Re-fetch from API (cache expired or hydration already consumed)
+  const fresh = await fetchInsightsFromApi();
+  if (fresh) cached = fresh;
+  return fresh;
 }
 
 export function setServerInsights(data: ServerInsights): void {

@@ -14,7 +14,7 @@ import { deletePersistentCache, getPersistentCache, setPersistentCache } from '@
 import { t } from '@/services/i18n';
 import { isDesktopRuntime } from '@/services/runtime';
 import { getAiFlowSettings, isAnyAiProviderEnabled, subscribeAiFlowChange } from '@/services/ai-flow-settings';
-import { getServerInsights, type ServerInsights, type ServerInsightStory } from '@/services/insights-loader';
+import { loadServerInsights, type ServerInsights, type ServerInsightStory } from '@/services/insights-loader';
 import type { ClusteredEvent, FocalPoint, MilitaryFlight } from '@/types';
 
 export class InsightsPanel extends Panel {
@@ -263,8 +263,8 @@ export class InsightsPanel extends Panel {
       return;
     }
 
-    // Try server-side pre-computed insights first (instant)
-    const serverInsights = getServerInsights();
+    // Try server-side pre-computed insights first (cache → hydration → API re-fetch)
+    const serverInsights = await loadServerInsights();
     if (serverInsights) {
       await this.updateFromServer(serverInsights, clusters, thisGeneration);
       return;
