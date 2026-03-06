@@ -21,4 +21,11 @@ button {
 
 .live-mute-btn.live-toggle-mute-btn {
     color: var(--text-danger);
+    border-radius: 100%;
+    background-color: var(--bg-secondary);
+    border: 1px solid currentColor;
+    padding: 3px;
+    margin-left: auto;
+    margin-right: 8px;
+    transition-property: color, border;
 }

@@ -172,3 +172,8 @@ body.dir-rtl {
   letter-spacing: 0;
   font-size: 10px;
 }
+
+[dir="rtl"] .live-mute-btn.live-toggle-mute-btn {
+  margin-right: auto;
+  margin-left: 8px;
+}
