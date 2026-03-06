@@ -557,6 +557,7 @@ export interface MapLayers {
   ciiChoropleth: boolean;
   // Overlay layers
   dayNight: boolean;
+  geopoliticalBoundaries: boolean;
 }
 
 export interface AIDataCenter {

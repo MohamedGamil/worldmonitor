@@ -5,7 +5,6 @@ import {
   formatCounterValue,
   type CounterMetric,
 } from '@/services/humanity-counters';
-import { isDesktopRuntime } from '@/services/runtime';
 
 /**
  * CountersPanel -- Worldometer-style ticking counters showing positive global metrics.
@@ -20,10 +19,6 @@ import { isDesktopRuntime } from '@/services/runtime';
 export class CountersPanel extends Panel {
   private animFrameId: number | null = null;
   private valueElements: Map<string, HTMLElement> = new Map();
-  private readonly desktopMode = isDesktopRuntime();
-  private visibilityHandler: (() => void) | null = null;
-  private lastDesktopUpdateAt = 0;
-  private readonly desktopUpdateIntervalMs = 250;
 
   private isVisible = true;
   private isTicking = false;

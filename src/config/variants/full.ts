@@ -101,6 +101,7 @@ export const DEFAULT_MAP_LAYERS: MapLayers = {
   iranAttacks: true,
   ciiChoropleth: false,
   dayNight: false,
+  geopoliticalBoundaries: false,
 };
 
 // Mobile-specific defaults for geopolitical
@@ -154,6 +155,7 @@ export const MOBILE_DEFAULT_MAP_LAYERS: MapLayers = {
   iranAttacks: true,
   ciiChoropleth: false,
   dayNight: false,
+  geopoliticalBoundaries: false,
 };
 
 export const VARIANT_CONFIG: VariantConfig = {

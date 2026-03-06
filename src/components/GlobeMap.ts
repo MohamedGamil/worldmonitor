@@ -1673,11 +1673,16 @@ export class GlobeMap {
   }
 
   // ─── No-op stubs (keep MapContainer happy) ────────────────────────────────
-  public render(): void { this.resize(); }
-  public setIsResizing(isResizing: boolean): void {
-    // After drag-resize or fullscreen transition completes, re-sync dimensions
-    if (!isResizing) this.resize();
+  public render(): void {
+    if (!this.globe || this.destroyed) return;
+    this.resize();
   }
+
+  public setIsResizing(_isResizing: boolean): void {
+    if (!this.globe || this.destroyed || _isResizing) return;
+    this.resize();
+  }
+
   public setZoom(_z: number): void { }
   public setRenderPaused(paused: boolean): void {
     if (this.renderPaused === paused) return;

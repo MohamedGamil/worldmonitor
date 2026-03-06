@@ -3,11 +3,12 @@ import { fetchLiveVideoInfo } from '@/services/live-news';
 import { isDesktopRuntime, getRemoteApiBaseUrl, getApiBaseUrl, getLocalApiPort } from '@/services/runtime';
 import { t } from '../services/i18n';
 import { loadFromStorage, saveToStorage } from '@/utils';
-import { IDLE_PAUSE_MS, STORAGE_KEYS, SITE_VARIANT, FULL_LIVE_CHANNELS_GLOBAL, TECH_LIVE_CHANNELS_GLOBAL, LIVE_CHANNELS_LIST, ENTRIES_REGIONS, FULL_LIVE_CHANNELS_MENA } from '@/config';
+import { IDLE_PAUSE_MS, STORAGE_KEYS, SITE_VARIANT, TECH_LIVE_CHANNELS_GLOBAL, LIVE_CHANNELS_LIST, ENTRIES_REGIONS, FULL_LIVE_CHANNELS_MENA } from '@/config';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 
 import { getStreamQuality } from '@/services/ai-flow-settings';
-import { LiveChannel } from '@/interfaces/LiveChannel';
+import type { LiveChannel } from '@/interfaces/LiveChannel';
+export type { LiveChannel };
 import { getLiveStreamsAlwaysOn, subscribeLiveStreamsSettingsChange } from '@/services/live-stream-settings';
 
 // YouTube IFrame Player API types

@@ -4,7 +4,7 @@
 export interface LiveChannel {
     id: string;
     name: string;
-    handle: string; // YouTube channel handle (e.g., @bloomberg)
+    handle?: string; // YouTube channel handle (e.g., @bloomberg)
     fallbackVideoId?: string; // Fallback if no live stream detected
     videoId?: string; // Dynamically fetched live video ID
     isLive?: boolean;

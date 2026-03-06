@@ -3,6 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml } from '@/utils/sanitize';
 import { MarketServiceClient } from '@/generated/client/marsd/market/v1/service_client';
 import type { ListStablecoinMarketsResponse } from '@/generated/client/marsd/market/v1/service_client';
+import { getHydratedData } from '@/services/bootstrap';
 
 type StablecoinResult = ListStablecoinMarketsResponse;
 

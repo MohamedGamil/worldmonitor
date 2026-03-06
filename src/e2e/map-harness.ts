@@ -182,6 +182,7 @@ const allLayersEnabled: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: true,
+  geopoliticalBoundaries: false,
 };
 
 const allLayersDisabled: MapLayers = {
@@ -231,6 +232,7 @@ const allLayersDisabled: MapLayers = {
   iranAttacks: false,
   ciiChoropleth: false,
   dayNight: false,
+  geopoliticalBoundaries: false,
 };
 
 const SEEDED_NEWS_LOCATIONS: Array<{
@@ -239,13 +241,13 @@ const SEEDED_NEWS_LOCATIONS: Array<{
   title: string;
   threatLevel: string;
 }> = [
-  {
-    lat: 48.85,
-    lon: 2.35,
-    title: 'Harness News Item',
-    threatLevel: 'high',
-  },
-];
+    {
+      lat: 48.85,
+      lon: 2.35,
+      title: 'Harness News Item',
+      threatLevel: 'high',
+    },
+  ];
 
 const map = new DeckGLMap(app, {
   zoom: 5,
@@ -733,8 +735,8 @@ const filterScenariosForVariant = (variant: HarnessVariant): VisualScenario[] =>
 const currentHarnessVariant: HarnessVariant = SITE_VARIANT === 'tech'
   ? 'tech'
   : SITE_VARIANT === 'finance'
-  ? 'finance'
-  : 'full';
+    ? 'finance'
+    : 'full';
 
 const buildProtests = (scenario: Scenario): SocialUnrestEvent[] => {
   const title =

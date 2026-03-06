@@ -201,15 +201,26 @@ export class MapContainer {
       this.initSvgMap('[MapContainer] Initializing SVG map (mobile/fallback mode)');
     }
 
-    // Automatic resize on container change (fixes gaps on load/layout shift)
-    if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => {
-        // Skip if we are already handling resize manually via drag handlers
-        if (this.isResizingInternal) return;
-        this.resize();
-      });
-      this.resizeObserver.observe(this.container);
+    this.setupResizeObserver();
+  }
+
+  private setupResizeObserver(): void {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
+    this.resizeObserver = new ResizeObserver(() => {
+      if (document.hidden) return;
+      if (this.isResizingInternal) return;
+      if (this.useGlobe && this.globeMap) {
+        this.globeMap.resize();
+      } else if (this.useDeckGL && this.deckGLMap) {
+        this.deckGLMap.resize();
+      } else if (this.svgMap) {
+        this.svgMap.resize();
+      }
+    });
+    this.resizeObserver.observe(this.container);
   }
 
   /** Switch to 3D globe mode at runtime (called from Settings). */
@@ -217,14 +228,15 @@ export class MapContainer {
     if (this.useGlobe) return;
     const snapshot = this.getState();
     const center = this.getCenter();
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
     this.destroyFlatMap();
     this.useGlobe = true;
     this.useDeckGL = false;
     this.globeMap = new GlobeMap(this.container, this.initialState);
+    this.setupResizeObserver();
     this.restoreViewport(snapshot, center);
     this.rehydrateActiveMap();
+
+    // setTimeout(() => this.globeMap?.resize(), 500);
   }
 
   /** Switch back to flat map at runtime (called from Settings). */
@@ -232,8 +244,6 @@ export class MapContainer {
     if (!this.useGlobe) return;
     const snapshot = this.getState();
     const center = this.getCenter();
-    this.resizeObserver?.disconnect();
-    this.resizeObserver = null;
     this.globeMap?.destroy();
     this.globeMap = null;
     this.useGlobe = false;
@@ -241,6 +251,8 @@ export class MapContainer {
     this.init();
     this.restoreViewport(snapshot, center);
     this.rehydrateActiveMap();
+
+    // setTimeout(() => (this.deckGLMap || this.svgMap)?.resize(), 500);
   }
 
   private restoreViewport(snapshot: MapContainerState, center: { lat: number; lon: number } | null): void {

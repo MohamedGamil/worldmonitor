@@ -282,7 +282,6 @@ export class DeckGLMap {
   private container: HTMLElement;
   private deckOverlay: MapboxOverlay | null = null;
   private maplibreMap: maplibregl.Map | null = null;
-  private resizeObserver: ResizeObserver | null = null;
   private state: DeckMapState;
   private popup: MapPopup;
   private isResizing = false;
@@ -446,8 +445,6 @@ export class DeckGLMap {
     window.addEventListener('theme-changed', this.handleThemeChange);
 
     this.initMapLibre();
-    this.setupResizeObserver();
-
     this.mapClusterWorker = new Worker(new URL('@/workers/map-cluster.worker.ts', import.meta.url), { type: 'module' });
     this.mapClusterWorker.onmessage = (e: MessageEvent<any>) => {
       const msg = e.data;
@@ -907,16 +904,6 @@ export class DeckGLMap {
     });
   }
 
-  private setupResizeObserver(): void {
-    this.resizeObserver = new ResizeObserver(() => {
-      if (document.hidden) return;
-      if (this.maplibreMap) {
-        this.maplibreMap.resize();
-      }
-    });
-    this.resizeObserver.observe(this.container);
-  }
-
   public setIsResizing(value: boolean): void {
     this.isResizing = value;
     if (value && this.maplibreMap) {
@@ -1091,6 +1078,20 @@ export class DeckGLMap {
   private rebuildTechEventSupercluster(): void {
     if (this.mapClusterWorkerReady && this.mapClusterWorker) {
       this.mapClusterWorker.postMessage({ type: 'set-tech-events', source: this.techEvents });
+      this.lastSCZoom = -1; // force cluster re-fetch
+      this.updateClusterData();
+    }
+  }
+
+  private rebuildDatacenterSupercluster(): void {
+    if (this.mapClusterWorkerReady && this.mapClusterWorker) {
+      this.lastSCZoom = -1; // force cluster re-fetch
+      this.updateClusterData();
+    }
+  }
+
+  private rebuildTechHQSupercluster(): void {
+    if (this.mapClusterWorkerReady && this.mapClusterWorker) {
       this.lastSCZoom = -1; // force cluster re-fetch
       this.updateClusterData();
     }
@@ -1784,23 +1785,15 @@ export class DeckGLMap {
     });
   }
 
-  private createGhostLayer<T>(id: string, data: T[], getPosition: (d: T) => [number, number], opts: { radiusMinPixels?: number } = {}): ScatterplotLayer<T> {
-    return new ScatterplotLayer<T>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
-      id: `${id}-ghost`,
-      data,
-      getPosition,
-      getRadius: 1,
-      radiusMinPixels: opts.radiusMinPixels ?? 12,
-      getFillColor: [0, 0, 0, 0],
-      pickable: true,
-    });
+  private createGeopoliticalBoundariesLayer(): ScatterplotLayer {
+    return this.createEmptyGhost('geopolitical-boundaries-layer');
   }
 
   /** Empty sentinel layer — keeps a stable layer ID for deck.gl interleaved mode without rendering anything. */
   private createEmptyGhost(id: string): ScatterplotLayer {
     return new ScatterplotLayer({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false }, id: `${id}-ghost`, data: [], getPosition: () => [0, 0], visible: false });
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false }, id: `${id}-ghost`, data: [], getPosition: () => [0, 0], visible: false
+    });
   }
 
 
@@ -2375,7 +2368,7 @@ export class DeckGLMap {
     const multiClusters = this.protestClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapProtestCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'protest-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2396,7 +2389,7 @@ export class DeckGLMap {
     if (pulseClusters.length > 0) {
       const pulse = 1.0 + 0.8 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 400));
       layers.push(new ScatterplotLayer<MapProtestCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'protest-clusters-pulse',
         data: pulseClusters,
         getPosition: d => [d.lon, d.lat],
@@ -2442,7 +2435,7 @@ export class DeckGLMap {
     const multiClusters = this.techHQClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapTechHQCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'tech-hq-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2463,7 +2456,7 @@ export class DeckGLMap {
       const singles = this.techHQClusters.filter(c => c.count === 1);
       if (singles.length > 0) {
         layers.push(new TextLayer<MapTechHQCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+          parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
           id: 'tech-hq-clusters-label',
           data: singles,
           getText: d => d.items[0]?.company ?? '',
@@ -2504,7 +2497,7 @@ export class DeckGLMap {
     const multiClusters = this.techEventClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapTechEventCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'tech-event-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2548,7 +2541,7 @@ export class DeckGLMap {
     const multiClusters = this.datacenterClusters.filter(c => c.count > 1);
     if (multiClusters.length > 0) {
       layers.push(new TextLayer<MapDatacenterCluster>({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'datacenter-clusters-badge',
         data: multiClusters,
         getText: d => String(d.count),
@@ -2605,7 +2598,7 @@ export class DeckGLMap {
     if (highHotspots.length > 0) {
       const pulse = 1.0 + 0.8 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 400));
       layers.push(new ScatterplotLayer({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'hotspots-pulse',
         data: highHotspots,
         getPosition: (d) => [d.lon, d.lat],
@@ -2745,7 +2738,7 @@ export class DeckGLMap {
 
     const layers: ScatterplotLayer[] = [
       new ScatterplotLayer({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'news-locations-layer',
         data: filteredNewsLocations,
         getPosition: (d) => [d.lon, d.lat],
@@ -2770,7 +2763,7 @@ export class DeckGLMap {
       const pulse = 1.0 + 1.5 * (0.5 + 0.5 * Math.sin(now / 318));
 
       layers.push(new ScatterplotLayer({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'news-pulse-layer',
         data: recentNews,
         getPosition: (d) => [d.lon, d.lat],
@@ -2834,7 +2827,7 @@ export class DeckGLMap {
     if (significantEvents.length > 0) {
       const pulse = 1.0 + 0.4 * (0.5 + 0.5 * Math.sin((this.pulseTime || Date.now()) / 800));
       layers.push(new ScatterplotLayer({
-      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+        parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
         id: 'positive-events-pulse',
         data: significantEvents,
         getPosition: (d: PositiveGeoEvent) => [d.lon, d.lat],
@@ -5060,11 +5053,6 @@ export class DeckGLMap {
     if (this.aircraftFetchTimer) {
       clearInterval(this.aircraftFetchTimer);
       this.aircraftFetchTimer = null;
-    }
-
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
     }
 
     this.layerCache.clear();
