@@ -577,7 +577,7 @@ export class LiveNewsPanel extends Panel {
 
   private createMuteButton(): void {
     this.muteBtn = document.createElement('button');
-    this.muteBtn.className = 'live-mute-btn';
+    this.muteBtn.className = 'live-mute-btn live-toggle-mute-btn';
     this.muteBtn.title = 'Toggle sound';
     this.updateMuteIcon();
     this.muteBtn.addEventListener('click', (e) => {

@@ -18,3 +18,7 @@ button {
 .panel[data-panel="live-news"] .panel-header .panel-header-left {
     display: none !important;
 }
+
+.live-mute-btn.live-toggle-mute-btn {
+    color: var(--text-danger);
+}
