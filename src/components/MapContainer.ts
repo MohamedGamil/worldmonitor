@@ -236,7 +236,7 @@ export class MapContainer {
     this.restoreViewport(snapshot, center);
     this.rehydrateActiveMap();
 
-    // setTimeout(() => this.globeMap?.resize(), 500);
+    this.syncMapDimensions();
   }
 
   /** Switch back to flat map at runtime (called from Settings). */
@@ -252,7 +252,22 @@ export class MapContainer {
     this.restoreViewport(snapshot, center);
     this.rehydrateActiveMap();
 
-    // setTimeout(() => (this.deckGLMap || this.svgMap)?.resize(), 500);
+    this.syncMapDimensions();
+  }
+
+  /** Ensures map boundaries correctly recalculate after rapid DOM replacement. */
+  private syncMapDimensions(): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (this.useGlobe && this.globeMap) {
+          this.globeMap.resize();
+        } else if (this.useDeckGL && this.deckGLMap) {
+          this.deckGLMap.resize();
+        } else if (this.svgMap) {
+          this.svgMap.resize();
+        }
+      });
+    });
   }
 
   private restoreViewport(snapshot: MapContainerState, center: { lat: number; lon: number } | null): void {

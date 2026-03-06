@@ -2355,7 +2355,7 @@ body.live-news-fullscreen-active .map-controls,
 body.live-news-fullscreen-active .map-timestamp,
 body.live-news-fullscreen-active .map-bottom-grid,
 body.live-news-fullscreen-active .map-resize-handle {
-  visibility: hidden !important;
+  display: none !important;
   pointer-events: none !important;
 }
 
