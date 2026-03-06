@@ -77,6 +77,48 @@
       "stockIndex": "مؤشر الأسهم: {{value}}",
       "recentHeadlines": "**أحدث العناوين:**",
       "activeStrikes": "{{count}} ضربة نشطة مُكتشفة"
+    },
+    "militaryActivity": "النشاط العسكري",
+    "economicIndicators": "المؤشرات الاقتصادية",
+    "ownFlights": "الرحلات الخاصة",
+    "foreignFlights": "الرحلات الأجنبية",
+    "navalVessels": "السفن البحرية",
+    "foreignPresence": "الوجود الأجنبي",
+    "nearestBases": "أقرب القواعد العسكرية",
+    "noBasesNearby": "لا توجد قواعد قريبة في نطاق 600 كم.",
+    "noInfrastructure": "لم يتم العثور على بنية تحتية حيوية في نطاق 600 كم.",
+    "noGeometry": "لا تتوفر بيانات جغرافية لربط البنية التحتية.",
+    "noSignals": "لا توجد إشارات حديثة عالية الخطورة.",
+    "assessmentUnavailable": "التقييم غير متاح.",
+    "noNews": "لا توجد تغطية إعلامية حديثة خاصة بالدولة.",
+    "noIndicators": "لا تتوفر مؤشرات خاصة بالدولة.",
+    "nearbyPorts": "الموانئ القريبة",
+    "detected": "مُكتشف",
+    "notDetected": "غير مُكتشف",
+    "ciiUnavailable": "مؤشر عدم الاستقرار (CII) غير متاح لهذه الدولة.",
+    "chips": {
+      "criticalNews": "أخبار حرجة",
+      "protests": "احتجاجات",
+      "militaryAir": "طيران عسكري",
+      "navalVessels": "سفن بحرية",
+      "outages": "انقطاعات",
+      "aisDisruptions": "اضطرابات AIS",
+      "satelliteFires": "حرائق فضائية",
+      "temporalAnomalies": "شذوذ زمني",
+      "cyberThreats": "تهديدات سيبرانية",
+      "earthquakes": "زلازل",
+      "displaced": "نازحون",
+      "climateStress": "إجهاد مناخي",
+      "conflictEvents": "أحداث نزاع",
+      "activeStrikes": "ضربات نشطة",
+      "doNotTravel": "لا تسافر",
+      "reconsiderTravel": "أعد التفكير في السفر",
+      "exerciseCaution": "توخَّ الحذر",
+      "advisory": "تنبيه",
+      "activeSirens": "صفارات نشطة",
+      "sirens24h": "صفارات / 24 ساعة",
+      "aviationDisruptions": "اضطرابات الملاحة الجوية",
+      "gpsJammingZones": "مناطق تشويش GPS"
     }
   },
   "header": {
@@ -143,7 +185,9 @@
     "panelCatCentralBanks": "البنوك المركزية والاقتصاد",
     "panelCatDeals": "الصفقات والمؤسسات",
     "panelCatGulfMena": "الخليج والشرق الأوسط",
-    "panelCatTradePolicy": "السياسة التجارية"
+    "panelCatTradePolicy": "السياسة التجارية",
+    "downloadApp": "تنزيل التطبيق",
+    "selectRegion": "اختر المنطقة"
   },
   "panels": {
     "liveNews": "أخبار مباشرة",
@@ -518,10 +562,25 @@
           "success": "أنت في القائمة! سنُخبرك أولاً.",
           "alreadyRegistered": "أنت مسجّل بالفعل في قائمة الانتظار.",
           "error": "فشل التسجيل. يرجى المحاولة مرة أخرى.",
-          "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح."
+          "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح.",
+          "statusValid": "مُرخَّص",
+          "statusMissing": "بدون ترخيص"
         },
         "byokTitle": "أو استخدم مفاتيحك الخاصة",
-        "byokDescription": "تفضّل التحكم الكامل؟ انتقل إلى تبويبتي مفاتيح API وLLMs لتهيئة كل مصدر بيانات ومزود AI على حدة."
+        "byokDescription": "تفضّل التحكم الكامل؟ انتقل إلى تبويبتي مفاتيح API وLLMs لتهيئة كل مصدر بيانات ومزود AI على حدة.",
+        "tabLabel": "Marsd",
+        "dividerOr": "أو",
+        "register": {
+          "title": "احجز مكانك",
+          "description": "نحن نستعد لإطلاق تراخيص Marsd. سجّل الآن وكن أول من يحصل على الوصول — الأعضاء الأوائل يحصلون على أولوية الوصول وتسعير المؤسسين.",
+          "emailPlaceholder": "بريدك@الإلكتروني.com",
+          "submitBtn": "انضم لقائمة الانتظار",
+          "submitting": "جارٍ الإرسال...",
+          "success": "أنت في القائمة! سنُعلِمُك أولاً.",
+          "alreadyRegistered": "أنت مسجّل بالفعل في قائمة الانتظار.",
+          "error": "فشل التسجيل. يُرجى المحاولة مرة أخرى.",
+          "invalidEmail": "يُرجى إدخال عنوان بريد إلكتروني صالح."
+        }
       }
     },
     "countryIntel": {
@@ -629,7 +688,9 @@
         "americas": "الأمريكتان",
         "asia": "آسيا"
       },
-      "expand": "توسيع"
+      "expand": "توسيع",
+      "paused": "الكاميرات متوقفة مؤقتًا",
+      "pausedIdle": "الكاميرات متوقفة — حرّك الفأرة للاستئناف"
     },
     "monitor": {
       "placeholder": "كلمات مفتاحية (مفصولة بفواصل)",
@@ -858,7 +919,8 @@
       "shareStory": "مشاركة القصة",
       "printPdf": "طباعة / PDF",
       "exportData": "تصدير البيانات",
-      "sourceRef": "المصدر [{{n}}]"
+      "sourceRef": "المصدر [{{n}}]",
+      "shareLink": "مشاركة الرابط"
     },
     "relatedAssets": {
       "pipeline": "خط أنابيب",
@@ -901,7 +963,12 @@
         "monitoring": "مراقبة",
         "base": "قاعدة",
         "nuclear": "نووي",
-        "aircraft": "طائرات"
+        "aircraft": "طائرات",
+        "ciiLow": "منخفض (<40)",
+        "ciiNormal": "طبيعي",
+        "ciiElevated": "مُتصاعد",
+        "ciiHigh": "مرتفع",
+        "ciiCritical": "حرج"
       },
       "layerGuide": "دليل الطبقات",
       "layersTitle": "الطبقات",
@@ -955,7 +1022,13 @@
         "gpsJamming": "التشويش على GPS",
         "iranAttacks": "هجمات إيران",
         "dayNight": "نهار/ليل",
-        "geopoliticalBoundaries": "الحدود الجيوسياسية"
+        "geopoliticalBoundaries": "الحدود الجيوسياسية",
+        "ciiChoropleth": "مؤشر CII للدول",
+        "positiveEvents": "الأحداث الإيجابية",
+        "kindness": "مبادرات إنسانية",
+        "happiness": "مؤشر السعادة الأساسي",
+        "speciesRecovery": "استعادة الحياة البرية",
+        "renewableInstallations": "مشاريع الطاقة المتجددة"
       },
       "tooltip": {
         "earthquake": "زلزال",
@@ -1060,7 +1133,8 @@
           "techCyberThreats": "هجمات سيبرانية وأحداث أمنية",
           "techEvents": "مؤتمرات وفعاليات تقنية كبرى",
           "techFires": "حرائق غابات نشطة بالقرب من البنية التحتية التقنية",
-          "geoBoundaries": "مناطق منزوعة السلاح وخطوط الهدنة والحدود المتنازع عليها"
+          "geoBoundaries": "مناطق منزوعة السلاح وخطوط الهدنة والحدود المتنازع عليها",
+          "ciiChoropleth": "خريطة مجسّمة توضح تصنيف عدم الاستقرار (CII) لكل دولة."
         },
         "notes": {
           "timeAffects": "يؤثر على: الزلازل، الطقس، الاحتجاجات، الانقطاعات"
@@ -1110,7 +1184,16 @@
       "headlineMemoryLabel": "ذاكرة العناوين",
       "headlineMemoryDesc": "تذكر العناوين المشاهدة لتمييز الجديدة",
       "streamAlwaysOnLabel": "إبقاء البث المباشر قيد التشغيل",
-      "streamAlwaysOnDesc": "يمنع إيقاف Live Cams وLive News تلقائيًا عند الخمول. يُنصح به لاستخدام الشاشة الثانية / لوحة المراقبة. عطّله (Eco) لتوفير CPU/النطاق الترددي."
+      "streamAlwaysOnDesc": "يمنع إيقاف Live Cams وLive News تلقائيًا عند الخمول. يُنصح به لاستخدام الشاشة الثانية / لوحة المراقبة. عطّله (Eco) لتوفير CPU/النطاق الترددي.",
+      "globeRenderQualityLabel": "جودة العرض الجوي",
+      "globeRenderQualityDesc": "اضبط دقة الأرض ثلاثية الأبعاد (يتطلب إعادة التحميل).",
+      "globeRenderScaleOptions": {
+        "1": "أساسي (1x)",
+        "2": "عالي (2x)",
+        "3": "فائق (3x)",
+        "auto": "تلقائي",
+        "1_5": "متوازن (1.5x)"
+      }
     },
     "cascade": {
       "noImpacts": "لم يتم رصد تأثيرات على الدول",
@@ -1282,7 +1365,9 @@
       "summarize": "تلخيص هذه اللوحة",
       "generatingSummary": "جارٍ إنشاء الملخص...",
       "sources": "{{count}} مصادر",
-      "relatedAssetsNear": "أصول ذات صلة بالقرب من {{location}}"
+      "relatedAssetsNear": "أصول ذات صلة بالقرب من {{location}}",
+      "summaryError": "تعذّر تحميل الملخص",
+      "summaryFailed": "فشل توليد الملخص"
     },
     "export": {
       "exportData": "تصدير البيانات"
@@ -1427,7 +1512,8 @@
       "openSettings": "Open Settings"
     },
     "languageSelector": {
-      "selectLanguage": "Select Language"
+      "selectLanguage": "Select Language",
+      "mapLabelsFallbackVi": "تسميات الخريطة قد تُعرض بالإنجليزية"
     },
     "serviceStatus": {
       "checkingServices": "Checking services...",
@@ -1508,7 +1594,10 @@
       "signInToYouTube": "تسجيل الدخول إلى YouTube",
       "togglePlayback": "إيقاف/تشغيل البث",
       "live": "مباشر",
-      "paused": "متوقف"
+      "paused": "متوقف",
+      "noResults": "لم يتم العثور على نتائج",
+      "hlsUrl": "رابط HLS",
+      "invalidHlsUrl": "رابط HLS غير صالح"
     },
     "securityAdvisories": {
       "loading": "جاري جلب التحذيرات الأمنية...",
@@ -1541,7 +1630,9 @@
       "time": "Time",
       "justNow": "just now",
       "historyCount": "{{count}} alerts in last 24h",
-      "infoTooltip": "<strong>صفارات إنذار الجبهة الداخلية</strong><br>تنبيهات فورية لصفارات الإنذار من الصواريخ والقذائف من قيادة الجبهة الداخلية (oref.org.il).<br><br>يتم جلب البيانات كل 10 ثوانٍ عبر وسيط. يشير المؤشر الأحمر النابض إلى وجود صفارات إنذار نشطة."
+      "infoTooltip": "<strong>صفارات إنذار الجبهة الداخلية</strong><br>تنبيهات فورية لصفارات الإنذار من الصواريخ والقذائف من قيادة الجبهة الداخلية (oref.org.il).<br><br>يتم جلب البيانات كل 10 ثوانٍ عبر وسيط. يشير المؤشر الأحمر النابض إلى وجود صفارات إنذار نشطة.",
+      "historySummary": "ملخص التاريخ",
+      "loadingHistory": "جارٍ تحميل التاريخ..."
     },
     "supplyChain": {
       "title": "سلسلة التوريد",
@@ -1558,7 +1649,8 @@
       "spikeAlert": "تم رصد ارتفاع حاد — المعدل أعلى بكثير من متوسط 52 أسبوع (أسبوعي)",
       "topProducers": "أكبر المنتجين",
       "upstreamUnavailable": "بيانات سلسلة الإمداد غير متاحة مؤقتاً — عرض البيانات المخزنة",
-      "warnings": "تحذير(ات)"
+      "warnings": "تحذير(ات)",
+      "aisDisruptions": "اضطراب(ات) AIS"
     },
     "giving": {
       "title": "العطاء الخيري",
@@ -1586,7 +1678,8 @@
       "topReceivers": "أكبر المتلقين",
       "trending": "رائج",
       "velocity": "السرعة",
-      "wallets": "المحافظ"
+      "wallets": "المحافظ",
+      "cafIndex": "مؤشر CAF للعطاء المرجعي"
     },
     "breakingNews": {
       "critical": "حرج",
@@ -1596,6 +1689,30 @@
       "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding.",
       "historySummary": "{{count}} تنبيه خلال 24 ساعة — {{waves}} موجات",
       "loadingHistory": "جارٍ تحميل السجل..."
+    },
+    "positiveNewsFeed": {
+      "noStories": "لا توجد قصص في هذه الفئة بعد"
+    },
+    "goodThingsDigest": {
+      "noStories": "لا توجد قصص متاحة",
+      "summarizing": "جارٍ التلخيص…"
+    },
+    "progressCharts": {
+      "noData": "لا تتوفر بيانات التقدم"
+    },
+    "settings": {
+      "dataManagementLabel": "إدارة البيانات",
+      "exportSettings": "تصدير الإعدادات",
+      "importSettings": "استيراد الإعدادات",
+      "exportSuccess": "تم تصدير الإعدادات بنجاح",
+      "exportFailed": "فشل التصدير",
+      "importSuccess": "تم استيراد الإعدادات بنجاح",
+      "importFailed": "فشل الاستيراد — بيانات غير صالحة",
+      "reloadNow": "أعِد التحميل الآن"
+    },
+    "map": {
+      "showMap": "إظهار الخريطة",
+      "hideMap": "إخفاء الخريطة"
     }
   },
   "popups": {
@@ -2066,6 +2183,14 @@
       "uae_ecsr": "الإمارات/ECSR",
       "venezuela_crisis": "أزمة فنزويلا",
       "yemen_houthis": "اليمن/الحوثيون"
+    },
+    "aircraft": {
+      "altitude": "الارتفاع",
+      "speed": "السرعة",
+      "heading": "الاتجاه",
+      "position": "الموقع",
+      "ground": "على الأرض",
+      "airborne": "في الجو"
     }
   },
   "signals": {

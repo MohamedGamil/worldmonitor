@@ -167,6 +167,11 @@ body.dir-rtl {
   direction: rtl;
 }
 
+[dir="rtl"] .deckgl-layer-toggles .layer-toggle.zoom-hidden::after {
+  right: auto;
+  left: 2px;
+}
+
 [dir="rtl"] .globe-beta-badge {
   font-family: var(--font-ar);
   letter-spacing: 0;
