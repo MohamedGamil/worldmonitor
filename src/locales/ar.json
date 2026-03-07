@@ -1646,6 +1646,8 @@
       "health": "صحة",
       "sources": "وزارة الخارجية الأمريكية، DFAT الأسترالية، FCDO البريطانية، MFAT النيوزيلندية, CDC, ECDC, WHO, US Embassies",
       "refresh": "تحديث",
+      "showMap": "إظهار الخريطة",
+      "hideMap": "إخفاء الخريطة",
       "levels": {
         "doNotTravel": "لا تسافر",
         "reconsider": "أعد التفكير في السفر",
@@ -1750,10 +1752,6 @@
       "importFailed": "فشل الاستيراد — بيانات غير صالحة",
       "reloadNow": "أعِد التحميل الآن"
     },
-    "map": {
-      "showMap": "إظهار الخريطة",
-      "hideMap": "إخفاء الخريطة"
-    },
     "globe": {
       "loadingGlobe": "جارٍ التحميل…"
     }
@@ -1801,13 +1799,82 @@
         "us-nato": "أمريكي/NATO",
         "china": "صيني",
         "russia": "روسي"
-      }
+      },
+      "branch": "الفرع",
+      "country": "الدولة",
+      "categories": "التصنيفات"
+    },
+    "values": {
+      "branches": {
+        "navy": "البحرية",
+        "air_force": "سلاح الجو",
+        "army": "الجيش البري",
+        "marines": "مشاة البحرية",
+        "coast_guard": "خفر السواحل",
+        "special_forces": "القوات الخاصة",
+        "space_force": "قوة الفضاء",
+        "national_guard": "الحرس الوطني"
+      },
+      "categories": {
+        "air_force": "سلاح الجو",
+        "naval": "بحري",
+        "nuclear": "نووي",
+        "space": "فضاء",
+        "training": "تدريب",
+        "logistics": "لوجستيات",
+        "intelligence": "استخبارات"
+      },
+      "exercise": "تمرين",
+      "patrol": "دورية",
+      "deployment": "انتشار",
+      "transit": "عبور",
+      "transport": "نقل",
+      "reconnaissance": "استطلاع",
+      "unknown": "غير معروف",
+      "fighter": "مقاتلة",
+      "bomber": "قاذفة",
+      "tanker": "ناقلة وقود",
+      "awacs": "AWACS",
+      "helicopter": "مروحية",
+      "drone": "طائرة مسيّرة",
+      "special_ops": "عمليات خاصة",
+      "vip": "شخصيات هامة",
+      "carrier": "حاملة طائرات",
+      "destroyer": "مدمرة",
+      "frigate": "فرقاطة",
+      "submarine": "غواصة",
+      "amphibious": "برمائية",
+      "auxiliary": "مساندة",
+      "research": "بحث علمي",
+      "icebreaker": "كاسحة جليد",
+      "special": "خاصة",
+      "usaf": "سلاح الجو الأمريكي",
+      "usn": "البحرية الأمريكية",
+      "usmc": "مشاة البحرية الأمريكية",
+      "usa": "الجيش الأمريكي",
+      "raf": "سلاح الجو الملكي",
+      "rn": "البحرية الملكية",
+      "faf": "سلاح الجو الفرنسي",
+      "gaf": "سلاح الجو الألماني",
+      "plaaf": "سلاح الجو الصيني",
+      "plan": "البحرية الصينية",
+      "vks": "سلاح الجو الروسي",
+      "iaf": "سلاح الجو الإسرائيلي",
+      "nato": "NATO",
+      "other": "أخرى"
     },
     "protest": {
       "acledVerified": "ACLED (موثّق)",
       "gdelt": "GDELT",
       "riots": "أعمال شغب",
-      "highSeverity": "شدة عالية"
+      "highSeverity": "شدة عالية",
+      "types": {
+        "protest": "احتجاج",
+        "riot": "أعمال شغب",
+        "civil_unrest": "اضطرابات مدنية",
+        "strike": "إضراب",
+        "demonstration": "مظاهرة"
+      }
     },
     "gpsJamming": {
       "title": "تداخل GPS/GNSS",
@@ -1974,6 +2041,11 @@
         "elevated": "متصاعد",
         "high": "مرتفع",
         "critical": "حرج"
+      },
+      "trends": {
+        "escalating": "تصاعدي",
+        "stable": "مستقر",
+        "deEscalating": "تهدئة"
       }
     },
     "buttons": {

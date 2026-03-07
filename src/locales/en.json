@@ -1768,13 +1768,82 @@
         "us-nato": "US/NATO",
         "china": "CHINA",
         "russia": "RUSSIA"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
+    },
+    "values": {
+      "branches": {
+        "navy": "Navy",
+        "air_force": "Air Force",
+        "army": "Army",
+        "marines": "Marines",
+        "coast_guard": "Coast Guard",
+        "special_forces": "Special Forces",
+        "space_force": "Space Force",
+        "national_guard": "National Guard"
+      },
+      "categories": {
+        "air_force": "Air Force",
+        "naval": "Naval",
+        "nuclear": "Nuclear",
+        "space": "Space",
+        "training": "Training",
+        "logistics": "Logistics",
+        "intelligence": "Intelligence"
+      },
+      "exercise": "Exercise",
+      "patrol": "Patrol",
+      "deployment": "Deployment",
+      "transit": "Transit",
+      "transport": "Transport",
+      "reconnaissance": "Reconnaissance",
+      "unknown": "Unknown",
+      "fighter": "Fighter",
+      "bomber": "Bomber",
+      "tanker": "Tanker",
+      "awacs": "AWACS",
+      "helicopter": "Helicopter",
+      "drone": "Drone",
+      "special_ops": "Special Ops",
+      "vip": "VIP",
+      "carrier": "Aircraft Carrier",
+      "destroyer": "Destroyer",
+      "frigate": "Frigate",
+      "submarine": "Submarine",
+      "amphibious": "Amphibious",
+      "auxiliary": "Auxiliary",
+      "research": "Research",
+      "icebreaker": "Icebreaker",
+      "special": "Special",
+      "usaf": "US Air Force",
+      "usn": "US Navy",
+      "usmc": "US Marines",
+      "usa": "US Army",
+      "raf": "Royal Air Force",
+      "rn": "Royal Navy",
+      "faf": "French Air Force",
+      "gaf": "German Air Force",
+      "plaaf": "PLA Air Force",
+      "plan": "PLA Navy",
+      "vks": "Russian Aerospace",
+      "iaf": "Israeli Air Force",
+      "nato": "NATO",
+      "other": "Other"
     },
     "protest": {
       "acledVerified": "ACLED (verified)",
       "gdelt": "GDELT",
       "riots": "Riots",
-      "highSeverity": "High Severity"
+      "highSeverity": "High Severity",
+      "types": {
+        "protest": "Protest",
+        "riot": "Riot",
+        "civil_unrest": "Civil Unrest",
+        "strike": "Strike",
+        "demonstration": "Demonstration"
+      }
     },
     "gpsJamming": {
       "title": "GPS/GNSS Interference",
@@ -1949,6 +2018,11 @@
         "elevated": "ELEVATED",
         "high": "HIGH",
         "critical": "CRITICAL"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "DE-ESCALATING"
       }
     },
     "buttons": {

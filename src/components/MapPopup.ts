@@ -8,7 +8,7 @@ import type { TechHubActivity } from '@/services/tech-activity';
 import type { GeoHubActivity } from '@/services/geo-activity';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { isMobileDevice, getCSSColor } from '@/utils';
-import { t, getLocalizedGeoName } from '@/services/i18n';
+import { t, tv, getLocalizedGeoName } from '@/services/i18n';
 import { fetchHotspotContext, formatArticleDate, extractDomain, type GdeltArticle } from '@/services/gdelt-intel';
 import { getNaturalEventIcon } from '@/services/eonet';
 import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot-escalation';
@@ -516,7 +516,7 @@ export class MapPopup {
 
   private renderConflictPopup(conflict: ConflictZone): string {
     const severityClass = conflict.intensity === 'high' ? 'high' : conflict.intensity === 'medium' ? 'medium' : 'low';
-    const severityLabel = escapeHtml(conflict.intensity?.toUpperCase() || t('popups.unknown').toUpperCase());
+    const severityLabel = escapeHtml(t(`popups.severities.${(conflict.intensity || 'unknown').toLowerCase()}`));
 
     return `
       <div class="popup-header conflict">
@@ -576,7 +576,7 @@ export class MapPopup {
 
   private renderHotspotPopup(hotspot: Hotspot, relatedNews?: NewsItem[]): string {
     const severityClass = hotspot.level || 'low';
-    const severityLabel = escapeHtml((hotspot.level || 'low').toUpperCase());
+    const severityLabel = escapeHtml(t(`popups.severities.${(hotspot.level || 'low').toLowerCase()}`));
     const localizedSubtext = hotspot.subtext ? this.getLocalizedHotspotSubtext(hotspot.subtext) : '';
 
     // Get dynamic escalation score
@@ -600,6 +600,7 @@ export class MapPopup {
     };
     const trendIcons: Record<string, string> = { 'escalating': '↑', 'stable': '→', 'de-escalating': '↓' };
     const trendColors: Record<string, string> = { 'escalating': getCSSColor('--semantic-critical'), 'stable': getCSSColor('--semantic-elevated'), 'de-escalating': getCSSColor('--semantic-normal') };
+    const trendLabels: Record<string, string> = { 'escalating': t('popups.hotspot.trends.escalating'), 'stable': t('popups.hotspot.trends.stable'), 'de-escalating': t('popups.hotspot.trends.deEscalating') };
 
     const displayScore = dynamicScore?.combinedScore ?? hotspot.escalationScore ?? 3;
     const displayScoreInt = Math.round(displayScore);
@@ -615,7 +616,7 @@ export class MapPopup {
           </div>
           <div class="escalation-trend" style="color: ${trendColors[displayTrend] || getCSSColor('--text-dim')}">
             <span class="trend-icon">${trendIcons[displayTrend] || ''}</span>
-            <span class="trend-label">${escapeHtml(displayTrend.toUpperCase())}</span>
+            <span class="trend-label">${escapeHtml(trendLabels[displayTrend] || displayTrend.toUpperCase())}</span>
           </div>
         </div>
         ${dynamicScore ? `
@@ -905,11 +906,11 @@ export class MapPopup {
 
     const enriched = base as MilitaryBase & { kind?: string; catAirforce?: boolean; catNaval?: boolean; catNuclear?: boolean; catSpace?: boolean; catTraining?: boolean };
     const categories: string[] = [];
-    if (enriched.catAirforce) categories.push('Air Force');
-    if (enriched.catNaval) categories.push('Naval');
-    if (enriched.catNuclear) categories.push('Nuclear');
-    if (enriched.catSpace) categories.push('Space');
-    if (enriched.catTraining) categories.push('Training');
+    if (enriched.catAirforce) categories.push(tv('Air Force', 'popups.values.categories'));
+    if (enriched.catNaval) categories.push(tv('Naval', 'popups.values.categories'));
+    if (enriched.catNuclear) categories.push(tv('Nuclear', 'popups.values.categories'));
+    if (enriched.catSpace) categories.push(tv('Space', 'popups.values.categories'));
+    if (enriched.catTraining) categories.push(tv('Training', 'popups.values.categories'));
 
     return `
       <div class="popup-header base">
@@ -925,9 +926,9 @@ export class MapPopup {
             <span class="stat-label">${t('popups.type')}</span>
             <span class="stat-value">${escapeHtml(typeLabels[base.type] || base.type)}</span>
           </div>
-          ${base.arm ? `<div class="popup-stat"><span class="stat-label">Branch</span><span class="stat-value">${escapeHtml(base.arm)}</span></div>` : ''}
-          ${base.country ? `<div class="popup-stat"><span class="stat-label">Country</span><span class="stat-value">${escapeHtml(getLocalizedGeoName(base.country))}</span></div>` : ''}
-          ${categories.length > 0 ? `<div class="popup-stat"><span class="stat-label">Categories</span><span class="stat-value">${escapeHtml(categories.join(', '))}</span></div>` : ''}
+          ${base.arm ? `<div class="popup-stat"><span class="stat-label">${t('popups.base.branch')}</span><span class="stat-value">${escapeHtml(tv(base.arm, 'popups.values.branches'))}</span></div>` : ''}
+          ${base.country ? `<div class="popup-stat"><span class="stat-label">${t('popups.base.country')}</span><span class="stat-value">${escapeHtml(getLocalizedGeoName(base.country))}</span></div>` : ''}
+          ${categories.length > 0 ? `<div class="popup-stat"><span class="stat-label">${t('popups.base.categories')}</span><span class="stat-value">${escapeHtml(categories.join(', '))}</span></div>` : ''}
           <div class="popup-stat">
             <span class="stat-label">${t('popups.coordinates')}</span>
             <span class="stat-value">${base.lat.toFixed(2)}°, ${base.lon.toFixed(2)}°</span>
@@ -958,7 +959,7 @@ export class MapPopup {
 
   private renderAisPopup(event: AisDisruptionEvent): string {
     const severityClass = escapeHtml(event.severity);
-    const severityLabel = escapeHtml(event.severity.toUpperCase());
+    const severityLabel = escapeHtml(t(`popups.severities.${event.severity.toLowerCase()}`));
     const typeLabel = event.type === 'gap_spike' ? t('popups.aisGapSpike') : t('popups.chokepointCongestion');
     const changeLabel = event.type === 'gap_spike' ? t('popups.darkening') : t('popups.density');
     const countLabel = event.type === 'gap_spike' ? t('popups.darkShips') : t('popups.vesselCount');
@@ -999,8 +1000,8 @@ export class MapPopup {
 
   private renderProtestPopup(event: SocialUnrestEvent): string {
     const severityClass = escapeHtml(event.severity);
-    const severityLabel = escapeHtml(event.severity.toUpperCase());
-    const eventTypeLabel = escapeHtml(event.eventType.replace('_', ' ').toUpperCase());
+    const severityLabel = escapeHtml(t(`popups.severities.${event.severity.toLowerCase()}`));
+    const eventTypeLabel = escapeHtml(tv(event.eventType, 'popups.protest.types'));
     const icon = event.eventType === 'riot' ? '🔥' : event.eventType === 'strike' ? '✊' : '📢';
     const sourceLabel = event.sourceType === 'acled' ? t('popups.protest.acledVerified') : t('popups.protest.gdelt');
     const validatedBadge = event.validated ? `<span class="popup-badge verified">${t('popups.verified')}</span>` : '';
@@ -1096,7 +1097,7 @@ export class MapPopup {
 
   private renderFlightPopup(delay: AirportDelayAlert): string {
     const severityClass = escapeHtml(delay.severity);
-    const severityLabel = escapeHtml(delay.severity.toUpperCase());
+    const severityLabel = escapeHtml(t(`popups.severities.${delay.severity.toLowerCase()}`));
     const delayTypeLabels: Record<string, string> = {
       'ground_stop': t('popups.flight.groundStop'),
       'ground_delay': t('popups.flight.groundDelay'),
@@ -2314,11 +2315,13 @@ export class MapPopup {
 
     const activityType = cluster.activityType || 'unknown';
     const clusterName = escapeHtml(cluster.name);
-    const activityTypeLabel = escapeHtml(activityType.toUpperCase());
-    const dominantOperator = cluster.dominantOperator ? escapeHtml(cluster.dominantOperator.toUpperCase()) : '';
+    const activityTypeLabel = escapeHtml(activityLabels[activityType] || tv(activityType));
+    const dominantOperator = cluster.dominantOperator
+      ? escapeHtml(tv(cluster.dominantOperator, 'popups.militaryFlight.operators'))
+      : '';
     const flightSummary = cluster.flights
       .slice(0, 5)
-      .map(f => `<div class="cluster-flight-item">${escapeHtml(f.callsign)} - ${escapeHtml(f.aircraftType)}</div>`)
+      .map(f => `<div class="cluster-flight-item">${escapeHtml(f.callsign)} - ${escapeHtml(tv(f.aircraftType, 'popups.militaryFlight.types'))}</div>`)
       .join('');
     const moreFlights = cluster.flightCount > 5
       ? `<div class="cluster-more">${t('popups.militaryCluster.moreAircraft', { count: String(cluster.flightCount - 5) })}</div>`
@@ -2382,7 +2385,7 @@ export class MapPopup {
     // Strip the " CSG" suffix for the title so it isn't redundantly displayed
     const rawDisplayName = isCsg ? cluster.name.slice(0, -4).trim() : cluster.name;
     const clusterName = escapeHtml(rawDisplayName);
-    const activityTypeLabel = escapeHtml(activityType.toUpperCase());
+    const activityTypeLabel = escapeHtml(activityLabels[activityType] || tv(activityType));
     const region = cluster.region ? escapeHtml(cluster.region) : '';
 
     // Subtitle: for CSG clusters use a dedicated localised label instead of the
@@ -2406,7 +2409,7 @@ export class MapPopup {
 
     const vesselSummary = cluster.vessels
       .slice(0, 5)
-      .map(v => `<div class="cluster-vessel-item">${escapeHtml(v.name)} - ${escapeHtml(v.vesselType)}</div>`)
+      .map(v => `<div class="cluster-vessel-item">${escapeHtml(v.name)} - ${escapeHtml(tv(v.vesselType, 'popups.militaryVessel.types'))}</div>`)
       .join('');
     const moreVessels = cluster.vesselCount > 5
       ? `<div class="cluster-more">${t('popups.militaryCluster.moreVessels', { count: String(cluster.vesselCount - 5) })}</div>`

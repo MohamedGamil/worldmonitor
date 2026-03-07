@@ -109,6 +109,42 @@ export function t(key: string, options?: Record<string, unknown>): string {
   return i18next.t(key, options);
 }
 
+/**
+ * Translate a dynamic enum-like value with graceful fallback.
+ *
+ * Resolution order:
+ *  1. `${keyPrefix}.${value}` (exact, if prefix supplied)
+ *  2. `${keyPrefix}.${normalizedKey}` (lowercased + underscored, if prefix supplied)
+ *  3. `popups.values.${normalizedKey}` (general catch-all namespace)
+ *  4. `fallback` (if supplied)
+ *  5. Raw `value` string (unchanged)
+ *
+ * @example
+ *   tv('special_ops', 'popups.militaryFlight.types')  // → "Special Ops"
+ *   tv('carrier', 'popups.militaryVessel.types')       // → "Aircraft Carrier" / "حاملة طائرات"
+ *   tv('Air Force', 'popups.values.branches')          // → localized branch name
+ */
+export function tv(value: string, keyPrefix?: string, fallback?: string): string {
+  if (!value) return fallback ?? value;
+  // Normalize: lowercase, collapse spaces/hyphens/slashes to underscores
+  const key = value.toLowerCase().replace(/[\s\-/]+/g, '_');
+
+  if (keyPrefix) {
+    // Try exact value (for keys already using the right casing)
+    const a = i18next.t(`${keyPrefix}.${value}`);
+    if (a !== `${keyPrefix}.${value}`) return a;
+    // Try normalized key
+    const b = i18next.t(`${keyPrefix}.${key}`);
+    if (b !== `${keyPrefix}.${key}`) return b;
+  }
+
+  // General values namespace
+  const c = i18next.t(`popups.values.${key}`);
+  if (c !== `popups.values.${key}`) return c;
+
+  return fallback ?? value;
+}
+
 // Helper to change language
 export async function changeLanguage(lng: string): Promise<void> {
   const normalized = await ensureLanguageLoaded(lng);
