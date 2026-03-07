@@ -3098,7 +3098,7 @@ export class DeckGLMap {
       case 'bases-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(getLocalizedGeoName(obj.country))}${obj.kind ? ` · ${text(obj.kind)}` : ''}</div>` };
       case 'bases-cluster-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${obj.count} bases</strong></div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.tooltip.basesCount', { count: String(obj.count) })}</strong></div>` };
       case 'nuclear-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.type)}</div>` };
       case 'datacenters-layer':
@@ -3118,7 +3118,9 @@ export class DeckGLMap {
       }
       case 'conflict-zones-layer': {
         const props = obj.properties || obj;
-        return { html: `<div class="deckgl-tooltip"><strong>${text(props.name)}</strong><br/>${t('components.deckgl.tooltip.conflictZone')}</div>` };
+        const czKey = `geo.conflictZones.${props.id}`;
+        const czName = t(czKey) !== czKey ? t(czKey) : text(props.name);
+        return { html: `<div class="deckgl-tooltip"><strong>${czName}</strong><br/>${t('components.deckgl.tooltip.conflictZone')}</div>` };
       }
 
       case 'natural-events-layer':
@@ -3173,7 +3175,7 @@ export class DeckGLMap {
       case 'ais-disruptions-layer':
         return { html: `<div class="deckgl-tooltip"><strong>AIS ${text(obj.type || t('components.deckgl.tooltip.disruption'))}</strong><br/>${text(obj.severity)} ${t('popups.severity')}<br/>${text(obj.description)}</div>` };
       case 'gps-jamming-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>GPS Jamming</strong><br/>${text(obj.level)} interference (${obj.pct}%)<br/>H3: ${text(obj.h3)}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${t('popups.gpsJamming.title')}</strong><br/>${text(obj.level)} ${t('popups.gpsJamming.interference').toLowerCase()} (${obj.pct}%)<br/>H3: ${text(obj.h3)}</div>` };
       case 'cable-advisories-layer': {
         const cableName = UNDERSEA_CABLES.find(c => c.id === obj.cableId)?.name || obj.cableId;
         return { html: `<div class="deckgl-tooltip"><strong>${text(cableName)}</strong><br/>${text(obj.severity || t('components.deckgl.tooltip.advisory'))}<br/>${text(obj.description)}</div>` };
@@ -3194,8 +3196,8 @@ export class DeckGLMap {
       case 'news-locations-layer':
         return { html: `<div class="deckgl-tooltip"><strong>📰 ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'positive-events-layer': {
-        const catLabel = obj.category ? obj.category.replace(/-/g, ' & ') : 'Positive Event';
-        const countInfo = obj.count > 1 ? `<br/><span style="opacity:.7">${obj.count} sources reporting</span>` : '';
+        const catLabel = obj.category ? obj.category.replace(/-/g, ' & ') : t('components.deckgl.tooltip.positiveEvent');
+        const countInfo = obj.count > 1 ? `<br/><span style="opacity:.7">${obj.count} ${t('components.deckgl.tooltip.sourcesReporting')}</span>` : '';
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/><span style="text-transform:capitalize">${text(catLabel)}</span>${countInfo}</div>` };
       }
       case 'kindness-layer':

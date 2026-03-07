@@ -301,6 +301,7 @@ interface GlobePath {
 interface GlobePolygon {
   coords: number[][][];
   name: string;
+  id?: string;
   _kind: 'cii' | 'conflict';
   level?: string;
   score?: number;
@@ -739,9 +740,11 @@ export class GlobeMap {
           return `<b>${escapeHtml(locName)}</b><br/>CII: ${d.score}/100 (${escapeHtml(d.level ?? '')})`;
         }
         if (d._kind === 'conflict') {
-          let label = `<b>${escapeHtml(d.name)}</b>`;
-          if (d.parties?.length) label += `<br/>Parties: ${d.parties.map(p => escapeHtml(p)).join(', ')}`;
-          if (d.casualties) label += `<br/>Casualties: ${escapeHtml(d.casualties)}`;
+          const czKey = `geo.conflictZones.${d.id}`;
+          const czName = t(czKey) !== czKey ? t(czKey) : d.name;
+          let label = `<b>${escapeHtml(czName)}</b>`;
+          if (d.parties?.length) label += `<br/>${escapeHtml(t('popups.ucdpEvent.parties'))}: ${d.parties.map(p => escapeHtml(p)).join(', ')}`;
+          if (d.casualties) label += `<br/>${escapeHtml(t('popups.casualties'))}: ${escapeHtml(d.casualties)}`;
           return label;
         }
         return escapeHtml(d.name);
@@ -833,7 +836,8 @@ export class GlobeMap {
           clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
           box-shadow:0 0 8px 2px ${c}88;
         "></div>`;
-      el.title = d.name;
+      const hsKey = `geo.hotspots.${d.id}`;
+      el.title = t(hsKey) !== hsKey ? t(hsKey) : d.name;
     } else if (d._kind === 'flight') {
       const heading = d.heading ?? 0;
       const typeColors: Record<string, string> = {
@@ -898,7 +902,7 @@ export class GlobeMap {
     } else if (d._kind === 'fire') {
       const intensity = d.brightness > 400 ? '#ff2020' : d.brightness > 330 ? '#ff6600' : '#ffaa00';
       el.innerHTML = `<div style="font-size:10px;color:${intensity};text-shadow:0 0 4px ${intensity}88;">🔥</div>`;
-      el.title = `Fire — ${d.region}`;
+      el.title = `${t('components.satelliteFires.fires')} — ${d.region}`;
     } else if (d._kind === 'protest') {
       const typeColors: Record<string, string> = {
         riot: '#ff3030', protest: '#ffaa00', strike: '#44aaff',
@@ -913,7 +917,7 @@ export class GlobeMap {
         <div style="position:relative;width:${size}px;height:${size}px;">
           <div style="position:absolute;inset:0;border-radius:50%;background:rgba(255,100,0,0.85);border:1.5px solid rgba(255,160,80,0.9);box-shadow:0 0 5px 2px rgba(255,100,0,0.5);"></div>
         </div>`;
-      el.title = `${d.sideA} vs ${d.sideB}`;
+      el.title = `${d.sideA} ${t('common.vs')} ${d.sideB}`;
     } else if (d._kind === 'displacement') {
       el.innerHTML = `<div style="font-size:11px;color:#88bbff;text-shadow:0 0 4px #88bbff88;">👥</div>`;
       el.title = `${d.origin} → ${d.asylum}`;
@@ -925,7 +929,7 @@ export class GlobeMap {
     } else if (d._kind === 'gpsjam') {
       const c = d.level === 'high' ? '#ff2020' : '#ff8800';
       el.innerHTML = `<div style="font-size:10px;color:${c};text-shadow:0 0 4px ${c}88;">📡</div>`;
-      el.title = `GPS Jamming (${d.level})`;
+      el.title = `${t('popups.gpsJamming.title')} (${d.level})`;
     } else if (d._kind === 'tech') {
       el.innerHTML = `<div style="font-size:10px;color:#44aaff;text-shadow:0 0 4px #44aaff88;">💻</div>`;
       el.title = d.title;
@@ -944,7 +948,8 @@ export class GlobeMap {
             font-size:9px;line-height:1;color:${intColor};
           ">⚔</div>
         </div>`;
-      el.title = d.name;
+      const czKey = `geo.conflictZones.${d.id}`;
+      el.title = t(czKey) !== czKey ? t(czKey) : d.name;
     } else if (d._kind === 'milbase') {
       const typeColors: Record<string, string> = {
         'us-nato': '#4488ff', uk: '#4488ff', france: '#4488ff',
@@ -1521,6 +1526,7 @@ export class GlobeMap {
               polys.push({
                 coords: this.getReversedRing(z.id, code, ri, rings[ri] as number[][][]),
                 name: z.name,
+                id: z.id,
                 _kind: 'conflict',
                 intensity: z.intensity ?? 'low',
                 parties: z.parties,

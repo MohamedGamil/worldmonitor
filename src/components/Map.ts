@@ -2359,7 +2359,7 @@ export class MapComponent {
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.style.zIndex = activity.activityLevel === 'high' ? '60' : activity.activityLevel === 'elevated' ? '50' : '40';
-        div.title = `${activity.name}: ${activity.newsCount} stories`;
+        div.title = `${activity.name}: ${activity.newsCount} ${t('components.geoHubs.stories')}`;
 
         div.addEventListener('click', (e) => {
           e.stopPropagation();

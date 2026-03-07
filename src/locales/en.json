@@ -1071,7 +1071,10 @@
         "medium": "medium",
         "news": "News",
         "undisclosed": "Undisclosed",
-        "stake": "stake"
+        "stake": "stake",
+        "basesCount": "{{count}} bases",
+        "positiveEvent": "Positive Event",
+        "sourcesReporting": "sources reporting"
       },
       "layerHelp": {
         "title": "Map Layers Guide",
@@ -2564,6 +2567,50 @@
     "retry": "Retry",
     "refresh": "Refresh",
     "all": "All",
-    "beta": "BETA"
+    "beta": "BETA",
+    "vs": "vs"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "Iran War Theater",
+      "strait_hormuz": "Strait of Hormuz Crisis",
+      "ukraine": "Ukraine War",
+      "gaza": "Gaza Conflict",
+      "south_lebanon": "Israel-Lebanon Border",
+      "yemen_redsea": "Red Sea Crisis",
+      "sudan": "Sudan Civil War",
+      "myanmar": "Myanmar Civil War",
+      "korean_dmz": "Korean Demilitarized Zone"
+    },
+    "hotspots": {
+      "sahel": "Sahel",
+      "haiti": "Port-au-Prince",
+      "horn_africa": "Horn of Africa",
+      "dc": "DC",
+      "silicon_valley": "Silicon Valley",
+      "wall_street": "Wall Street",
+      "houston": "Houston",
+      "moscow": "Moscow",
+      "beijing": "Beijing",
+      "kyiv": "Kyiv",
+      "taipei": "Taipei",
+      "tehran": "Tehran",
+      "telaviv": "Tel Aviv",
+      "pyongyang": "Pyongyang",
+      "london": "London",
+      "brussels": "Brussels",
+      "caracas": "Caracas",
+      "mexico": "Mexico City",
+      "nuuk": "Nuuk",
+      "riyadh": "Riyadh",
+      "cairo": "Cairo",
+      "baghdad": "Baghdad",
+      "damascus": "Damascus",
+      "doha": "Doha",
+      "ankara": "Ankara",
+      "beirut": "Beirut",
+      "sanaa": "Sana'a",
+      "abudhabi": "Abu Dhabi"
+    }
   }
 }

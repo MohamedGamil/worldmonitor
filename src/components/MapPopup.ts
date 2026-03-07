@@ -535,10 +535,12 @@ export class MapPopup {
   private renderConflictPopup(conflict: ConflictZone): string {
     const severityClass = conflict.intensity === 'high' ? 'high' : conflict.intensity === 'medium' ? 'medium' : 'low';
     const severityLabel = escapeHtml(t(`popups.severities.${(conflict.intensity || 'unknown').toLowerCase()}`));
+    const czKey = `geo.conflictZones.${conflict.id}`;
+    const czDisplayName = t(czKey) !== czKey ? t(czKey) : conflict.name;
 
     return `
       <div class="popup-header conflict">
-        <span class="popup-title">${escapeHtml(conflict.name.toUpperCase())}</span>
+        <span class="popup-title">${escapeHtml(czDisplayName.toUpperCase())}</span>
         <span class="popup-badge ${severityClass}">${severityLabel}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -724,7 +726,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header hotspot">
-        <span class="popup-title">${escapeHtml(hotspot.name.toUpperCase())}</span>
+        <span class="popup-title">${escapeHtml((() => { const k = `geo.hotspots.${hotspot.id}`; return t(k) !== k ? t(k) : hotspot.name; })().toUpperCase())}</span>
         <span class="popup-badge ${severityClass}">${severityLabel}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
