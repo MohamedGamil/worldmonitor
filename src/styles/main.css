@@ -2378,11 +2378,11 @@ body.live-news-fullscreen-active .panels-grid>*:not(.live-news-fullscreen) {
 
 /* Map popup + country brief panel must sit above the fullscreen panel (z 10000) */
 body.live-news-fullscreen-active .map-popup {
-  z-index: 10001 !important;
+  z-index: 90009 !important;
 }
 
 body.live-news-fullscreen-active .country-deep-dive {
-  z-index: 10001 !important;
+  z-index: 90010 !important;
 }
 
 .live-indicator-btn {
@@ -9185,6 +9185,75 @@ a.prediction-link:hover {
 .popup-description.alert {
   color: var(--semantic-critical);
   font-weight: bold;
+}
+
+/* ─── Popup media (Wikipedia photo for military aircraft / vessels) ─────────── */
+.popup-media {
+  width: 100%;
+  /* Cinematic 16:9 ratio keeps the popup content ratio comfortable */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--overlay-light, rgba(255,255,255,0.04));
+  position: relative;
+  flex-shrink: 0;
+}
+
+.popup-media--loading .popup-media__skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--overlay-light, rgba(255,255,255,0.04)) 25%,
+    var(--overlay-mid, rgba(255,255,255,0.10)) 50%,
+    var(--overlay-light, rgba(255,255,255,0.04)) 75%
+  );
+  background-size: 200% 100%;
+  animation: popup-media-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes popup-media-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.popup-media__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: opacity 0.25s ease;
+}
+
+.popup-media__caption {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: 4px 8px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 100%);
+  font-size: 9px;
+  color: rgba(255,255,255,0.75);
+  text-align: right;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+}
+
+.popup-media__caption a {
+  color: rgba(255,255,255,0.85);
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,0.35);
+  pointer-events: auto;
+}
+
+.popup-media__caption a:hover {
+  color: #fff;
+}
+
+/* Mobile sheet: constrain media height so stats remain visible */
+.map-popup.map-popup-sheet .popup-media {
+  aspect-ratio: unset;
+  height: 140px;
 }
 
 .popup-attribution {

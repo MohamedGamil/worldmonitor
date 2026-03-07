@@ -2183,7 +2183,9 @@
       "moreVessels": "+{{count}} more vessels",
       "vesselsCount": "{{count}} VESSELS",
       "vessels": "VESSELS",
-      "trackedVessels": "TRACKED VESSELS"
+      "trackedVessels": "TRACKED VESSELS",
+      "csg": "Carrier Strike Group",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "CLOSED",

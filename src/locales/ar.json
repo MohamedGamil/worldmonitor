@@ -2208,7 +2208,9 @@
       "moreVessels": "+{{count}} سفينة إضافية",
       "vesselsCount": "{{count}} سفينة",
       "vessels": "سفن",
-      "trackedVessels": "سفن مُتتبَّعة"
+      "trackedVessels": "سفن مُتتبَّعة",
+      "csg": "مجموعة ضاربة لحاملة الطائرات",
+      "csgBadge": "حاملة طائرات"
     },
     "naturalEvent": {
       "closed": "مغلق",

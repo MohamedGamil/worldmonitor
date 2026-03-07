@@ -13,6 +13,7 @@ import { fetchHotspotContext, formatArticleDate, extractDomain, type GdeltArticl
 import { getNaturalEventIcon } from '@/services/eonet';
 import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot-escalation';
 import { getCableHealthRecord } from '@/services/cable-health';
+import { getAircraftWikiTitle, getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage } from '@/services/military-images';
 
 export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'gpsJamming';
 interface TechEventPopupData {
@@ -191,6 +192,9 @@ export class MapPopup {
     // Append to body to avoid container overflow clipping
     document.body.appendChild(this.popup);
 
+    // Asynchronously load Wikipedia images for military aircraft/vessel popups
+    void this.loadPopupImages();
+
     // Close button handler via event delegation on the popup element.
     // This avoids re-querying and re-attaching listeners after innerHTML.
     this.popup.addEventListener('click', (e) => {
@@ -225,6 +229,47 @@ export class MapPopup {
       document.addEventListener('keydown', this.handleEscapeKey);
       this.outsideListenerTimeoutId = null;
     }, 0);
+  }
+
+  /**
+   * Asynchronously fills in `.popup-media` placeholders with Wikipedia images.
+   * Called as a fire-and-forget after the popup is mounted in the DOM.
+   * Guards against the popup being closed before the fetch completes.
+   */
+  private async loadPopupImages(): Promise<void> {
+    if (!this.popup) return;
+    const mediaEls = Array.from(
+      this.popup.querySelectorAll<HTMLElement>('.popup-media[data-wiki-query]'),
+    );
+    if (mediaEls.length === 0) return;
+
+    for (const el of mediaEls) {
+      const encoded = el.getAttribute('data-wiki-query') || '';
+      const wikiTitle = decodeURIComponent(encoded);
+      if (!wikiTitle) { el.hidden = true; continue; }
+
+      const imgUrl = await fetchWikipediaImage(wikiTitle);
+
+      // Guard: popup may have been closed while awaiting the network request
+      if (!this.popup || !this.popup.isConnected) return;
+      if (!el.isConnected) continue;
+
+      if (!imgUrl) {
+        el.hidden = true;
+        continue;
+      }
+
+      el.classList.remove('popup-media--loading');
+      el.innerHTML = `
+        <img
+          src="${escapeHtml(imgUrl)}"
+          alt="${escapeHtml(wikiTitle)}"
+          class="popup-media__img"
+          decoding="async"
+        />
+        <div class="popup-media__caption">📸 <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(wikiTitle)}" target="_blank" rel="noopener noreferrer">Wikipedia</a></div>
+      `;
+    }
   }
 
   private positionDesktopPopup(data: PopupData, containerRect: DOMRect): void {
@@ -2090,12 +2135,19 @@ export class MapPopup {
     const squawk = flight.squawk ? escapeHtml(flight.squawk) : '';
     const note = flight.note ? escapeHtml(flight.note) : '';
 
+    // Wikipedia image lookup — embed query title as data attribute; loaded async after mount
+    const wikiTitle = getAircraftWikiTitle(flight.aircraftType, flight.aircraftModel);
+    const mediaHtml = wikiTitle
+      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(wikiTitle)}" role="img" aria-label="${escapeHtml(wikiTitle)}"><div class="popup-media__skeleton"></div></div>`
+      : '';
+
     return `
       <div class="popup-header military-flight ${flight.operator}">
         <span class="popup-title">${callsign}</span>
         <span class="popup-badge ${confidenceColors[flight.confidence] || 'low'}">${aircraftTypeBadge}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
+      ${mediaHtml}
       <div class="popup-body">
         <div class="popup-subtitle">${operatorLabel}</div>
         <div class="popup-stats">
@@ -2182,6 +2234,12 @@ export class MapPopup {
     const vesselHull = vessel.hullNumber ? escapeHtml(vessel.hullNumber) : '';
     const vesselNote = vessel.note ? escapeHtml(vessel.note) : '';
 
+    // Wikipedia image lookup — use vessel name as the article search term
+    const vesselWikiTitle = getVesselWikiTitle(vessel.name || '', vessel.vesselType);
+    const vesselMediaHtml = vesselWikiTitle
+      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(vesselWikiTitle)}" role="img" aria-label="${escapeHtml(vesselWikiTitle)}"><div class="popup-media__skeleton"></div></div>`
+      : '';
+
     return `
       <div class="popup-header military-vessel ${vessel.operator}">
         <span class="popup-title">${vesselName}</span>
@@ -2190,6 +2248,7 @@ export class MapPopup {
         <span class="popup-badge elevated">${vesselBadgeType}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
+      ${vesselMediaHtml}
       <div class="popup-body">
         <div class="popup-subtitle">${vesselOperator}</div>
         <div class="popup-stats">
@@ -2317,9 +2376,34 @@ export class MapPopup {
     };
 
     const activityType = cluster.activityType || 'unknown';
-    const clusterName = escapeHtml(cluster.name);
+
+    // Detect carrier strike groups — named "… CSG" by usni-fleet.ts
+    const isCsg = cluster.name.endsWith(' CSG');
+    // Strip the " CSG" suffix for the title so it isn't redundantly displayed
+    const rawDisplayName = isCsg ? cluster.name.slice(0, -4).trim() : cluster.name;
+    const clusterName = escapeHtml(rawDisplayName);
     const activityTypeLabel = escapeHtml(activityType.toUpperCase());
     const region = cluster.region ? escapeHtml(cluster.region) : '';
+
+    // Subtitle: for CSG clusters use a dedicated localised label instead of the
+    // generic activity label
+    const subtitle = isCsg
+      ? t('popups.militaryCluster.csg')
+      : (activityLabels[activityType] || t('popups.militaryCluster.vesselActivity.unknown'));
+
+    // Badge: for CSGs show "CSG" abbreviation, otherwise show vessel count
+    const badge = isCsg
+      ? t('popups.militaryCluster.csgBadge')
+      : t('popups.militaryCluster.vesselsCount', { count: String(cluster.vesselCount) });
+
+    // Image: for CSG clusters fetch the carrier's Wikipedia photo
+    const csgWikiTitle = isCsg
+      ? getStrikeGroupWikiTitle(cluster.name, cluster.vessels)
+      : null;
+    const csgMediaHtml = csgWikiTitle
+      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(csgWikiTitle)}" role="img" aria-label="${escapeHtml(csgWikiTitle)}"><div class="popup-media__skeleton"></div></div>`
+      : '';
+
     const vesselSummary = cluster.vessels
       .slice(0, 5)
       .map(v => `<div class="cluster-vessel-item">${escapeHtml(v.name)} - ${escapeHtml(v.vesselType)}</div>`)
@@ -2331,11 +2415,12 @@ export class MapPopup {
     return `
       <div class="popup-header military-cluster">
         <span class="popup-title">${clusterName}</span>
-        <span class="popup-badge ${activityColors[activityType] || 'low'}">${t('popups.militaryCluster.vesselsCount', { count: String(cluster.vesselCount) })}</span>
+        <span class="popup-badge ${activityColors[activityType] || 'low'}">${badge}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
+      ${csgMediaHtml}
       <div class="popup-body">
-        <div class="popup-subtitle">${activityLabels[activityType] || t('popups.militaryCluster.vesselActivity.unknown')}</div>
+        <div class="popup-subtitle">${subtitle}</div>
         <div class="popup-stats">
           <div class="popup-stat">
             <span class="stat-label">${t('popups.militaryCluster.vessels')}</span>
