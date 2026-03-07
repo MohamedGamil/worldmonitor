@@ -71,7 +71,11 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
 
 const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
   full: [
-    'iranAttacks', 'hotspots', 'conflicts',
+    // Disabled layers that are not fully ready or have data issues:
+    // 'iranAttacks', 
+    // 'fires',
+
+    'hotspots', 'conflicts',
     'military',
     'ucdpEvents', 'displacement',
     'bases', 
@@ -81,7 +85,6 @@ const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
     'climate', 'weather',
     'cyberThreats', 
     'outages', 'natural', 
-    // 'fires',
     'waterways', 'economic', 'minerals', 'gpsJamming',
     'ciiChoropleth', 'geopoliticalBoundaries', 'dayNight',
   ],
