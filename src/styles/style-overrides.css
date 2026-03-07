@@ -21,6 +21,10 @@ body .map-popup {
     box-shadow: var(--popup-box-shadow);
 }
 
+.map-popup .popup-header {
+    transform: none !important;
+}
+
 .panel[data-panel="live-news"] .panel-header .panel-header-left {
     display: none !important;
 }
