@@ -1814,7 +1814,23 @@
       "interference": "التداخل",
       "aircraftAffected": "الطائرات المتأثرة",
       "aircraftNormal": "الطائرات السليمة",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 Hex",
+      "levels": {
+        "high": "مرتفع",
+        "medium": "متوسط",
+        "low": "منخفض"
+      }
+    },
+    "severities": {
+      "extreme": "شديد",
+      "severe": "حاد",
+      "moderate": "معتدل",
+      "minor": "طفيف",
+      "critical": "حرج",
+      "high": "مرتفع",
+      "medium": "متوسط",
+      "low": "منخفض",
+      "unknown": "غير معروف"
     },
     "flight": {
       "groundStop": "توقف أرضي",
@@ -1851,6 +1867,11 @@
         "enrichment": "تخصيب",
         "weapons": "مجمع أسلحة",
         "research": "بحث"
+      },
+      "statuses": {
+        "active": "نشطة",
+        "contested": "متنازع عليها",
+        "decommissioned": "خارج الخدمة"
       },
       "description": "منشأة نووية تحت المراقبة. ذات أهمية استراتيجية للأمن الإقليمي ومخاوف عدم الانتشار."
     },
@@ -2154,6 +2175,11 @@
       "region": "REGION",
       "strikeGroup": "STRIKE GROUP",
       "deploymentStatus": "STATUS",
+      "deploymentStatuses": {
+        "deployed": "منتشرة",
+        "underway": "في عرض البحر",
+        "in-port": "في الميناء"
+      },
       "usniIntel": "USNI Intel",
       "usniSource": "Source: USNI News Fleet Tracker",
       "approximatePosition": "Position approximate — based on USNI weekly report, not real-time AIS.",

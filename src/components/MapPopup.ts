@@ -15,7 +15,6 @@ import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot
 import { getCableHealthRecord } from '@/services/cable-health';
 
 export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'gpsJamming';
-
 interface TechEventPopupData {
   id: string;
   title: string;
@@ -818,7 +817,7 @@ export class MapPopup {
     return `
       <div class="popup-header weather ${severityClass}">
         <span class="popup-title">${escapeHtml(alert.event.toUpperCase())}</span>
-        <span class="popup-badge ${severityClass}">${escapeHtml(alert.severity.toUpperCase())}</span>
+        <span class="popup-badge ${severityClass}">${escapeHtml(t(`popups.severities.${alert.severity.toLowerCase()}`) || alert.severity.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -1226,7 +1225,7 @@ export class MapPopup {
     return `
       <div class="popup-header apt ${severityClass}">
         <span class="popup-title">${t('popups.cyberThreat.title')}</span>
-        <span class="popup-badge ${severityClass}">${escapeHtml(threat.severity.toUpperCase())}</span>
+        <span class="popup-badge ${severityClass}">${escapeHtml(t(`popups.severities.${threat.severity}`) || threat.severity.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -1277,7 +1276,7 @@ export class MapPopup {
     return `
       <div class="popup-header nuclear">
         <span class="popup-title">${escapeHtml(facility.name.toUpperCase())}</span>
-        <span class="popup-badge ${statusColors[facility.status] || 'low'}">${escapeHtml(facility.status.toUpperCase())}</span>
+        <span class="popup-badge ${statusColors[facility.status] || 'low'}">${escapeHtml(t(`popups.nuclear.statuses.${facility.status}`) || facility.status.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -1288,7 +1287,7 @@ export class MapPopup {
           </div>
           <div class="popup-stat">
             <span class="stat-label">${t('popups.status')}</span>
-            <span class="stat-value">${escapeHtml(facility.status.toUpperCase())}</span>
+            <span class="stat-value">${escapeHtml(t(`popups.nuclear.statuses.${facility.status}`) || facility.status.toUpperCase())}</span>
           </div>
           <div class="popup-stat">
             <span class="stat-label">${t('popups.coordinates')}</span>
@@ -1403,7 +1402,7 @@ export class MapPopup {
     return `
       <div class="popup-header pipeline ${pipeline.type}">
         <span class="popup-title">${typeIcon} ${escapeHtml(pipeline.name.toUpperCase())}</span>
-        <span class="popup-badge ${typeColors[pipeline.type] || 'low'}">${escapeHtml(pipeline.type.toUpperCase())}</span>
+        <span class="popup-badge ${typeColors[pipeline.type] || 'low'}">${escapeHtml(typeLabels[pipeline.type] || pipeline.type.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -2084,7 +2083,7 @@ export class MapPopup {
       low: 'low',
     };
     const callsign = escapeHtml(flight.callsign || t('popups.unknown'));
-    const aircraftTypeBadge = escapeHtml(flight.aircraftType.toUpperCase());
+    const aircraftTypeBadge = escapeHtml(typeLabels[flight.aircraftType] || flight.aircraftType.toUpperCase());
     const operatorLabel = escapeHtml(operatorLabels[flight.operator] || flight.operatorCountry || t('popups.unknown'));
     const hexCode = escapeHtml(flight.hexCode || '');
     const aircraftType = escapeHtml(typeLabels[flight.aircraftType] || flight.aircraftType);
@@ -2165,7 +2164,7 @@ export class MapPopup {
 
     // USNI deployment status badge
     const deploymentBadge = vessel.usniDeploymentStatus && vessel.usniDeploymentStatus !== 'unknown'
-      ? `<span class="popup-badge ${vessel.usniDeploymentStatus === 'deployed' ? 'high' : vessel.usniDeploymentStatus === 'underway' ? 'elevated' : 'low'}">${vessel.usniDeploymentStatus.toUpperCase().replace('-', ' ')}</span>`
+      ? `<span class="popup-badge ${vessel.usniDeploymentStatus === 'deployed' ? 'high' : vessel.usniDeploymentStatus === 'underway' ? 'elevated' : 'low'}">${escapeHtml(t(`popups.militaryVessel.deploymentStatuses.${vessel.usniDeploymentStatus}`) || vessel.usniDeploymentStatus.toUpperCase().replace('-', ' '))}</span>`
       : '';
 
     // Show AIS ship type when military type is unknown
@@ -2174,7 +2173,7 @@ export class MapPopup {
       : (typeLabels[vessel.vesselType] || vessel.vesselType);
     const badgeType = vessel.vesselType === 'unknown' && vessel.aisShipType
       ? vessel.aisShipType.toUpperCase()
-      : vessel.vesselType.toUpperCase();
+      : (typeLabels[vessel.vesselType] || vessel.vesselType.toUpperCase());
     const vesselName = escapeHtml(vessel.name || `${t('popups.militaryVessel.vessel')} ${vessel.mmsi}`);
     const vesselOperator = escapeHtml(operatorLabels[vessel.operator] || vessel.operatorCountry || t('popups.unknown'));
     const vesselTypeLabel = escapeHtml(displayType);
@@ -2689,7 +2688,7 @@ export class MapPopup {
       const rSev = this.normalizeSeverity(r.severity);
       const rTime = r.timestamp ? this.getTimeAgo(new Date(r.timestamp)) : '';
       const rTitle = r.title.length > 60 ? r.title.slice(0, 60) + '…' : r.title;
-      return `< li class="cluster-item" > <span class="popup-badge ${rSev}" style = "font-size:9px;padding:1px 4px;" > ${escapeHtml(rSev.toUpperCase())} </span> ${escapeHtml(rTitle)}${rTime ? ` <span style="color:var(--text-muted);font-size:10px;">${escapeHtml(rTime)}</span > ` : ''}</li>`;
+      return `< li class="cluster-item" > <span class="popup-badge ${rSev}" style = "font-size:9px;padding:1px 4px;" > ${escapeHtml(t(`popups.severities.${rSev}`) || rSev.toUpperCase())} </span> ${escapeHtml(rTitle)}${rTime ? ` <span style="color:var(--text-muted);font-size:10px;">${escapeHtml(rTime)}</span > ` : ''}</li>`;
     }).join('')
       }
 </ul>
@@ -2698,7 +2697,7 @@ export class MapPopup {
     return `
       <div class="popup-header iranEvent ${severity}">
         <span class="popup-title">${escapeHtml(event.title)}</span>
-        <span class="popup-badge ${severity}">${escapeHtml(severity.toUpperCase())}</span>
+        <span class="popup-badge ${severity}">${escapeHtml(t(`popups.severities.${severity}`) || severity.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -2729,7 +2728,7 @@ export class MapPopup {
     return `
       <div class="popup-header" style="background:${headerColor}">
         <span class="popup-title">${t('popups.gpsJamming.title')}</span>
-        <span class="popup-badge ${badgeClass}">${escapeHtml(data.level.toUpperCase())}</span>
+        <span class="popup-badge ${badgeClass}">${escapeHtml(t(`popups.gpsJamming.levels.${data.level}`) || data.level.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">

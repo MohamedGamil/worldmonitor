@@ -1781,7 +1781,23 @@
       "interference": "Interference",
       "aircraftAffected": "Aircraft Affected",
       "aircraftNormal": "Aircraft Normal",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 Hex",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
     },
     "flight": {
       "groundStop": "GROUND STOP",
@@ -1826,6 +1842,11 @@
         "enrichment": "ENRICHMENT",
         "weapons": "WEAPONS COMPLEX",
         "research": "RESEARCH"
+      },
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
       },
       "description": "Nuclear facility under monitoring. Strategic importance for regional security and non-proliferation concerns."
     },
@@ -2129,6 +2150,11 @@
       "region": "REGION",
       "strikeGroup": "STRIKE GROUP",
       "deploymentStatus": "STATUS",
+      "deploymentStatuses": {
+        "deployed": "Deployed",
+        "underway": "Underway",
+        "in-port": "In Port"
+      },
       "usniIntel": "USNI Intel",
       "usniSource": "Source: USNI News Fleet Tracker",
       "approximatePosition": "Position approximate — based on USNI weekly report, not real-time AIS.",
