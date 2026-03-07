@@ -871,7 +871,7 @@ export class GlobeMap {
         unknown:        '#cccccc',
       };
       const color = typeColors[d.type] ?? '#cccccc';
-      el.innerHTML = `<div style="transform:rotate(${heading}deg);display:inline-block;line-height:0;">${svgIcon('plane', color, 12)}</div>`;
+      el.innerHTML = `<div style="transform:rotate(${heading}deg);display:inline-block;line-height:0;">${svgIcon('plane', color, 15)}</div>`;
       el.title = `${d.callsign} (${d.type})`;
     } else if (d._kind === 'vessel') {
       const typeColors: Record<string, string> = {
@@ -879,7 +879,7 @@ export class GlobeMap {
         frigate: '#44aaff', amphibious: '#88ff44', support: '#aaaaaa',
       };
       const c = typeColors[d.type] ?? '#44aaff';
-      el.innerHTML = svgIcon('vessel', c, 11);
+      el.innerHTML = svgIcon('vessel', c, 24);
       el.title = `${d.name} (${d.type})`;
     } else if (d._kind === 'weather') {
       const severityColors: Record<string, string> = {
@@ -1023,7 +1023,7 @@ export class GlobeMap {
       el.title = d.name;
     } else if (d._kind === 'aircraftPos') {
       const acColor = d.onGround ? '#777777' : '#a064ff';
-      const acSize = d.onGround ? '10px' : '13px';
+      const acSize = d.onGround ? '12px' : '16px';
       el.innerHTML = `
         <div style="transform:rotate(${d.trackDeg ?? 0}deg);font-size:${acSize};color:${acColor};text-shadow:0 0 5px ${acColor}99;line-height:1;transition:transform 0.3s;">
           &#9992;
