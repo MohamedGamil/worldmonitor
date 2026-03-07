@@ -874,7 +874,7 @@ export class GlobeMap {
       const color = isInteresting ? '#ffd200' : (typeColors[d.type] ?? '#cccccc');
       const iconHtml = svgIcon('plane', color, isInteresting ? 17 : 15);
       const strokeRing = isInteresting
-        ? `<div style="position:absolute;inset:-5px;border-radius:50%;border:1px solid #ffd200cc;"></div>`
+        ? `<div style="position:absolute;inset:-5px;border-radius:50%;"></div>`
         : '';
       el.innerHTML = `<div style="position:relative;display:inline-block;line-height:0;">${strokeRing}<div style="transform:rotate(${heading}deg);display:inline-block;line-height:0;">${iconHtml}</div></div>`;
       el.title = `${d.callsign} (${d.type})${isInteresting ? ' ★' : ''}`;
