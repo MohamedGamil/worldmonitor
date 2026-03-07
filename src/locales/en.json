@@ -1074,7 +1074,18 @@
         "stake": "stake",
         "basesCount": "{{count}} bases",
         "positiveEvent": "Positive Event",
-        "sourcesReporting": "sources reporting"
+        "sourcesReporting": "sources reporting",
+        "wildfire": "Wildfire",
+        "brightness": "Brightness",
+        "deaths": "Deaths",
+        "displacement": "Displacement",
+        "refugees": "Refugees",
+        "vsLabel": "vs",
+        "happiness": "Happiness",
+        "noData": "No data",
+        "cii": "CII",
+        "status": "Status",
+        "renewable": "Renewable"
       },
       "layerHelp": {
         "title": "Map Layers Guide",

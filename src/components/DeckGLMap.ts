@@ -49,6 +49,7 @@ import { HeatmapLayer } from '@deck.gl/aggregation-layers';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import type { WeatherAlert } from '@/services/weather';
 import { escapeHtml } from '@/utils/sanitize';
+import { svgIcon } from '@/utils/icons';
 import { tokenizeForMatch, matchKeyword, matchesAnyKeyword, findMatchingKeywords } from '@/utils/keyword-match';
 import { t, getCurrentLanguage, getLocalizedGeoName, getLocalizedCountryName } from '@/services/i18n';
 import arGeoFallbacks from '@/locales/geo/ar';
@@ -257,14 +258,21 @@ const MARKER_ICONS = {
   circle: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="white"/></svg>`),
   // Star - for special markers
   star: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 30,12 22,19 25,30 16,23 7,30 10,19 2,12 12,12" fill="white"/></svg>`),
-  // Airplane silhouette - top-down with wings and tail (pointing north, rotated by trackDeg)
-  plane: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2 L17.5 10 L17 12 L27 17 L27 19 L17 16 L17 24 L20 26.5 L20 28 L16 27 L12 28 L12 26.5 L15 24 L15 16 L5 19 L5 17 L15 12 L14.5 10 Z" fill="white"/></svg>`),
+  // Aircraft silhouette - fighter jet (from fighter-jet-svgrepo-com.svg, pointing north, rotated by heading)
+  plane: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 -64 640 640"><path fill="white" d="M544 224l-128-16-48-16h-24L227.158 44h39.509C278.333 44 288 41.375 288 38s-9.667-6-21.333-6H152v12h16v164h-48l-66.667-80H18.667L8 138.667V208h8v16h48v2.666l-64 8v42.667l64 8V288H16v16H8v69.333L18.667 384h34.667L120 304h48v164h-16v12h114.667c11.667 0 21.333-2.625 21.333-6s-9.667-6-21.333-6h-39.509L344 320h24l48-16 128-16c96-21.333 96-26.583 96-32 0-5.417 0-10.667-96-32z"/></svg>`),
+  // Naval vessel silhouette (from warship-icon.svg)
+  ship: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" width="32" height="32" viewBox="0 0 512 183.27"><path fill="white" d="M3.94 99.58c61.77 6.59 104.79 11.27 161.95 14.65l14.89-69.53c5.51 0 11.1-.04 16.75-.09V0h18.21v44.38l12.62-.19V18.71h18.21v25.25c20.32-.2 40.52-.16 59.57.76 11.93.99 22.31 4.87 30.64 12.57 8.15 7.54 14.07 18.59 17.21 33.98l.11.55.02.59.61 29.19c22.02.51 29.63.95 52.62 1.34l100.71 1.74c2.04.03 4.75 1.99 3.71 3.71l-31.01 51.17c-1.03 1.7-1.71 3.71-3.71 3.71H50.06c-2.32 0-44.96-71.58-49.83-79.97-.81-1.39.57-4.05 3.71-3.72zm106.35-43.25h-10.21L98.7 44.24c-.13-1.05-.89-1.92-1.93-1.92h-24.7c-1.04 0-1.8.87-1.92 1.92l-1.39 12.09h-9.23c-1.46 0-2.3 1.28-2.69 2.68l-.86 3.11-44.72-7.37-1.53 7.66L52.7 74.03l-6.66 24.35c26.95 2.57 53.25 4.78 79.21 6.7l-12.28-46.07c-.37-1.42-1.25-2.68-2.68-2.68zm293.72 27.61h10.2l1.39-12.09c.12-1.05.87-1.92 1.92-1.92h24.7c1.06 0 1.81.87 1.93 1.92l1.39 12.09h9.23c1.48 0 2.3 1.28 2.68 2.68l.86 3.11 37.65-5.46 1.53 7.66-35.9 9.71 4.62 16.85-58.86-1.01-14.18-.25 8.15-30.61c.38-1.42 1.21-2.68 2.69-2.68zM278.44 67.81h54.22c4.87 7.34 8.34 14.84 9.38 22.53h-63.6V67.81zm-36.92-.01h23.33v23.08h-23.33V67.8z"/></svg>`),
+  // Cardinal compass star - for military bases (from cardinal-compass.svg)
+  compass: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="M12,24l-3-9L0,12l9-3L12,0l3,9,9,3-9,3-3,9ZM7.425,7.425l.473-1.385-3.898-2.039,2.039,3.898,1.385-.473Zm9.15,0l1.385,.473,2.039-3.897-3.898,2.039,.473,1.385ZM7.424,16.575l-1.385-.473-2.039,3.898,3.897-2.039-.473-1.385Zm9.151,0l-.473,1.385,3.898,2.039-2.039-3.898-1.385,.473Z"/></svg>`),
+  // Radiation symbol - ringed with three sector arms (from radiation-alt (1).svg)
+  radiation: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="m12,0C5.383,0,0,5.383,0,12s5.383,12,12,12,12-5.383,12-12S18.617,0,12,0Zm0,21c-4.963,0-9-4.037-9-9S7.037,3,12,3s9,4.037,9,9-4.037,9-9,9Zm-1.5-9c0-.828.672-1.5,1.5-1.5s1.5.672,1.5,1.5-.672,1.5-1.5,1.5-1.5-.672-1.5-1.5Zm8.5,0h-3.5c0-1.221-.628-2.294-1.576-2.92l1.926-2.927c.773.508,1.459,1.177,2,2,.781,1.188,1.151,2.525,1.15,3.848Zm-10.5,0h-3.5c-.001-1.323.368-2.66,1.15-3.848.541-.822,1.227-1.491,2-2l1.926,2.927c-.948.626-1.576,1.699-1.576,2.92Zm5.338,2.969l1.841,2.973c-1.07.665-2.326,1.06-3.678,1.06s-2.608-.395-3.678-1.06l1.84-2.973c.535.332,1.162.531,1.838.531s1.303-.199,1.838-.531Z"/></svg>`),
 };
 
-const BASES_ICON_MAPPING = { triangleUp: { x: 0, y: 0, width: 32, height: 32, mask: true } };
-const NUCLEAR_ICON_MAPPING = { hexagon: { x: 0, y: 0, width: 32, height: 32, mask: true } };
-const DATACENTER_ICON_MAPPING = { square: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const RADIATION_ICON_MAPPING = { radiation: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const AIRCRAFT_ICON_MAPPING = { plane: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const SHIP_ICON_MAPPING = { ship: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const DATACENTER_ICON_MAPPING = { square: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const COMPASS_ICON_MAPPING = { compass: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 
 const CONFLICT_ZONES_GEOJSON: GeoJSON.FeatureCollection = {
   type: 'FeatureCollection',
@@ -1604,9 +1612,9 @@ export class DeckGLMap {
       id: 'bases-layer',
       data,
       getPosition: (d) => [d.lon, d.lat],
-      getIcon: () => 'triangleUp',
-      iconAtlas: MARKER_ICONS.triangleUp,
-      iconMapping: BASES_ICON_MAPPING,
+      getIcon: () => 'plane',
+      iconAtlas: MARKER_ICONS.plane,
+      iconMapping: AIRCRAFT_ICON_MAPPING,
       getSize: (d) => highlightedBases.has(d.id) ? 16 : 11,
       getColor: (d) => {
         if (highlightedBases.has(d.id)) {
@@ -1659,15 +1667,15 @@ export class DeckGLMap {
     const highlightedNuclear = this.highlightedAssets.nuclear;
     const data = NUCLEAR_FACILITIES.filter(f => f.status !== 'decommissioned');
 
-    // Nuclear: HEXAGON icons - yellow/orange color, semi-transparent
+    // Nuclear: RADIATION icons - yellow/orange color, semi-transparent
     return new IconLayer({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'nuclear-layer',
       data,
       getPosition: (d) => [d.lon, d.lat],
-      getIcon: () => 'hexagon',
-      iconAtlas: MARKER_ICONS.hexagon,
-      iconMapping: NUCLEAR_ICON_MAPPING,
+      getIcon: () => 'radiation',
+      iconAtlas: MARKER_ICONS.radiation,
+      iconMapping: RADIATION_ICON_MAPPING,
       getSize: (d) => highlightedNuclear.has(d.id) ? 15 : 11,
       getColor: (d) => {
         if (highlightedNuclear.has(d.id)) {
@@ -1685,16 +1693,20 @@ export class DeckGLMap {
     });
   }
 
-  private createIrradiatorsLayer(): ScatterplotLayer {
-    return new ScatterplotLayer({
+  private createIrradiatorsLayer(): IconLayer {
+    return new IconLayer({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'irradiators-layer',
       data: GAMMA_IRRADIATORS,
       getPosition: (d) => [d.lon, d.lat],
-      getRadius: 6000,
-      getFillColor: [255, 100, 255, 180] as [number, number, number, number], // Magenta
-      radiusMinPixels: 4,
-      radiusMaxPixels: 10,
+      getIcon: () => 'radiation',
+      iconAtlas: MARKER_ICONS.radiation,
+      iconMapping: RADIATION_ICON_MAPPING,
+      getSize: 9,
+      getColor: [200, 100, 255, 200] as [number, number, number, number], // Purple
+      sizeScale: 1,
+      sizeMinPixels: 5,
+      sizeMaxPixels: 12,
       pickable: true,
     });
   }
@@ -2115,26 +2127,35 @@ export class DeckGLMap {
     });
   }
 
-  private createMilitaryVesselsLayer(vessels: MilitaryVessel[]): ScatterplotLayer {
-    return new ScatterplotLayer({
+  private createMilitaryVesselsLayer(vessels: MilitaryVessel[]): IconLayer<MilitaryVessel> {
+    const TYPE_COLORS: Record<string, [number, number, number, number]> = {
+      carrier:     [255,  68,  68, 230],
+      destroyer:   [255, 136,   0, 230],
+      submarine:   [136,  68, 255, 220],
+      frigate:     [ 68, 170, 255, 220],
+      amphibious:  [136, 255,  68, 220],
+      support:     [180, 180, 180, 200],
+    };
+    return new IconLayer<MilitaryVessel>({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: 'military-vessels-layer',
       data: vessels,
       getPosition: (d) => [d.lon, d.lat],
-      getRadius: 6000,
-      getFillColor: (d) => {
-        if (d.usniSource) return [255, 160, 60, 160] as [number, number, number, number]; // Orange, lower alpha for USNI-only
-        return COLORS.vesselMilitary;
+      getIcon: () => 'ship',
+      iconAtlas: MARKER_ICONS.ship,
+      iconMapping: SHIP_ICON_MAPPING,
+      getSize: (d) => d.vesselType === 'carrier' ? 20 : 15,
+      getColor: (d) => {
+        if (d.usniSource) return [255, 160, 60, 180] as [number, number, number, number];
+        return TYPE_COLORS[d.vesselType] ?? COLORS.vesselMilitary;
       },
-      radiusMinPixels: 4,
-      radiusMaxPixels: 10,
+      getAngle: (d) => -(d.heading ?? 0),
+      sizeMinPixels: 6,
+      sizeMaxPixels: 22,
+      sizeScale: 1,
+      billboard: false,
       pickable: true,
-      stroked: true,
-      getLineColor: (d) => {
-        if (d.usniSource) return [255, 180, 80, 200] as [number, number, number, number]; // Orange outline
-        return [0, 0, 0, 0] as [number, number, number, number]; // No outline for AIS
-      },
-      lineWidthMinPixels: 2,
+      updateTriggers: { getColor: vessels.length, getAngle: vessels.length, getSize: vessels.length },
     });
   }
 
@@ -3057,8 +3078,13 @@ export class DeckGLMap {
     const text = (value: unknown): string => escapeHtml(String(value ?? ''));
 
     switch (layerId) {
-      case 'hotspots-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.subtext)}</div>` };
+      case 'hotspots-layer': {
+        const hsKey = `geo.hotspots.${obj.id}`;
+        const hsName = t(hsKey) !== hsKey ? t(hsKey) : text(obj.location || obj.name);
+        const hsArea = obj.location ? text(getLocalizedGeoName(obj.location)) : '';
+        const hsSubtext = obj.subtext ? `<br/><span style="opacity:.7">${text(obj.subtext)}</span>` : '';
+        return { html: `<div class="deckgl-tooltip"><strong>${hsName}</strong>${hsArea && hsArea !== hsName ? `<br/>${hsArea}` : ''}${hsSubtext}</div>` };
+      }
       case 'earthquakes-layer':
         return { html: `<div class="deckgl-tooltip"><strong>M${(obj.magnitude || 0).toFixed(1)} ${t('components.deckgl.tooltip.earthquake')}</strong><br/>${text(obj.place)}</div>` };
       case 'military-vessels-layer':
@@ -3154,7 +3180,7 @@ export class DeckGLMap {
       case 'spaceports-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(obj.country || t('components.deckgl.layers.spaceports'))}</div>` };
       case 'ports-layer': {
-        const typeIcon = obj.type === 'naval' ? '⚓' : obj.type === 'oil' || obj.type === 'lng' ? '🛢️' : '🏭';
+        const typeIcon = obj.type === 'naval' ? svgIcon('anchor', '#6496ff', 12) : obj.type === 'oil' || obj.type === 'lng' ? svgIcon('oil', '#ff8c00', 12) : svgIcon('factory', '#00c8ff', 12);
         return { html: `<div class="deckgl-tooltip"><strong>${typeIcon} ${text(obj.name)}</strong><br/>${text(obj.type || t('components.deckgl.tooltip.port'))} - ${text(getLocalizedGeoName(obj.country))}</div>` };
       }
       case 'flight-delays-layer':
@@ -3194,7 +3220,7 @@ export class DeckGLMap {
       case 'iran-events-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.iranAttacks')}: ${text(obj.category || '')}</strong><br/>${text((obj.title || '').slice(0, 80))}</div>` };
       case 'news-locations-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>📰 ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${svgIcon('news', '#aaaaaa', 12)} ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'positive-events-layer': {
         const catLabel = obj.category ? obj.category.replace(/-/g, ' & ') : t('components.deckgl.tooltip.positiveEvent');
         const countInfo = obj.count > 1 ? `<br/><span style="opacity:.7">${obj.count} ${t('components.deckgl.tooltip.sourcesReporting')}</span>` : '';
@@ -3203,25 +3229,25 @@ export class DeckGLMap {
       case 'kindness-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong></div>` };
       case 'happiness-choropleth-layer': {
-        const hcName = obj.properties?.name ?? 'Unknown';
+        const hcName = getLocalizedGeoName(obj.properties?.name ?? '');
         const hcCode = obj.properties?.['ISO3166-1-Alpha-2'];
         const hcScore = hcCode ? this.happinessScores.get(hcCode as string) : undefined;
-        const hcScoreStr = hcScore != null ? hcScore.toFixed(1) : 'No data';
-        return { html: `<div class="deckgl-tooltip"><strong>${text(hcName)}</strong><br/>Happiness: ${hcScoreStr}/10${hcScore != null ? `<br/><span style="opacity:.7">${text(this.happinessSource)} (${this.happinessYear})</span>` : ''}</div>` };
+        const hcScoreStr = hcScore != null ? hcScore.toFixed(1) : t('components.deckgl.tooltip.noData');
+        return { html: `<div class="deckgl-tooltip"><strong>${text(hcName)}</strong><br/>${t('components.deckgl.tooltip.happiness')}: ${hcScoreStr}/10${hcScore != null ? `<br/><span style="opacity:.7">${text(this.happinessSource)} (${this.happinessYear})</span>` : ''}</div>` };
       }
       case 'cii-choropleth-layer': {
-        const ciiName = obj.properties?.name ?? 'Unknown';
+        const ciiName = getLocalizedGeoName(obj.properties?.name ?? '');
         const ciiCode = obj.properties?.['ISO3166-1-Alpha-2'];
         const ciiEntry = ciiCode ? this.ciiScoresMap.get(ciiCode as string) : undefined;
-        if (!ciiEntry) return { html: `<div class="deckgl-tooltip"><strong>${text(ciiName)}</strong><br/><span style="opacity:.7">No CII data</span></div>` };
+        if (!ciiEntry) return { html: `<div class="deckgl-tooltip"><strong>${text(ciiName)}</strong><br/><span style="opacity:.7">${t('components.deckgl.tooltip.noData')}</span></div>` };
         const levelColor = DeckGLMap.CII_LEVEL_HEX[ciiEntry.level] ?? '#888';
-        return { html: `<div class="deckgl-tooltip"><strong>${text(ciiName)}</strong><br/>CII: <span style="color:${levelColor};font-weight:600">${ciiEntry.score}/100</span><br/><span style="text-transform:capitalize;opacity:.7">${text(ciiEntry.level)}</span></div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(ciiName)}</strong><br/>${t('components.deckgl.tooltip.cii')}: <span style="color:${levelColor};font-weight:600">${ciiEntry.score}/100</span><br/><span style="text-transform:capitalize;opacity:.7">${text(ciiEntry.level)}</span></div>` };
       }
       case 'species-recovery-layer': {
-        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.commonName)}</strong><br/>${text(obj.recoveryZone?.name ?? obj.region)}<br/><span style="opacity:.7">Status: ${text(obj.recoveryStatus)}</span></div>` };
+        return { html: `<div class="deckgl-tooltip"><strong>${text(obj.commonName)}</strong><br/>${text(obj.recoveryZone?.name ?? obj.region)}<br/><span style="opacity:.7">${t('components.deckgl.tooltip.status')}: ${text(obj.recoveryStatus)}</span></div>` };
       }
       case 'renewable-installations-layer': {
-        const riTypeLabel = obj.type ? String(obj.type).charAt(0).toUpperCase() + String(obj.type).slice(1) : 'Renewable';
+        const riTypeLabel = obj.type ? String(obj.type).charAt(0).toUpperCase() + String(obj.type).slice(1) : t('components.deckgl.tooltip.renewable');
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${riTypeLabel} &middot; ${obj.capacityMW?.toLocaleString() ?? '?'} MW<br/><span style="opacity:.7">${text(getLocalizedGeoName(obj.country))} &middot; ${obj.year}</span></div>` };
       }
       case 'gulf-investments-layer': {
@@ -3235,7 +3261,7 @@ export class DeckGLMap {
           html: `<div class="deckgl-tooltip">
             <strong>${flag} ${text(inv.assetName)}</strong><br/>
             <em>${text(inv.investingEntity)}</em><br/>
-            ${text(inv.targetCountry)} · ${text(inv.sector)}<br/>
+            ${text(getLocalizedGeoName(inv.targetCountry))} · ${text(inv.sector)}<br/>
             <strong>${usd}</strong>${stake}<br/>
             <span style="text-transform:capitalize">${text(inv.status)}</span>
           </div>`,

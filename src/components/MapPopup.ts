@@ -7,6 +7,7 @@ import type { StartupHub, Accelerator, TechHQ, CloudRegion } from '@/config/tech
 import type { TechHubActivity } from '@/services/tech-activity';
 import type { GeoHubActivity } from '@/services/geo-activity';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
+import { svgIcon } from '@/utils/icons';
 import { isMobileDevice, getCSSColor } from '@/utils';
 import { t, tv, getLocalizedGeoName } from '@/services/i18n';
 import { fetchHotspotContext, formatArticleDate, extractDomain, type GdeltArticle } from '@/services/gdelt-intel';
@@ -1022,7 +1023,7 @@ export class MapPopup {
     const severityClass = escapeHtml(event.severity);
     const severityLabel = escapeHtml(t(`popups.severities.${event.severity.toLowerCase()}`));
     const eventTypeLabel = escapeHtml(tv(event.eventType, 'popups.protest.types'));
-    const icon = event.eventType === 'riot' ? '🔥' : event.eventType === 'strike' ? '✊' : '📢';
+    const icon = event.eventType === 'riot' ? svgIcon('fire', '#ff3030', 14) : event.eventType === 'strike' ? svgIcon('fist', '#44aaff', 14) : svgIcon('megaphone', '#ffaa00', 14);
     const sourceLabel = event.sourceType === 'acled' ? t('popups.protest.acledVerified') : t('popups.protest.gdelt');
     const validatedBadge = event.validated ? `<span class="popup-badge verified">${t('popups.verified')}</span>` : '';
     const fatalitiesSection = event.fatalities
@@ -1083,7 +1084,7 @@ export class MapPopup {
     });
 
     const listItems = sortedItems.slice(0, 10).map(event => {
-      const icon = event.eventType === 'riot' ? '🔥' : event.eventType === 'strike' ? '✊' : '📢';
+      const icon = event.eventType === 'riot' ? svgIcon('fire', '#ff3030', 12) : event.eventType === 'strike' ? svgIcon('fist', '#44aaff', 12) : svgIcon('megaphone', '#ffaa00', 12);
       const sevClass = event.severity;
       const dateStr = event.time.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
       const city = event.city ? escapeHtml(event.city) : '';
@@ -1098,16 +1099,16 @@ export class MapPopup {
 
     return `
       <div class="popup-header protest ${headerClass} cluster">
-        <span class="popup-title">📢 ${escapeHtml(getLocalizedGeoName(data.country))}</span>
+        <span class="popup-title">${svgIcon('megaphone', '#ffaa00', 14)} ${escapeHtml(getLocalizedGeoName(data.country))}</span>
         <span class="popup-badge">${totalCount} ${t('popups.events').toUpperCase()}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body cluster-popup">
         <div class="cluster-summary">
-          ${riots ? `<span class="summary-item riot">🔥 ${riots} ${t('popups.protest.riots')}</span>` : ''}
-          ${highSeverity ? `<span class="summary-item high">⚠️ ${highSeverity} ${t('popups.protest.highSeverity')}</span>` : ''}
+          ${riots ? `<span class="summary-item riot">${svgIcon('fire', '#ff3030', 11)} ${riots} ${t('popups.protest.riots')}</span>` : ''}
+          ${highSeverity ? `<span class="summary-item high">${svgIcon('warning', '#ffaa00', 11)} ${highSeverity} ${t('popups.protest.highSeverity')}</span>` : ''}
           ${verified ? `<span class="summary-item verified">✓ ${verified} ${t('popups.verified')}</span>` : ''}
-          ${totalFatalities > 0 ? `<span class="summary-item fatalities">💀 ${totalFatalities} ${t('popups.fatalities')}</span>` : ''}
+          ${totalFatalities > 0 ? `<span class="summary-item fatalities">${svgIcon('warning', '#ff4444', 11)} ${totalFatalities} ${t('popups.fatalities')}</span>` : ''}
         </div>
         <ul class="cluster-list">${listItems}${moreCount}</ul>
         ${data.sampled ? `<p class="popup-more">${t('popups.sampledList', { count: data.items.length })}</p>` : ''}
@@ -1127,7 +1128,7 @@ export class MapPopup {
       'closure': t('popups.flight.closure'),
     };
     const delayTypeLabel = delayTypeLabels[delay.delayType] || t('popups.flight.delays');
-    const icon = delay.delayType === 'closure' ? '🚫' : delay.delayType === 'ground_stop' ? '🛑' : delay.severity === 'severe' ? '✈️' : '🛫';
+    const icon = delay.delayType === 'closure' ? svgIcon('stop', '#ff2020', 14) : delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff4400', 14) : delay.severity === 'severe' ? svgIcon('plane', '#ff4444', 14) : svgIcon('plane', '#ffaa00', 14);
     const sourceLabels: Record<string, string> = {
       'faa': t('popups.flight.sources.faa'),
       'eurocontrol': t('popups.flight.sources.eurocontrol'),
@@ -1221,7 +1222,7 @@ export class MapPopup {
       ${mediaHtml}
       <div class="popup-body">
         <div class="popup-subtitle">ICAO24: ${escapeHtml(pos.icao24)}</div>
-        ${isSimulated ? `<div class="popup-notice" style="color:var(--semantic-elevated);font-size:11px;margin-bottom:6px;">⚠ Simulated data — live feed unavailable</div>` : ''}
+        ${isSimulated ? `<div class="popup-notice" style="color:var(--semantic-elevated);font-size:11px;margin-bottom:6px;">${svgIcon('warning', '#ffaa00', 11)} Simulated data — live feed unavailable</div>` : ''}
         <div class="popup-stats">
           <div class="popup-stat">
             <span class="stat-label">${t('popups.aircraft.altitude')}</span>
@@ -1379,9 +1380,9 @@ export class MapPopup {
       'financial-hub': t('popups.economic.types.financialHub'),
     };
     const typeIcons: Record<string, string> = {
-      'exchange': '📈',
-      'central-bank': '🏛',
-      'financial-hub': '💰',
+      'exchange': svgIcon('chart', '#ffd700', 14),
+      'central-bank': svgIcon('bank', '#4488ff', 14),
+      'financial-hub': svgIcon('coin', '#44cc88', 14),
     };
 
     const marketStatus = center.marketHours ? this.getMarketStatus(center.marketHours) : null;
@@ -1429,7 +1430,7 @@ export class MapPopup {
   private renderIrradiatorPopup(irradiator: GammaIrradiator): string {
     return `
       <div class="popup-header irradiator">
-        <span class="popup-title">☢ ${escapeHtml(irradiator.city.toUpperCase())}</span>
+        <span class="popup-title">${svgIcon('radiation', '#ffcc00', 14)} ${escapeHtml(irradiator.city.toUpperCase())}</span>
         <span class="popup-badge elevated">${t('popups.gamma')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1470,7 +1471,7 @@ export class MapPopup {
       'operating': t('popups.pipeline.status.operating'),
       'construction': t('popups.pipeline.status.construction'),
     };
-    const typeIcon = pipeline.type === 'oil' ? '🛢' : pipeline.type === 'gas' ? '🔥' : '⛽';
+    const typeIcon = pipeline.type === 'oil' ? svgIcon('oil', '#ff8800', 14) : pipeline.type === 'gas' ? svgIcon('fire', '#ff6600', 14) : svgIcon('oil', '#ffcc00', 14);
 
     return `
       <div class="popup-header pipeline ${pipeline.type}">
@@ -1551,7 +1552,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header cable">
-        <span class="popup-title">🌐 ${cableName}</span>
+        <span class="popup-title">${svgIcon('cable', '#44aaff', 14)} ${cableName}</span>
         <span class="popup-badge ${statusBadge}">${cable.major ? t('popups.cable.major') : t('popups.cable.cable')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1622,7 +1623,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header cable">
-        <span class="popup-title">🚨 ${cableName}</span>
+        <span class="popup-title">${svgIcon('warning', '#ff4444', 14)} ${cableName}</span>
         <span class="popup-badge ${advisory.severity === 'fault' ? 'high' : 'elevated'}">${statusLabel}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1659,7 +1660,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header cable">
-        <span class="popup-title">🚢 ${shipName}</span>
+        <span class="popup-title">${svgIcon('repair-ship', '#44aaff', 14)} ${shipName}</span>
         <span class="popup-badge elevated">${t('popups.repairShip.badge')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1717,7 +1718,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header outage ${severityClass}">
-        <span class="popup-title">📡 ${escapeHtml(getLocalizedGeoName(outage.country).toUpperCase())}</span>
+        <span class="popup-title">${svgIcon('satellite-dish', '#ff8800', 14)} ${escapeHtml(getLocalizedGeoName(outage.country).toUpperCase())}</span>
         <span class="popup-badge ${severityColors[outage.severity] || 'low'}">${severityLabels[outage.severity] || t('popups.outage.levels.disruption')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1771,7 +1772,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header datacenter ${dc.status}">
-        <span class="popup-title">🖥️ ${escapeHtml(dc.name)}</span>
+        <span class="popup-title">${svgIcon('server', '#88aaff', 14)} ${escapeHtml(dc.name)}</span>
         <span class="popup-badge ${statusColors[dc.status] || 'normal'}">${statusLabels[dc.status] || t('popups.datacenter.status.unknown')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1820,7 +1821,7 @@ export class MapPopup {
 
     const dcListHtml = data.items.slice(0, 8).map(dc => `
       <div class="cluster-item">
-        <span class="cluster-item-icon">${dc.status === 'planned' ? '🔨' : '🖥️'}</span>
+        <span class="cluster-item-icon">${dc.status === 'planned' ? svgIcon('target', '#ffaa00', 12) : svgIcon('server', '#88aaff', 12)}</span>
         <div class="cluster-item-info">
           <span class="cluster-item-name">${escapeHtml(dc.name.slice(0, 40))}${dc.name.length > 40 ? '...' : ''}</span>
           <span class="cluster-item-detail">${escapeHtml(dc.owner)} • ${formatNumber(dc.chipCount)} ${t('popups.datacenter.chips')}</span>
@@ -1830,7 +1831,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header datacenter cluster">
-        <span class="popup-title">🖥️ ${t('popups.datacenter.cluster.title', { count: String(totalCount) })}</span>
+        <span class="popup-title">${svgIcon('server', '#88aaff', 14)} ${t('popups.datacenter.cluster.title', { count: String(totalCount) })}</span>
         <span class="popup-badge elevated">${escapeHtml(data.region)}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1872,10 +1873,10 @@ export class MapPopup {
       'major': t('popups.startupHub.tiers.major'),
       'emerging': t('popups.startupHub.tiers.emerging'),
     };
-    const tierIcons: Record<string, string> = { 'mega': '🦄', 'major': '🚀', 'emerging': '💡' };
+    const tierIcons: Record<string, string> = { 'mega': svgIcon('unicorn', '#cc88ff', 14), 'major': svgIcon('rocket', '#88ddff', 14), 'emerging': svgIcon('lightbulb', '#ffdd44', 14) };
     return `
       <div class="popup-header startup-hub ${hub.tier}">
-        <span class="popup-title">${tierIcons[hub.tier] || '🚀'} ${escapeHtml(hub.name)}</span>
+        <span class="popup-title">${tierIcons[hub.tier] || svgIcon('rocket', '#88ddff', 14)} ${escapeHtml(hub.name)}</span>
         <span class="popup-badge ${hub.tier}">${tierLabels[hub.tier] || t('popups.startupHub.tiers.hub')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1896,10 +1897,10 @@ export class MapPopup {
 
   private renderCloudRegionPopup(region: CloudRegion): string {
     const providerNames: Record<string, string> = { 'aws': 'Amazon Web Services', 'gcp': 'Google Cloud Platform', 'azure': 'Microsoft Azure', 'cloudflare': 'Cloudflare' };
-    const providerIcons: Record<string, string> = { 'aws': '🟠', 'gcp': '🔵', 'azure': '🟣', 'cloudflare': '🟡' };
+    const providerIcons: Record<string, string> = { 'aws': svgIcon('cloud-aws', '#FF9900', 14), 'gcp': svgIcon('cloud-gcp', '#4285F4', 14), 'azure': svgIcon('cloud-azure', '#0078D4', 14), 'cloudflare': svgIcon('cloud-cf', '#F48120', 14) };
     return `
       <div class="popup-header cloud-region ${region.provider}">
-        <span class="popup-title">${providerIcons[region.provider] || '☁️'} ${escapeHtml(region.name)}</span>
+        <span class="popup-title">${providerIcons[region.provider] || svgIcon('cloud-aws', '#aaaaaa', 14)} ${escapeHtml(region.name)}</span>
         <span class="popup-badge ${region.provider}">${escapeHtml(region.provider.toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1927,10 +1928,10 @@ export class MapPopup {
       'unicorn': t('popups.techHQ.types.unicorn'),
       'public': t('popups.techHQ.types.public'),
     };
-    const typeIcons: Record<string, string> = { 'faang': '🏛️', 'unicorn': '🦄', 'public': '🏢' };
+    const typeIcons: Record<string, string> = { 'faang': svgIcon('bank', '#ffd700', 14), 'unicorn': svgIcon('unicorn', '#cc88ff', 14), 'public': svgIcon('building', '#aaaaaa', 14) };
     return `
       <div class="popup-header tech-hq ${hq.type}">
-        <span class="popup-title">${typeIcons[hq.type] || '🏢'} ${escapeHtml(hq.company)}</span>
+        <span class="popup-title">${typeIcons[hq.type] || svgIcon('building', '#aaaaaa', 14)} ${escapeHtml(hq.company)}</span>
         <span class="popup-badge ${hq.type}">${typeLabels[hq.type] || t('popups.techHQ.types.tech')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -1960,10 +1961,10 @@ export class MapPopup {
       'incubator': t('popups.accelerator.types.incubator'),
       'studio': t('popups.accelerator.types.studio'),
     };
-    const typeIcons: Record<string, string> = { 'accelerator': '🎯', 'incubator': '🔬', 'studio': '🎨' };
+    const typeIcons: Record<string, string> = { 'accelerator': svgIcon('target', '#ff8844', 14), 'incubator': svgIcon('microscope', '#44ccaa', 14), 'studio': svgIcon('palette', '#cc88ff', 14) };
     return `
       <div class="popup-header accelerator ${acc.type}">
-        <span class="popup-title">${typeIcons[acc.type] || '🎯'} ${escapeHtml(acc.name)}</span>
+        <span class="popup-title">${typeIcons[acc.type] || svgIcon('target', '#ff8844', 14)} ${escapeHtml(acc.name)}</span>
         <span class="popup-badge ${acc.type}">${typeLabels[acc.type] || t('popups.accelerator.types.accelerator')}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
@@ -2004,12 +2005,12 @@ export class MapPopup {
 
     return `
       <div class="popup-header tech-event ${urgencyClass}">
-        <span class="popup-title">📅 ${escapeHtml(event.title)}</span>
+        <span class="popup-title">${svgIcon('chart', '#44aaff', 14)} ${escapeHtml(event.title)}</span>
         <span class="popup-badge ${urgencyClass}">${daysLabel}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
-        <div class="popup-subtitle">📍 ${escapeHtml(event.location)}, ${escapeHtml(getLocalizedGeoName(event.country))}</div>
+        <div class="popup-subtitle">${svgIcon('globe', '#aaaaaa', 12)} ${escapeHtml(event.location)}, ${escapeHtml(getLocalizedGeoName(event.country))}</div>
         <div class="popup-stats">
           <div class="popup-stat">
             <span class="stat-label">${t('popups.techEvent.date')}</span>
@@ -2041,23 +2042,23 @@ export class MapPopup {
     });
 
     const listItems = sortedItems.map(hq => {
-      const icon = hq.type === 'faang' ? '🏛️' : hq.type === 'unicorn' ? '🦄' : '🏢';
+      const icon = hq.type === 'faang' ? svgIcon('bank', '#ffd700', 12) : hq.type === 'unicorn' ? svgIcon('unicorn', '#cc88ff', 12) : svgIcon('building', '#aaaaaa', 12);
       const marketCap = hq.marketCap ? ` (${escapeHtml(hq.marketCap)})` : '';
       return `<li class="cluster-item ${hq.type}">${icon} ${escapeHtml(hq.company)}${marketCap}</li>`;
     }).join('');
 
     return `
       <div class="popup-header tech-hq cluster">
-        <span class="popup-title">🏙️ ${escapeHtml(data.city)}</span>
+        <span class="popup-title">${svgIcon('building', '#aaaaaa', 14)} ${escapeHtml(data.city)}</span>
         <span class="popup-badge">${t('popups.techHQCluster.companiesCount', { count: String(totalCount) })}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body cluster-popup">
-        <div class="popup-subtitle">📍 ${escapeHtml(data.city)}, ${escapeHtml(getLocalizedGeoName(data.country))}</div>
+        <div class="popup-subtitle">${svgIcon('globe', '#aaaaaa', 12)} ${escapeHtml(data.city)}, ${escapeHtml(getLocalizedGeoName(data.country))}</div>
         <div class="cluster-summary">
-          ${faangCount ? `<span class="summary-item faang">🏛️ ${t('popups.techHQCluster.bigTechCount', { count: String(faangCount) })}</span>` : ''}
-          ${unicornCount ? `<span class="summary-item unicorn">🦄 ${t('popups.techHQCluster.unicornsCount', { count: String(unicornCount) })}</span>` : ''}
-          ${publicCount ? `<span class="summary-item public">🏢 ${t('popups.techHQCluster.publicCount', { count: String(publicCount) })}</span>` : ''}
+          ${faangCount ? `<span class="summary-item faang">${svgIcon('bank', '#ffd700', 11)} ${t('popups.techHQCluster.bigTechCount', { count: String(faangCount) })}</span>` : ''}
+          ${unicornCount ? `<span class="summary-item unicorn">${svgIcon('unicorn', '#cc88ff', 11)} ${t('popups.techHQCluster.unicornsCount', { count: String(unicornCount) })}</span>` : ''}
+          ${publicCount ? `<span class="summary-item public">${svgIcon('building', '#aaaaaa', 11)} ${t('popups.techHQCluster.publicCount', { count: String(publicCount) })}</span>` : ''}
         </div>
         <ul class="cluster-list">${listItems}</ul>
         ${data.sampled ? `<p class="popup-more">${t('popups.techHQCluster.sampled', { count: String(data.items.length) })}</p>` : ''}
@@ -2074,18 +2075,18 @@ export class MapPopup {
       const startDate = new Date(event.startDate);
       const dateStr = startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
       const urgencyClass = event.daysUntil <= 7 ? 'urgent' : event.daysUntil <= 30 ? 'soon' : '';
-      return `<li class="cluster-item ${urgencyClass}">📅 ${dateStr}: ${escapeHtml(event.title)}</li>`;
+      return `<li class="cluster-item ${urgencyClass}">${svgIcon('chart', '#44aaff', 11)} ${dateStr}: ${escapeHtml(event.title)}</li>`;
     }).join('');
 
     return `
       <div class="popup-header tech-event cluster">
-        <span class="popup-title">📅 ${escapeHtml(data.location)}</span>
+        <span class="popup-title">${svgIcon('chart', '#44aaff', 14)} ${escapeHtml(data.location)}</span>
         <span class="popup-badge">${t('popups.techEventCluster.eventsCount', { count: String(totalCount) })}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body cluster-popup">
-        <div class="popup-subtitle">📍 ${escapeHtml(data.location)}, ${escapeHtml(getLocalizedGeoName(data.country))}</div>
-        ${upcomingSoon ? `<div class="cluster-summary"><span class="summary-item soon">⚡ ${t('popups.techEventCluster.upcomingWithin2Weeks', { count: String(upcomingSoon) })}</span></div>` : ''}
+        <div class="popup-subtitle">${svgIcon('globe', '#aaaaaa', 12)} ${escapeHtml(data.location)}, ${escapeHtml(getLocalizedGeoName(data.country))}</div>
+        ${upcomingSoon ? `<div class="cluster-summary"><span class="summary-item soon">${svgIcon('lightning', '#ffcc00', 11)} ${t('popups.techEventCluster.upcomingWithin2Weeks', { count: String(upcomingSoon) })}</span></div>` : ''}
         <ul class="cluster-list">${listItems}</ul>
         ${data.sampled ? `<p class="popup-more">${t('popups.techEventCluster.sampled', { count: String(data.items.length) })}</p>` : ''}
       </div>
@@ -2560,12 +2561,12 @@ export class MapPopup {
       bulk: 'low',
     };
     const typeIcons: Record<string, string> = {
-      container: '🏭',
-      oil: '🛢️',
-      lng: '🔥',
-      naval: '⚓',
-      mixed: '🚢',
-      bulk: '📦',
+      container: svgIcon('factory', '#00c8ff', 14),
+      oil: svgIcon('oil', '#ff8c00', 14),
+      lng: svgIcon('fire', '#ffcc00', 14),
+      naval: svgIcon('anchor', '#6496ff', 14),
+      mixed: svgIcon('vessel', '#aaaaaa', 14),
+      bulk: svgIcon('package', '#cc8844', 14),
     };
 
     const rankSection = port.rank
@@ -2574,7 +2575,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header port ${escapeHtml(port.type)}">
-        <span class="popup-icon">${typeIcons[port.type] || '🚢'}</span>
+        <span class="popup-icon">${typeIcons[port.type] || svgIcon('vessel', '#aaaaaa', 14)}</span>
         <span class="popup-title">${escapeHtml(port.name.toUpperCase())}</span>
         <span class="popup-badge ${typeColors[port.type] || 'normal'}">${typeLabels[port.type] || port.type.toUpperCase()}</span>
         <button class="popup-close" aria-label="Close">×</button>
@@ -2611,7 +2612,7 @@ export class MapPopup {
 
     return `
       <div class="popup-header spaceport ${port.status}">
-        <span class="popup-icon">🚀</span>
+        <span class="popup-icon">${svgIcon('rocket', '#88ddff', 14)}</span>
         <span class="popup-title">${escapeHtml(port.name.toUpperCase())}</span>
         <span class="popup-badge ${statusColors[port.status] || 'normal'}">${statusLabels[port.status] || port.status.toUpperCase()}</span>
         <button class="popup-close" aria-label="Close">×</button>
@@ -2646,7 +2647,7 @@ export class MapPopup {
     };
 
     // Icon based on mineral type
-    const icon = mine.mineral === 'Lithium' ? '🔋' : mine.mineral === 'Rare Earths' ? '🧲' : '💎';
+    const icon = mine.mineral === 'Lithium' ? svgIcon('lightning', '#44ffcc', 14) : mine.mineral === 'Rare Earths' ? svgIcon('diamond', '#cc88ff', 14) : svgIcon('diamond', '#aaaaaa', 14);
 
     return `
       <div class="popup-header mineral ${mine.status}">

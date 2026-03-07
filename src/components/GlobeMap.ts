@@ -19,6 +19,7 @@ import { isDesktopRuntime } from '@/services/runtime';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
 import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES } from '@/config/geo';
 import { t } from '@/services/i18n';
+import { svgIcon } from '@/utils/icons';
 import { SITE_VARIANT } from '@/config/variant';
 import { getGlobeRenderScale, resolveGlobePixelRatio, resolvePerformanceProfile, subscribeGlobeRenderScaleChange, getGlobeTexture, GLOBE_TEXTURE_URLS, subscribeGlobeTextureChange, type GlobeRenderScale, type GlobePerformanceProfile } from '@/services/globe-render-settings';
 import { getLayersForVariant, resolveLayerLabel, type MapVariant } from '@/config/map-layer-definitions';
@@ -26,6 +27,8 @@ import type { TradeRouteSegment } from '@/config/trade-routes';
 import type { GlobeStaticReadyMessage } from '@/workers/globe-data.worker';
 import { getCountryBbox, getCountriesGeoJson } from '@/services/country-geometry';
 import { escapeHtml } from '@/utils/sanitize';
+import { getNaturalEventIcon } from '@/services/eonet';
+import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
 import type { FeatureCollection, Geometry } from 'geojson';
 import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
@@ -848,14 +851,7 @@ export class GlobeMap {
     } else if (d._kind === 'hotspot') {
       const colors: Record<number, string> = { 5: '#ff2020', 4: '#ff6600', 3: '#ffaa00', 2: '#ffdd00', 1: '#88ff44' };
       const c = colors[d.escalationScore] ?? '#ffaa00';
-      el.innerHTML = `
-        <div style="
-          width:10px;height:10px;
-          background:${c};
-          border:1.5px solid rgba(255,255,255,0.6);
-          clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
-          box-shadow:0 0 8px 2px ${c}88;
-        "></div>`;
+      el.innerHTML = svgIcon('hotspot', c, 13);
       const hsKey = `geo.hotspots.${d.id}`;
       el.title = t(hsKey) !== hsKey ? t(hsKey) : d.name;
     } else if (d._kind === 'flight') {
@@ -875,10 +871,7 @@ export class GlobeMap {
         unknown:        '#cccccc',
       };
       const color = typeColors[d.type] ?? '#cccccc';
-      el.innerHTML = `
-        <div style="transform:rotate(${heading}deg);font-size:11px;color:${color};text-shadow:0 0 4px ${color}88;line-height:1;">
-          ✈
-        </div>`;
+      el.innerHTML = `<div style="transform:rotate(${heading}deg);display:inline-block;line-height:0;">${svgIcon('plane', color, 12)}</div>`;
       el.title = `${d.callsign} (${d.type})`;
     } else if (d._kind === 'vessel') {
       const typeColors: Record<string, string> = {
@@ -886,22 +879,17 @@ export class GlobeMap {
         frigate: '#44aaff', amphibious: '#88ff44', support: '#aaaaaa',
       };
       const c = typeColors[d.type] ?? '#44aaff';
-      el.innerHTML = `<div style="font-size:10px;color:${c};text-shadow:0 0 4px ${c}88;">⛴</div>`;
+      el.innerHTML = svgIcon('vessel', c, 11);
       el.title = `${d.name} (${d.type})`;
     } else if (d._kind === 'weather') {
       const severityColors: Record<string, string> = {
         Extreme: '#ff0044', Severe: '#ff6600', Moderate: '#ffaa00', Minor: '#88aaff',
       };
       const c = severityColors[d.severity] ?? '#88aaff';
-      el.innerHTML = `<div style="font-size:9px;color:${c};text-shadow:0 0 4px ${c}88;font-weight:bold;">⚡</div>`;
+      el.innerHTML = svgIcon('lightning', c, 11);
       el.title = d.headline;
     } else if (d._kind === 'natural') {
-      const typeIcons: Record<string, string> = {
-        earthquakes: '〽', volcanoes: '🌋', severeStorms: '🌀',
-        floods: '💧', wildfires: '🔥', drought: '☀',
-      };
-      const icon = typeIcons[d.category] ?? '⚠';
-      el.innerHTML = `<div style="font-size:11px;">${icon}</div>`;
+      el.innerHTML = getNaturalEventIcon(d.category as NaturalEventCategory, 12);
       el.title = d.title;
     } else if (d._kind === 'iran') {
       const sc = (d.severity === 'high' || d.severity === 'critical') ? '#ff3030' : d.severity === 'medium' ? '#ff8800' : '#ffcc00';
@@ -913,15 +901,15 @@ export class GlobeMap {
       el.title = d.title;
     } else if (d._kind === 'outage') {
       const sc = d.severity === 'total' ? '#ff2020' : d.severity === 'major' ? '#ff8800' : '#ffcc00';
-      el.innerHTML = `<div style="font-size:12px;color:${sc};text-shadow:0 0 4px ${sc}88;">📡</div>`;
+      el.innerHTML = svgIcon('satellite-dish', sc, 12);
       el.title = `${d.country}: ${d.title}`;
     } else if (d._kind === 'cyber') {
       const sc = d.severity === 'critical' ? '#ff0044' : d.severity === 'high' ? '#ff4400' : d.severity === 'medium' ? '#ffaa00' : '#44aaff';
-      el.innerHTML = `<div style="font-size:10px;color:${sc};text-shadow:0 0 4px ${sc}88;font-weight:bold;">🛡</div>`;
+      el.innerHTML = svgIcon('shield', sc, 11);
       el.title = `${d.type}: ${d.indicator}`;
     } else if (d._kind === 'fire') {
       const intensity = d.brightness > 400 ? '#ff2020' : d.brightness > 330 ? '#ff6600' : '#ffaa00';
-      el.innerHTML = `<div style="font-size:10px;color:${intensity};text-shadow:0 0 4px ${intensity}88;">🔥</div>`;
+      el.innerHTML = svgIcon('fire', intensity, 11);
       el.title = `${t('components.satelliteFires.fires')} — ${d.region}`;
     } else if (d._kind === 'protest') {
       const typeColors: Record<string, string> = {
@@ -929,7 +917,7 @@ export class GlobeMap {
         demonstration: '#88ff44', civil_unrest: '#ff6600',
       };
       const c = typeColors[d.eventType] ?? '#ffaa00';
-      el.innerHTML = `<div style="font-size:11px;color:${c};text-shadow:0 0 4px ${c}88;">📢</div>`;
+      el.innerHTML = svgIcon('megaphone', c, 12);
       el.title = d.title;
     } else if (d._kind === 'ucdp') {
       const size = Math.min(10, 5 + (d.deaths || 0) * 0.3);
@@ -939,19 +927,19 @@ export class GlobeMap {
         </div>`;
       el.title = `${d.sideA} ${t('common.vs')} ${d.sideB}`;
     } else if (d._kind === 'displacement') {
-      el.innerHTML = `<div style="font-size:11px;color:#88bbff;text-shadow:0 0 4px #88bbff88;">👥</div>`;
+      el.innerHTML = svgIcon('people', '#88bbff', 12);
       el.title = `${d.origin} → ${d.asylum}`;
     } else if (d._kind === 'climate') {
       const typeColors: Record<string, string> = { warm: '#ff4400', cold: '#44aaff', wet: '#00ccff', dry: '#ff8800', mixed: '#88ff88' };
       const c = typeColors[d.type] ?? '#88ff88';
-      el.innerHTML = `<div style="font-size:10px;color:${c};text-shadow:0 0 4px ${c}88;">🌡</div>`;
+      el.innerHTML = svgIcon('thermometer', c, 11);
       el.title = `${d.zone} (${d.type})`;
     } else if (d._kind === 'gpsjam') {
       const c = d.level === 'high' ? '#ff2020' : '#ff8800';
-      el.innerHTML = `<div style="font-size:10px;color:${c};text-shadow:0 0 4px ${c}88;">📡</div>`;
+      el.innerHTML = svgIcon('satellite-dish', c, 11);
       el.title = `${t('popups.gpsJamming.title')} (${d.level})`;
     } else if (d._kind === 'tech') {
-      el.innerHTML = `<div style="font-size:10px;color:#44aaff;text-shadow:0 0 4px #44aaff88;">💻</div>`;
+      el.innerHTML = svgIcon('laptop', '#44aaff', 11);
       el.title = d.title;
     } else if (d._kind === 'conflictZone') {
       const intColor = d.intensity === 'high' ? '#ff2020' : d.intensity === 'medium' ? '#ff8800' : '#ffcc00';
@@ -965,8 +953,8 @@ export class GlobeMap {
           "></div>
           <div style="
             position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-            font-size:9px;line-height:1;color:${intColor};
-          ">⚔</div>
+            line-height:0;
+          ">${svgIcon('conflict', intColor, 9)}</div>
         </div>`;
       const czKey = `geo.conflictZones.${d.id}`;
       el.title = t(czKey) !== czKey ? t(czKey) : d.name;
@@ -977,23 +965,16 @@ export class GlobeMap {
         other: '#aaaaaa',
       };
       const c = typeColors[d.type] ?? '#aaaaaa';
-      el.innerHTML = `
-        <div style="
-          width:0;height:0;
-          border-left:5px solid transparent;
-          border-right:5px solid transparent;
-          border-bottom:9px solid ${c};
-          filter:drop-shadow(0 0 3px ${c}88);
-        "></div>`;
+      el.innerHTML = svgIcon('compass', c, 12);
       el.title = `${d.name}${d.country ? ' · ' + d.country : ''}`;
     } else if (d._kind === 'nuclearSite') {
-      el.innerHTML = `<div style="font-size:11px;color:#ffd700;text-shadow:0 0 4px #ffd70088;">☢</div>`;
+      el.innerHTML = svgIcon('nuclear', '#ffd700', 12);
       el.title = `${d.name} (${d.type})`;
     } else if (d._kind === 'irradiator') {
-      el.innerHTML = `<div style="font-size:10px;color:#ff8800;text-shadow:0 0 3px #ff880088;">⚠</div>`;
+      el.innerHTML = svgIcon('nuclear', '#cc88ff', 11);
       el.title = `${d.city}, ${d.country}`;
     } else if (d._kind === 'spaceport') {
-      el.innerHTML = `<div style="font-size:11px;color:#88ddff;text-shadow:0 0 4px #88ddff88;">🚀</div>`;
+      el.innerHTML = svgIcon('rocket', '#88ddff', 12);
       el.title = `${d.name} (${d.operator})`;
     } else if (d._kind === 'earthquake') {
       const mc = d.magnitude >= 6 ? '#ff2020' : d.magnitude >= 4 ? '#ff8800' : '#ffcc00';
@@ -1002,28 +983,28 @@ export class GlobeMap {
       el.title = `M${d.magnitude.toFixed(1)} — ${d.place}`;
     } else if (d._kind === 'economic') {
       const ec = d.type === 'exchange' ? '#ffd700' : d.type === 'central-bank' ? '#4488ff' : '#44cc88';
-      el.innerHTML = `<div style="font-size:11px;color:${ec};text-shadow:0 0 4px ${ec}88;">💰</div>`;
+      el.innerHTML = svgIcon('coin', ec, 12);
       el.title = `${d.name} · ${d.country}`;
     } else if (d._kind === 'datacenter') {
-      el.innerHTML = `<div style="font-size:10px;color:#88aaff;text-shadow:0 0 3px #88aaff88;">🖥</div>`;
+      el.innerHTML = svgIcon('server', '#88aaff', 11);
       el.title = `${d.name} (${d.owner})`;
     } else if (d._kind === 'waterway') {
-      el.innerHTML = `<div style="font-size:10px;color:#44aadd;text-shadow:0 0 3px #44aadd88;">⚓</div>`;
+      el.innerHTML = svgIcon('anchor', '#44aadd', 11);
       el.title = d.name;
     } else if (d._kind === 'mineral') {
-      el.innerHTML = `<div style="font-size:10px;color:#cc88ff;text-shadow:0 0 3px #cc88ff88;">💎</div>`;
+      el.innerHTML = svgIcon('diamond', '#cc88ff', 11);
       el.title = `${d.mineral} — ${d.name}`;
     } else if (d._kind === 'flightDelay') {
       const sc = d.severity === 'severe' ? '#ff2020' : d.severity === 'major' ? '#ff6600' : d.severity === 'moderate' ? '#ffaa00' : '#ffee44';
-      el.innerHTML = `<div style="font-size:11px;color:${sc};text-shadow:0 0 4px ${sc}88;">✈</div>`;
+      el.innerHTML = svgIcon('plane', sc, 12);
       el.title = `${d.iata} — ${d.severity}`;
     } else if (d._kind === 'cableAdvisory') {
       const sc = d.severity === 'fault' ? '#ff2020' : '#ff8800';
-      el.innerHTML = `<div style="font-size:11px;color:${sc};text-shadow:0 0 4px ${sc}88;">🔌</div>`;
+      el.innerHTML = svgIcon('plug', sc, 12);
       el.title = `${d.title} (${d.severity})`;
     } else if (d._kind === 'repairShip') {
       const sc = d.status === 'on-station' ? '#44ff88' : '#44aaff';
-      el.innerHTML = `<div style="font-size:11px;color:${sc};text-shadow:0 0 4px ${sc}88;">🚢</div>`;
+      el.innerHTML = svgIcon('repair-ship', sc, 12);
       el.title = d.name;
     } else if (d._kind === 'newsLocation') {
       const tc = d.threatLevel === 'critical' ? '#ff2020'
@@ -1038,7 +1019,7 @@ export class GlobeMap {
       el.title = d.title;
     } else if (d._kind === 'aisDisruption') {
       const sc = d.severity === 'high' ? '#ff2020' : d.severity === 'elevated' ? '#ff8800' : '#44aaff';
-      el.innerHTML = `<div style="font-size:11px;color:${sc};text-shadow:0 0 4px ${sc}88;">⛴</div>`;
+      el.innerHTML = svgIcon('anchor', sc, 12);
       el.title = d.name;
     } else if (d._kind === 'aircraftPos') {
       const acColor = d.onGround ? '#777777' : '#a064ff';
@@ -1263,25 +1244,25 @@ export class GlobeMap {
   private showFallbackTooltip(d: GlobeMarker, e: MouseEvent): void {
     let html = '';
     if (d._kind === 'fire') {
-      html = `<span style="color:#ff6600;font-weight:bold;">🔥 Wildfire</span>` +
+      html = `<span style="color:#ff6600;font-weight:bold;">${svgIcon('fire', '#ff6600', 12)} ${t('components.deckgl.tooltip.wildfire')}</span>` +
         `<br><span style="opacity:.7;">${escapeHtml(d.region)}</span>` +
-        `<br><span style="opacity:.5;">Brightness: ${d.brightness.toFixed(0)} K</span>`;
+        `<br><span style="opacity:.5;">${t('components.deckgl.tooltip.brightness')}: ${d.brightness.toFixed(0)} K</span>`;
     } else if (d._kind === 'ucdp') {
-      html = `<span style="color:#ff6400;font-weight:bold;">⚔ ${escapeHtml(d.country)}</span>` +
-        `<br><span style="opacity:.7;">${escapeHtml(d.sideA)} vs ${escapeHtml(d.sideB)}</span>` +
-        (d.deaths ? `<br><span style="opacity:.5;">Deaths: ${d.deaths}</span>` : '');
+      html = `<span style="color:#ff6400;font-weight:bold;">${svgIcon('conflict', '#ff6400', 12)} ${escapeHtml(d.country)}</span>` +
+        `<br><span style="opacity:.7;">${escapeHtml(d.sideA)} ${t('components.deckgl.tooltip.vsLabel')} ${escapeHtml(d.sideB)}</span>` +
+        (d.deaths ? `<br><span style="opacity:.5;">${t('components.deckgl.tooltip.deaths')}: ${d.deaths}</span>` : '');
     } else if (d._kind === 'displacement') {
-      html = `<span style="color:#88bbff;font-weight:bold;">👥 Displacement</span>` +
+      html = `<span style="color:#88bbff;font-weight:bold;">${svgIcon('people', '#88bbff', 12)} ${t('components.deckgl.tooltip.displacement')}</span>` +
         `<br><span style="opacity:.7;">${escapeHtml(d.origin)} → ${escapeHtml(d.asylum)}</span>` +
-        `<br><span style="opacity:.5;">Refugees: ${d.refugees.toLocaleString()}</span>`;
+        `<br><span style="opacity:.5;">${t('components.deckgl.tooltip.refugees')}: ${d.refugees.toLocaleString()}</span>`;
     } else if (d._kind === 'climate') {
       const tc = d.type === 'warm' ? '#ff4400' : d.type === 'cold' ? '#44aaff' : '#88ff88';
-      html = `<span style="color:${tc};font-weight:bold;">🌡 ${escapeHtml(d.type.toUpperCase())}</span>` +
+      html = `<span style="color:${tc};font-weight:bold;">${svgIcon('thermometer', tc, 12)} ${escapeHtml(d.type.toUpperCase())}</span>` +
         `<br><span style="opacity:.7;">${escapeHtml(d.zone)}</span>` +
         `<br><span style="opacity:.5;">ΔT: ${d.tempDelta > 0 ? '+' : ''}${d.tempDelta.toFixed(1)}°C · ${escapeHtml(d.severity)}</span>`;
     } else if (d._kind === 'newsLocation') {
       const tc = d.threatLevel === 'critical' ? '#ff2020' : d.threatLevel === 'high' ? '#ff6600' : d.threatLevel === 'elevated' ? '#ffaa00' : '#44aaff';
-      html = `<span style="color:${tc};font-weight:bold;">📰 ${escapeHtml(d.title.slice(0, 60))}</span>` +
+      html = `<span style="color:${tc};font-weight:bold;">${svgIcon('news', tc, 12)} ${escapeHtml(d.title.slice(0, 60))}</span>` +
         `<br><span style="opacity:.5;">${escapeHtml(d.threatLevel)}</span>`;
     }
     if (!html) return;

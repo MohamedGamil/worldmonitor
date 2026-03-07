@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { escapeHtml } from '@/utils/sanitize';
+import { svgIcon } from '@/utils/icons';
 import { getCSSColor } from '@/utils';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { Feature, Geometry } from 'geojson';
@@ -652,8 +653,8 @@ export class MapComponent {
         <div class="map-legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>${escapeHtml(t('components.deckgl.layers.techHQs').toUpperCase())}</div>
         <div class="map-legend-item"><span class="legend-dot" style="background:#06b6d4"></span>${escapeHtml(t('components.deckgl.layers.startupHubs').toUpperCase())}</div>
         <div class="map-legend-item"><span class="legend-dot" style="background:#f59e0b"></span>${escapeHtml(t('components.deckgl.layers.cloudRegions').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="map-legend-icon" style="color:#a855f7">📅</span>${escapeHtml(t('components.deckgl.layers.techEvents').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="map-legend-icon" style="color:#4ecdc4">💾</span>${escapeHtml(t('components.deckgl.layers.aiDataCenters').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('chart', '#a855f7', 11)}</span>${escapeHtml(t('components.deckgl.layers.techEvents').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('server', '#4ecdc4', 11)}</span>${escapeHtml(t('components.deckgl.layers.aiDataCenters').toUpperCase())}</div>
       `;
     } else if (SITE_VARIANT === 'happy') {
       // Happy variant legend — natural events only
@@ -663,12 +664,14 @@ export class MapComponent {
     } else {
       // Geopolitical variant legend
       legend.innerHTML = `
-        <div class="map-legend-item"><span class="legend-dot high"></span>${escapeHtml((t('popups.hotspot.levels.high') ?? 'HIGH').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="legend-dot elevated"></span>${escapeHtml((t('popups.hotspot.levels.elevated') ?? 'ELEVATED').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="legend-dot low"></span>${escapeHtml((t('popups.monitoring') ?? 'MONITORING').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="map-legend-icon conflict">⚔</span>${escapeHtml(t('modals.search.types.conflict').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('hotspot', '#ff4444', 11)}</span>${escapeHtml((t('popups.hotspot.levels.high') ?? 'HIGH').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('hotspot', '#ff8800', 11)}</span>${escapeHtml((t('popups.hotspot.levels.elevated') ?? 'ELEVATED').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('hotspot', '#ffdd00', 11)}</span>${escapeHtml((t('popups.monitoring') ?? 'MONITORING').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon conflict">${svgIcon('conflict', '#ff4444', 11)}</span>${escapeHtml(t('modals.search.types.conflict').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('nuclear', '#ffd700', 11)}</span>${escapeHtml(t('components.deckgl.layers.nuclearSites').toUpperCase())}</div>
+        <div class="map-legend-item"><span class="map-legend-icon">${svgIcon('nuclear', '#cc88ff', 11)}</span>${escapeHtml(t('components.deckgl.layers.gammaIrradiators').toUpperCase())}</div>
         <div class="map-legend-item"><span class="map-legend-icon earthquake">●</span>${escapeHtml(t('modals.search.types.earthquake').toUpperCase())}</div>
-        <div class="map-legend-item"><span class="map-legend-icon apt">⚠</span>APT</div>
+        <div class="map-legend-item"><span class="map-legend-icon apt">${svgIcon('shield', '#ff4400', 11)}</span>APT</div>
       `;
     }
     return legend;
@@ -1409,6 +1412,8 @@ export class MapComponent {
         const div = document.createElement('div');
         const isHighlighted = this.highlightedAssets.nuclear.has(facility.id);
         div.className = `nuclear-marker ${facility.status}${isHighlighted ? ' asset-highlight asset-highlight-nuclear' : ''}`;
+        const nuclearColors: Record<string, string> = { active: '#ffd700', contested: '#ff4444', inactive: '#888888' };
+        div.innerHTML = svgIcon('nuclear', nuclearColors[facility.status] ?? '#ffd700', 13);
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.title = `${facility.name} (${facility.type})`;
@@ -1436,6 +1441,7 @@ export class MapComponent {
 
         const div = document.createElement('div');
         div.className = 'irradiator-marker';
+        div.innerHTML = svgIcon('nuclear', '#cc88ff', 10);
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.title = `${irradiator.city}, ${irradiator.country}`;
@@ -1644,7 +1650,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'economic-icon';
-        icon.textContent = center.type === 'exchange' ? '📈' : center.type === 'central-bank' ? '🏛' : '💰';
+        icon.innerHTML = center.type === 'exchange' ? svgIcon('chart', '#ffd700', 12) : center.type === 'central-bank' ? svgIcon('bank', '#4488ff', 12) : svgIcon('coin', '#44cc88', 12);
         div.appendChild(icon);
         div.title = center.name;
 
@@ -1678,7 +1684,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'weather-icon';
-        icon.textContent = '⚠';
+        icon.innerHTML = svgIcon('warning', '#ffaa00', 11);
         div.appendChild(icon);
 
         div.addEventListener('click', (e) => {
@@ -1709,7 +1715,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'outage-icon';
-        icon.textContent = '📡';
+        icon.innerHTML = svgIcon('satellite-dish', '#ff8800', 12);
         div.appendChild(icon);
 
         const label = document.createElement('div');
@@ -1745,7 +1751,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'cable-advisory-icon';
-        icon.textContent = advisory.severity === 'fault' ? '⚡' : '⚠';
+        icon.innerHTML = advisory.severity === 'fault' ? svgIcon('lightning', '#ff2020', 12) : svgIcon('warning', '#ff8800', 12);
         div.appendChild(icon);
 
         const label = document.createElement('div');
@@ -1778,7 +1784,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'repair-ship-icon';
-        icon.textContent = '🚢';
+        icon.innerHTML = svgIcon('repair-ship', '#44aaff', 12);
         div.appendChild(icon);
 
         const label = document.createElement('div');
@@ -1816,7 +1822,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'datacenter-icon';
-        icon.textContent = '🖥️';
+        icon.innerHTML = svgIcon('server', '#88aaff', 12);
         div.appendChild(icon);
 
         div.addEventListener('click', (e) => {
@@ -1847,7 +1853,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'spaceport-icon';
-        icon.textContent = '🚀';
+        icon.innerHTML = svgIcon('rocket', '#88ddff', 12);
         div.appendChild(icon);
 
         const label = document.createElement('div');
@@ -1884,7 +1890,7 @@ export class MapComponent {
         const icon = document.createElement('div');
         icon.className = 'mineral-icon';
         // Select icon based on mineral type
-        icon.textContent = mine.mineral === 'Lithium' ? '🔋' : mine.mineral === 'Rare Earths' ? '🧲' : '💎';
+        icon.innerHTML = mine.mineral === 'Lithium' ? svgIcon('lightning', '#44ffcc', 12) : mine.mineral === 'Rare Earths' ? svgIcon('diamond', '#cc88ff', 12) : svgIcon('diamond', '#cc88ff', 12);
         div.appendChild(icon);
 
         const label = document.createElement('div');
@@ -1922,7 +1928,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'startup-hub-icon';
-        icon.textContent = hub.tier === 'mega' ? '🦄' : hub.tier === 'major' ? '🚀' : '💡';
+        icon.innerHTML = hub.tier === 'mega' ? svgIcon('unicorn', '#cc88ff', 12) : hub.tier === 'major' ? svgIcon('rocket', '#88ddff', 12) : svgIcon('lightbulb', '#ffdd44', 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 2 || hub.tier === 'mega') {
@@ -1961,8 +1967,13 @@ export class MapComponent {
         const icon = document.createElement('div');
         icon.className = 'cloud-region-icon';
         // Provider-specific icons
-        const icons: Record<string, string> = { aws: '🟠', gcp: '🔵', azure: '🟣', cloudflare: '🟡' };
-        icon.textContent = icons[region.provider] || '☁️';
+        const iconMap: Record<string, string> = {
+          aws: svgIcon('cloud-aws', '#FF9900', 13),
+          gcp: svgIcon('cloud-gcp', '#4285F4', 13),
+          azure: svgIcon('cloud-azure', '#0078D4', 13),
+          cloudflare: svgIcon('cloud-cf', '#F48120', 13),
+        };
+        icon.innerHTML = iconMap[region.provider] || svgIcon('server', '#aaaaaa', 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 3) {
@@ -2011,7 +2022,7 @@ export class MapComponent {
           // Show count for clusters
           const unicornCount = cluster.items.filter(h => h.type === 'unicorn').length;
           const faangCount = cluster.items.filter(h => h.type === 'faang').length;
-          icon.textContent = faangCount > 0 ? '🏛️' : unicornCount > 0 ? '🦄' : '🏢';
+          icon.innerHTML = faangCount > 0 ? svgIcon('bank', '#ffd700', 12) : unicornCount > 0 ? svgIcon('unicorn', '#cc88ff', 12) : svgIcon('building', '#aaaaaa', 12);
 
           const badge = document.createElement('div');
           badge.className = 'cluster-badge';
@@ -2020,7 +2031,7 @@ export class MapComponent {
 
           div.title = cluster.items.map(h => h.company).join(', ');
         } else {
-          icon.textContent = primaryItem.type === 'faang' ? '🏛️' : primaryItem.type === 'unicorn' ? '🦄' : '🏢';
+          icon.innerHTML = primaryItem.type === 'faang' ? svgIcon('bank', '#ffd700', 12) : primaryItem.type === 'unicorn' ? svgIcon('unicorn', '#cc88ff', 12) : svgIcon('building', '#aaaaaa', 12);
         }
         div.appendChild(icon);
 
@@ -2070,7 +2081,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'accelerator-icon';
-        icon.textContent = acc.type === 'accelerator' ? '🎯' : acc.type === 'incubator' ? '🔬' : '🎨';
+        icon.innerHTML = acc.type === 'accelerator' ? svgIcon('target', '#ff8844', 12) : acc.type === 'incubator' ? svgIcon('microscope', '#44ccaa', 12) : svgIcon('palette', '#cc88ff', 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 3) {
@@ -2161,13 +2172,13 @@ export class MapComponent {
         const pos = projection([exchange.lon, exchange.lat]);
         if (!pos || !Number.isFinite(pos[0]) || !Number.isFinite(pos[1])) return;
 
-        const icon = exchange.tier === 'mega' ? '🏛️' : exchange.tier === 'major' ? '📊' : '📈';
+        const exchIcon = exchange.tier === 'mega' ? svgIcon('bank', '#ffd700', 13) : exchange.tier === 'major' ? svgIcon('chart', '#aaddff', 12) : svgIcon('chart', '#88aaff', 11);
         const div = document.createElement('div');
         div.className = `map-marker exchange-marker tier-${exchange.tier}`;
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.style.zIndex = exchange.tier === 'mega' ? '50' : '40';
-        div.textContent = icon;
+        div.innerHTML = exchIcon;
         div.title = `${exchange.shortName} (${exchange.city})`;
 
         if ((this.state.zoom >= 2 && exchange.tier === 'mega') || this.state.zoom >= 3) {
@@ -2198,13 +2209,13 @@ export class MapComponent {
         const pos = projection([center.lon, center.lat]);
         if (!pos || !Number.isFinite(pos[0]) || !Number.isFinite(pos[1])) return;
 
-        const icon = center.type === 'global' ? '💰' : center.type === 'regional' ? '🏦' : '🏝️';
+        const fcIcon = center.type === 'global' ? svgIcon('coin', '#ffd700', 13) : center.type === 'regional' ? svgIcon('bank', '#4488ff', 12) : svgIcon('coin', '#44cc88', 11);
         const div = document.createElement('div');
         div.className = `map-marker financial-center-marker type-${center.type}`;
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.style.zIndex = center.type === 'global' ? '45' : '35';
-        div.textContent = icon;
+        div.innerHTML = fcIcon;
         div.title = `${center.name} Financial Center`;
 
         if ((this.state.zoom >= 2 && center.type === 'global') || this.state.zoom >= 3) {
@@ -2235,13 +2246,13 @@ export class MapComponent {
         const pos = projection([bank.lon, bank.lat]);
         if (!pos || !Number.isFinite(pos[0]) || !Number.isFinite(pos[1])) return;
 
-        const icon = bank.type === 'supranational' ? '🌐' : bank.type === 'major' ? '🏛️' : '🏦';
+        const cbIcon = bank.type === 'supranational' ? svgIcon('globe', '#44aaff', 13) : bank.type === 'major' ? svgIcon('bank', '#ffd700', 13) : svgIcon('bank', '#aaaaaa', 12);
         const div = document.createElement('div');
         div.className = `map-marker central-bank-marker type-${bank.type}`;
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.style.zIndex = bank.type === 'supranational' ? '48' : bank.type === 'major' ? '42' : '38';
-        div.textContent = icon;
+        div.innerHTML = cbIcon;
         div.title = `${bank.shortName} - ${bank.name}`;
 
         if ((this.state.zoom >= 2 && (bank.type === 'major' || bank.type === 'supranational')) || this.state.zoom >= 3) {
@@ -2272,13 +2283,13 @@ export class MapComponent {
         const pos = projection([hub.lon, hub.lat]);
         if (!pos || !Number.isFinite(pos[0]) || !Number.isFinite(pos[1])) return;
 
-        const icon = hub.type === 'exchange' ? '📦' : hub.type === 'port' ? '🚢' : '⛽';
+        const chIcon = hub.type === 'exchange' ? svgIcon('package', '#cc8844', 12) : hub.type === 'port' ? svgIcon('anchor', '#44aadd', 12) : svgIcon('oil', '#ff8800', 12);
         const div = document.createElement('div');
         div.className = `map-marker commodity-hub-marker type-${hub.type}`;
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
         div.style.zIndex = '38';
-        div.textContent = icon;
+        div.innerHTML = chIcon;
         div.title = `${hub.name} (${hub.city})`;
 
         if (this.state.zoom >= 3) {
@@ -2403,7 +2414,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'protest-icon';
-        icon.textContent = hasRiot ? '🔥' : primaryEvent.eventType === 'strike' ? '✊' : '📢';
+        icon.innerHTML = hasRiot ? svgIcon('fire', '#ff3030', 12) : primaryEvent.eventType === 'strike' ? svgIcon('fist', '#44aaff', 12) : svgIcon('megaphone', '#ffaa00', 12);
         div.appendChild(icon);
 
         if (isCluster) {
@@ -2456,7 +2467,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'flight-delay-icon';
-        icon.textContent = delay.delayType === 'ground_stop' ? '🛑' : delay.severity === 'severe' ? '✈️' : '🛫';
+        icon.innerHTML = delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff2020', 12) : delay.severity === 'severe' ? svgIcon('plane', '#ff4444', 12) : svgIcon('plane', '#ffaa00', 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 3) {
@@ -2527,11 +2538,18 @@ export class MapComponent {
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
 
-        // Crosshair icon - rotates with heading
+        // Plane icon - rotates with heading
+        const FLIGHT_TYPE_COLORS: Record<string, string> = {
+          fighter: '#ff3232', bomber: '#ff7800', reconnaissance: '#3ca0ff',
+          awacs: '#3cc8ff', tanker: '#8cff50', transport: '#b4b4ff',
+          helicopter: '#ffff50', drone: '#ff50ff', patrol: '#50c8c8',
+          special_ops: '#ffa028', vip: '#dcb4ff', unknown: '#cccccc',
+        };
+        const flightColor = FLIGHT_TYPE_COLORS[flight.aircraftType] ?? '#cccccc';
         const icon = document.createElement('div');
         icon.className = `military-flight-icon ${flight.aircraftType}`;
-        icon.style.transform = `rotate(${flight.heading}deg)`;
-        // CSS handles the crosshair rendering
+        icon.style.lineHeight = '0';
+        icon.innerHTML = `<div style="transform:rotate(${flight.heading}deg);display:inline-block;line-height:0;">${svgIcon('plane', flightColor, 14)}</div>`;
         div.appendChild(icon);
 
         // Show callsign at higher zoom levels
@@ -2630,17 +2648,22 @@ export class MapComponent {
         div.style.left = `${pos[0]}px`;
         div.style.top = `${pos[1]}px`;
 
+        const VESSEL_TYPE_COLORS: Record<string, string> = {
+          carrier: '#ff4444', destroyer: '#ff8800', submarine: '#8844ff',
+          frigate: '#44aaff', amphibious: '#88ff44', support: '#aaaaaa',
+        };
+        const vesselColor = VESSEL_TYPE_COLORS[vessel.vesselType] ?? '#44aaff';
         const icon = document.createElement('div');
         icon.className = `military-vessel-icon ${vessel.vesselType}`;
-        icon.style.transform = `rotate(${vessel.heading}deg)`;
-        // CSS handles the diamond/anchor rendering
+        icon.style.lineHeight = '0';
+        icon.innerHTML = `<div style="transform:rotate(${vessel.heading}deg);display:inline-block;line-height:0;">${svgIcon('vessel', vesselColor, 12)}</div>`;
         div.appendChild(icon);
 
         // Dark vessel warning indicator
         if (vessel.isDark) {
           const darkIndicator = document.createElement('div');
           darkIndicator.className = 'dark-vessel-indicator';
-          darkIndicator.textContent = '⚠️';
+          darkIndicator.innerHTML = svgIcon('warning', '#ffaa00', 11);
           darkIndicator.title = 'AIS Signal Lost';
           div.appendChild(darkIndicator);
         }
@@ -2735,7 +2758,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'nat-event-icon';
-        icon.textContent = getNaturalEventIcon(event.category);
+        icon.innerHTML = getNaturalEventIcon(event.category, 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 2) {
@@ -2832,7 +2855,7 @@ export class MapComponent {
 
       const icon = document.createElement('div');
       icon.className = 'ais-disruption-icon';
-      icon.textContent = event.type === 'gap_spike' ? '🛰️' : '🚢';
+      icon.innerHTML = event.type === 'gap_spike' ? svgIcon('satellite2', '#4488ff', 12) : svgIcon('anchor', '#aaaaaa', 12);
       div.appendChild(icon);
 
       const label = document.createElement('div');
@@ -2893,7 +2916,7 @@ export class MapComponent {
 
       const icon = document.createElement('div');
       icon.className = 'port-icon';
-      icon.textContent = port.type === 'naval' ? '⚓' : port.type === 'oil' || port.type === 'lng' ? '🛢️' : '🏭';
+      icon.innerHTML = port.type === 'naval' ? svgIcon('anchor', '#6496ff', 12) : port.type === 'oil' || port.type === 'lng' ? svgIcon('oil', '#ff8c00', 12) : svgIcon('factory', '#00c8ff', 12);
       div.appendChild(icon);
 
       const label = document.createElement('div');
@@ -2926,7 +2949,7 @@ export class MapComponent {
       div.style.left = `${pos[0]}px`;
       div.style.top = `${pos[1]}px`;
       div.innerHTML = `
-        <div class="apt-icon">⚠</div>
+        <div class="apt-icon">${svgIcon('shield', '#ff4400', 12)}</div>
         <div class="apt-label">${escapeHtml(apt.name)}</div>
       `;
 

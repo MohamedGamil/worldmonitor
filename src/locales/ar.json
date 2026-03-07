@@ -1078,7 +1078,18 @@
         "stake": "حصة",
         "basesCount": "{{count}} قاعدة",
         "positiveEvent": "حدث إيجابي",
-        "sourcesReporting": "مصادر تُفيد"
+        "sourcesReporting": "مصادر تُفيد",
+        "wildfire": "حريق طبيعي",
+        "brightness": "السطوع",
+        "deaths": "وفيات",
+        "displacement": "نزوح",
+        "refugees": "لاجئون",
+        "vsLabel": "مقابل",
+        "happiness": "السعادة",
+        "noData": "لا بيانات",
+        "cii": "مؤشر CII",
+        "status": "الحالة",
+        "renewable": "طاقة متجددة"
       },
       "layerHelp": {
         "title": "دليل طبقات الخريطة",
