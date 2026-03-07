@@ -195,6 +195,45 @@ export function getLocalizedCountryName(codeOrName: string): string {
     code = alpha3To2[code]!;
   }
 
+  // Map common English country/entity names to ISO alpha-2 codes so that
+  // Intl.DisplayNames can localize them (e.g. "United States" → "US" → "الولايات المتحدة").
+  const nameToAlpha2: Record<string, string> = {
+    'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US', 'AMERICA': 'US',
+    'UNITED KINGDOM': 'GB', 'BRITAIN': 'GB', 'GREAT BRITAIN': 'GB', 'ENGLAND': 'GB',
+    'RUSSIA': 'RU', 'RUSSIAN FEDERATION': 'RU',
+    'CHINA': 'CN', "PEOPLE'S REPUBLIC OF CHINA": 'CN',
+    'UKRAINE': 'UA', 'FRANCE': 'FR', 'GERMANY': 'DE', 'ITALY': 'IT',
+    'SPAIN': 'ES', 'PORTUGAL': 'PT', 'NETHERLANDS': 'NL', 'BELGIUM': 'BE',
+    'SWEDEN': 'SE', 'NORWAY': 'NO', 'DENMARK': 'DK', 'FINLAND': 'FI',
+    'POLAND': 'PL', 'TURKEY': 'TR', 'GREECE': 'GR', 'SWITZERLAND': 'CH',
+    'AUSTRIA': 'AT', 'CZECH REPUBLIC': 'CZ', 'CZECHIA': 'CZ', 'HUNGARY': 'HU',
+    'ROMANIA': 'RO', 'BULGARIA': 'BG', 'SERBIA': 'RS', 'CROATIA': 'HR',
+    'ISRAEL': 'IL', 'IRAN': 'IR', 'IRAQ': 'IQ', 'SYRIA': 'SY',
+    'SAUDI ARABIA': 'SA', 'YEMEN': 'YE', 'JORDAN': 'JO', 'LEBANON': 'LB',
+    'EGYPT': 'EG', 'LIBYA': 'LY', 'TUNISIA': 'TN', 'ALGERIA': 'DZ',
+    'MOROCCO': 'MA', 'SUDAN': 'SD', 'SOUTH SUDAN': 'SS', 'ETHIOPIA': 'ET',
+    'SOMALIA': 'SO', 'KENYA': 'KE', 'NIGERIA': 'NG', 'GHANA': 'GH',
+    'SOUTH AFRICA': 'ZA', 'CONGO': 'CD', 'DEMOCRATIC REPUBLIC OF THE CONGO': 'CD',
+    'MALI': 'ML', 'NIGER': 'NE', 'CHAD': 'TD', 'MOZAMBIQUE': 'MZ',
+    'AFGHANISTAN': 'AF', 'PAKISTAN': 'PK', 'INDIA': 'IN', 'BANGLADESH': 'BD',
+    'MYANMAR': 'MM', 'BURMA': 'MM', 'THAILAND': 'TH', 'VIETNAM': 'VN',
+    'PHILIPPINES': 'PH', 'INDONESIA': 'ID', 'MALAYSIA': 'MY',
+    'SOUTH KOREA': 'KR', 'NORTH KOREA': 'KP', 'JAPAN': 'JP',
+    'TAIWAN': 'TW', 'HONG KONG': 'HK',
+    'BRAZIL': 'BR', 'ARGENTINA': 'AR', 'COLOMBIA': 'CO', 'VENEZUELA': 'VE',
+    'MEXICO': 'MX', 'CANADA': 'CA', 'CUBA': 'CU',
+    'AZERBAIJAN': 'AZ', 'ARMENIA': 'AM', 'GEORGIA': 'GE',
+    'KAZAKHSTAN': 'KZ', 'UZBEKISTAN': 'UZ',
+    'UNITED ARAB EMIRATES': 'AE', 'UAE': 'AE',
+    'QATAR': 'QA', 'KUWAIT': 'KW', 'BAHRAIN': 'BH', 'OMAN': 'OM',
+    'NATO': '', // handled below — no ISO code
+  };
+
+  if (code.length > 2) {
+    const mapped = nameToAlpha2[code];
+    if (mapped) code = mapped;
+  }
+
   // If it's strictly a 2-letter code, try to natively translate it
   if (code.length === 2) {
     try {

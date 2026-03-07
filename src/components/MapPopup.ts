@@ -548,7 +548,7 @@ export class MapPopup {
           <div class="popup-section">
             <span class="section-label">${t('popups.belligerents')}</span>
             <div class="popup-tags">
-              ${conflict.parties.map(p => `<span class="popup-tag">${escapeHtml(p)}</span>`).join('')}
+              ${conflict.parties.map(p => `<span class="popup-tag">${escapeHtml(getLocalizedGeoName(p))}</span>`).join('')}
             </div>
           </div>
         ` : ''}
@@ -1012,7 +1012,7 @@ export class MapPopup {
       ? `<div class="popup-stat"><span class="stat-label">${t('popups.actors')}</span><span class="stat-value">${event.actors.map(a => escapeHtml(a)).join(', ')}</span></div>`
       : '';
     const tagsSection = event.tags?.length
-      ? `<div class="popup-tags">${event.tags.map(t => `<span class="popup-tag">${escapeHtml(t)}</span>`).join('')}</div>`
+      ? `<div class="popup-tags">${event.tags.map(tag => `<span class="popup-tag">${escapeHtml(tag)}</span>`).join('')}</div>`
       : '';
     const relatedHotspots = event.relatedHotspots?.length
       ? `<div class="popup-related">${t('popups.near')}: ${event.relatedHotspots.map(h => escapeHtml(h)).join(', ')}</div>`
