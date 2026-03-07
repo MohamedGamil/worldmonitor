@@ -851,7 +851,7 @@ export class GlobeMap {
     } else if (d._kind === 'hotspot') {
       const colors: Record<number, string> = { 5: '#ff2020', 4: '#ff6600', 3: '#ffaa00', 2: '#ffdd00', 1: '#88ff44' };
       const c = colors[d.escalationScore] ?? '#ffaa00';
-      el.innerHTML = svgIcon('hotspot', c, 13);
+      el.innerHTML = svgIcon('hotspot', c, 15);
       const hsKey = `geo.hotspots.${d.id}`;
       el.title = t(hsKey) !== hsKey ? t(hsKey) : d.name;
     } else if (d._kind === 'flight') {
@@ -970,7 +970,7 @@ export class GlobeMap {
         other: '#aaaaaa',
       };
       const c = typeColors[d.type] ?? '#aaaaaa';
-      el.innerHTML = svgIcon('compass', c, 12);
+      el.innerHTML = svgIcon('compass', c, 14);
       el.title = `${d.name}${d.country ? ' · ' + d.country : ''}`;
     } else if (d._kind === 'nuclearSite') {
       el.innerHTML = svgIcon('nuclear', '#ffd700', 15);

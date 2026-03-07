@@ -1588,7 +1588,9 @@ export class DeckGLMap {
 
 
   private getBasesData(): MilitaryBaseEnriched[] {
-    return this.serverBasesLoaded ? this.serverBases : MILITARY_BASES as MilitaryBaseEnriched[];
+    return (this.serverBasesLoaded && this.serverBases.length > 0)
+      ? this.serverBases
+      : MILITARY_BASES as MilitaryBaseEnriched[];
   }
 
   private getBaseColor(type: string, a: number): [number, number, number, number] {
@@ -1619,7 +1621,7 @@ export class DeckGLMap {
       getIcon: () => 'plane',
       iconAtlas: MARKER_ICONS.plane,
       iconMapping: AIRCRAFT_ICON_MAPPING,
-      getSize: (d) => highlightedBases.has(d.id) ? 16 : 11,
+      getSize: (d) => highlightedBases.has(d.id) ? 18 : 13,
       getColor: (d) => {
         if (highlightedBases.has(d.id)) {
           return [255, 100, 100, 220] as [number, number, number, number];
@@ -1627,8 +1629,8 @@ export class DeckGLMap {
         return this.getBaseColor(d.type, a);
       },
       sizeScale: 1,
-      sizeMinPixels: 6,
-      sizeMaxPixels: 16,
+      sizeMinPixels: 7,
+      sizeMaxPixels: 18,
       pickable: true,
     });
   }
@@ -2693,7 +2695,7 @@ export class DeckGLMap {
   private createHotspotsLayers(): Layer[] {
     const zoom = this.maplibreMap?.getZoom() || 2;
     const zoomScale = Math.min(1, (zoom - 1) / 3);
-    const maxPx = 6 + Math.round(14 * zoomScale);
+    const maxPx = 8 + Math.round(16 * zoomScale);
     const baseOpacity = zoom < 2.5 ? 0.5 : zoom < 4 ? 0.7 : 1.0;
     const layers: Layer[] = [];
 
@@ -2713,7 +2715,7 @@ export class DeckGLMap {
         if (score >= 2) return [255, 165, 0, a] as [number, number, number, number];
         return [255, 255, 0, a] as [number, number, number, number];
       },
-      radiusMinPixels: 4,
+      radiusMinPixels: 5,
       radiusMaxPixels: maxPx,
       pickable: true,
       stroked: true,
@@ -2735,8 +2737,8 @@ export class DeckGLMap {
           return 10000 + score * 5000;
         },
         radiusScale: pulse,
-        radiusMinPixels: 6,
-        radiusMaxPixels: 30,
+        radiusMinPixels: 8,
+        radiusMaxPixels: 36,
         stroked: true,
         filled: false,
         getLineColor: (d) => {
