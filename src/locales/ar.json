@@ -271,7 +271,9 @@
     "gulfEconomies": "اقتصادات الخليج",
     "gulfIndices": "مؤشرات الخليج",
     "gulfCurrencies": "عملات الخليج",
-    "gulfOil": "نفط الخليج"
+    "gulfOil": "نفط الخليج",
+    "airlineIntel": "استخبارات الطيران",
+    "worldClock": "الساعة العالمية"
   },
   "commands": {
     "prefixes": {
@@ -1799,6 +1801,28 @@
     },
     "globe": {
       "loadingGlobe": "جارٍ التحميل…"
+    },
+    "securityAdvisories": {
+      "loading": "جارٍ جلب تحذيرات السفر...",
+      "noMatching": "لا توجد تحذيرات تطابق هذا الفلتر",
+      "critical": "حرج",
+      "health": "صحة",
+      "sources": "وزارة الخارجية الأمريكية، DFAT، FCDO، MFAT، CDC، ECDC، WHO",
+      "refresh": "تحديث",
+      "infoTooltip": "<strong>التحذيرات الأمنية</strong><br>تحذيرات السفر والتنبيهات الأمنية من وزارات الخارجية الحكومية.<br><br><strong>المصادر:</strong><br>🇺🇸 وزارة الخارجية الأمريكية<br>🇦🇺 DFAT الأسترالية<br>🇬🇧 FCDO البريطانية<br>🇳🇿 MFAT النيوزيلندية<br><br><strong>المستويات:</strong><br>🟥 لا تسافر<br>🟧 أعد التفكير في السفر<br>🟨 توخّ الحذر<br>🟩 احتياطات عادية",
+      "levels": {
+        "doNotTravel": "لا تسافر",
+        "reconsider": "أعد التفكير في السفر",
+        "caution": "توخّ الحذر",
+        "normal": "احتياطات عادية",
+        "info": "معلومات"
+      },
+      "time": {
+        "justNow": "الآن",
+        "minutesAgo": "منذ {{count}} د",
+        "hoursAgo": "منذ {{count}} س",
+        "daysAgo": "منذ {{count}} ي"
+      }
     }
   },
   "popups": {
@@ -2630,7 +2654,8 @@
     "loadingGiving": "جارٍ تحميل بيانات العطاء العالمي",
     "rateLimitedMarket": "بيانات السوق غير متاحة مؤقتاً (تقييد معدل الطلبات) — ستتم إعادة المحاولة قريباً",
     "beta": "نسخة تجريبية",
-    "vs": "ضد"
+    "vs": "ضد",
+    "all": "الكل"
   },
   "geo": {
     "conflictZones": {

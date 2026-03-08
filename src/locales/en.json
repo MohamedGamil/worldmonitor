@@ -262,7 +262,9 @@
     "gulfEconomies": "Gulf Economies",
     "gulfIndices": "Gulf Indices",
     "gulfCurrencies": "Gulf Currencies",
-    "gulfOil": "Gulf Oil"
+    "gulfOil": "Gulf Oil",
+    "airlineIntel": "Airline Intelligence",
+    "worldClock": "World Clock"
   },
   "commands": {
     "prefixes": {
