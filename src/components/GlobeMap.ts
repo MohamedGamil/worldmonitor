@@ -345,6 +345,7 @@ export class GlobeMap {
   private innerGlow: any = null;
   private starField: any = null;
   private cyanLight: any = null;
+  private satOrbits: Array<{ group: any; sprite: any; r: number; phase: number; speed: number }> = [];
   private extrasAnimFrameId: number | null = null;
   private pendingFlushWhilePaused = false;
   private globeDataWorker: Worker | null = null;
@@ -638,10 +639,66 @@ export class GlobeMap {
         this.starField = new THREE.Points(starGeo, starMat);
         scene.add(this.starField);
 
+        // --- Orbiting satellite sprites ---
+        // Globe.gl GLOBE_RADIUS = 100 in Three.js world units.
+        // Satellites orbit at r=110–130 (10–30 % above the surface).
+        const satCanvas = document.createElement('canvas');
+        satCanvas.width = 64;
+        satCanvas.height = 64;
+        const satCtx = satCanvas.getContext('2d')!;
+        // Scale 64×64 canvas to match SVG viewBox (24×24)
+        satCtx.scale(64 / 24, 64 / 24);
+        satCtx.fillStyle = 'rgba(255,255,255,0.95)';
+        // SVG path from satellite-3-f-svgrepo-com.svg
+        satCtx.fill(new Path2D(
+          'M1 9H0a15.018 15.018 0 0 0 15 15v-1A14.015 14.015 0 0 1 1 9zm4 0H4a11.007 11.007 0 0 0 11 11v-1A10.016 10.016 0 0 1 5 9zm4 0H8a7.008 7.008 0 0 0 7 7v-1a6.005 6.005 0 0 1-6-6zm15 5.29l-4.5-4.5-1 1-1.29-1.29 2-2-2.71-2.71-2 2-1.29-1.29 1-1L9.71 0h-.42l-2.5 2.5 4.71 4.71 1-1 1.29 1.29-2 2 2.71 2.71 2-2 1.29 1.29-1 1 4.71 4.71 2.5-2.5z'
+        ));
+        const satTex = new THREE.CanvasTexture(satCanvas);
+
+        // 5 orbital planes: ISS-like, SSO, equatorial, Molniya-like, polar
+        // Globe surface = 100 world units. Low-to-mid orbit: r=102–105 (2–5% above surface).
+        // Slow angular speeds (rad/s) to convey vast Earth-scale distances.
+        const SAT_ORBIT_CONFIGS = [
+          { r: 102.5, incl: 51.6, raan:   0, phase: 0.0, speed: 0.008 },
+          { r: 104.0, incl: 98.0, raan:  72, phase: 1.2, speed: 0.006 },
+          { r: 101.8, incl: 10.0, raan: 360, phase: 2.5, speed: 0.010 },
+          { r: 103.2, incl: 63.4, raan: 216, phase: 0.8, speed: 0.005 },
+          { r: 102.0, incl: 90.0, raan: 288, phase: 3.7, speed: 0.007 },
+        ] as const;
+
+        for (const orb of SAT_ORBIT_CONFIGS) {
+          const spriteMat = new THREE.SpriteMaterial({
+            map: satTex,
+            transparent: true,
+            opacity: 0.90,
+            depthWrite: false,
+            // depthTest: true (default) — satellites are occluded by the globe
+            // on the far hemisphere and reappear on the near side, giving true
+            // 3D orbital behaviour identical to how globe.gl HTML markers work.
+          });
+          const sprite = new THREE.Sprite(spriteMat);
+          sprite.scale.set(1.3, 1.3, 1);
+          const group = new THREE.Group();
+          group.rotation.order = 'YXZ';
+          // rotation.y = RAAN: rotates the node around the polar (Y) axis
+          group.rotation.y = orb.raan * (Math.PI / 180);
+          // rotation.x = inclination: tilts the orbital plane away from equatorial (XZ) plane
+          group.rotation.x = orb.incl * (Math.PI / 180);
+          sprite.position.set(orb.r, 0, 0);
+          group.add(sprite);
+          scene.add(group);
+          this.satOrbits.push({ group, sprite, r: orb.r, phase: orb.phase, speed: orb.speed });
+        }
+
         const animateExtras = () => {
           if (this.destroyed) return;
           if (this.outerGlow) this.outerGlow.rotation.y += 0.0003;
           if (this.starField) this.starField.rotation.y += 0.00005;
+          const tSec = Date.now() * 0.001;
+          for (const sat of this.satOrbits) {
+            const angle = sat.phase + tSec * sat.speed;
+            sat.sprite.position.set(sat.r * Math.cos(angle), 0, sat.r * Math.sin(angle));
+          }
           this.extrasAnimFrameId = requestAnimationFrame(animateExtras);
         };
         animateExtras();
@@ -2256,6 +2313,7 @@ export class GlobeMap {
       if (this.outerGlow) this.outerGlow.visible = true;
       if (this.innerGlow) this.innerGlow.visible = true;
     }
+    for (const sat of this.satOrbits) sat.group.visible = true;
 
     if (prevPulse !== this._pulseEnabled) {
       this.flushMarkers();
@@ -2289,6 +2347,12 @@ export class GlobeMap {
     this.innerGlow = null;
     this.starField = null;
     this.cyanLight = null;
+    for (const sat of this.satOrbits) {
+      if (scene) scene.remove(sat.group);
+      (sat.sprite.material as any).map?.dispose();
+      (sat.sprite.material as any).dispose();
+    }
+    this.satOrbits = [];
     if (this.flushTimer) { clearTimeout(this.flushTimer); this.flushTimer = null; }
     if (this.flushMaxTimer) { clearTimeout(this.flushMaxTimer); this.flushMaxTimer = null; }
     if (this.aircraftFetchTimer) { clearInterval(this.aircraftFetchTimer); this.aircraftFetchTimer = null; }
