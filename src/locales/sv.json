@@ -1407,7 +1407,19 @@
       "types": {
         "us-nato": "USA/NATO",
         "china": "KINA",
-        "russia": "RYSSLAND"
+        "russia": "RYSSLAND",
+        "france": "Frankrike",
+        "india": "Indien",
+        "italy": "Italien",
+        "japan": "Japan",
+        "uae": "UAE",
+        "uk": "UK",
+        "us": "USA",
+        "naval": "Marin",
+        "air": "Flygvapen",
+        "marine": "Marinkår",
+        "space": "Rymdstyrkan",
+        "other": "Annan"
       }
     },
     "protest": {

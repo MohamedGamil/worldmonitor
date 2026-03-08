@@ -1554,7 +1554,19 @@
       "types": {
         "us-nato": "美国/NATO",
         "china": "中国",
-        "russia": "俄罗斯"
+        "russia": "俄罗斯",
+        "france": "法国",
+        "india": "印度",
+        "italy": "意大利",
+        "japan": "日本",
+        "uae": "阿联酋",
+        "uk": "英国",
+        "us": "美军",
+        "naval": "海军",
+        "air": "空军",
+        "marine": "陆战队",
+        "space": "太空军",
+        "other": "其他"
       }
     },
     "protest": {

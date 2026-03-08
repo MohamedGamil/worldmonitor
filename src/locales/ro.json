@@ -1677,7 +1677,19 @@
       "types": {
         "us-nato": "SUA/NATO",
         "china": "CHINA",
-        "russia": "RUSIA"
+        "russia": "RUSIA",
+        "france": "Franța",
+        "india": "India",
+        "italy": "Italia",
+        "japan": "Japonia",
+        "uae": "EAU",
+        "uk": "UK",
+        "us": "SUA",
+        "naval": "Naval",
+        "air": "Aviație",
+        "marine": "Pușcași Marini",
+        "space": "Forțe Spațiale",
+        "other": "Altele"
       }
     },
     "protest": {

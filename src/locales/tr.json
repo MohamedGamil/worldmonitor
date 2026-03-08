@@ -1555,7 +1555,19 @@
       "types": {
         "us-nato": "ABD/NATO",
         "china": "CIN",
-        "russia": "RUSYA"
+        "russia": "RUSYA",
+        "france": "Fransa",
+        "india": "Hindistan",
+        "italy": "İtalya",
+        "japan": "Japonya",
+        "uae": "BAE",
+        "uk": "İNG",
+        "us": "ABD",
+        "naval": "Deniz",
+        "air": "Hava Kuvvetleri",
+        "marine": "Deniz Piyadesi",
+        "space": "Uzay Kuvvetleri",
+        "other": "Diğer"
       }
     },
     "protest": {

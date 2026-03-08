@@ -949,13 +949,19 @@ export class MapPopup {
   }
 
   private renderBasePopup(base: MilitaryBase): string {
-    const typeLabels: Record<string, string> = {
-      'us-nato': t('popups.base.types.us-nato'),
-      'china': t('popups.base.types.china'),
-      'russia': t('popups.base.types.russia'),
-    };
+    const typeKeys = [
+      'us-nato', 'china', 'russia', 'uk', 'france', 'india', 'italy',
+      'uae', 'turkey', 'japan', 'us', 'naval', 'air', 'marine', 'space', 'other',
+    ];
+    const typeLabels: Record<string, string> = Object.fromEntries(
+      typeKeys.map(k => [k, t(`popups.base.types.${k}`)]),
+    );
+    const localizedType = (type: string): string =>
+      typeLabels[type] || getLocalizedGeoName(type) || type;
+
     const typeColors: Record<string, string> = {
       'us-nato': 'elevated',
+      'us': 'elevated',
       'china': 'high',
       'russia': 'high',
     };
@@ -971,7 +977,7 @@ export class MapPopup {
     return `
       <div class="popup-header base">
         <span class="popup-title">${escapeHtml(base.name.toUpperCase())}</span>
-        <span class="popup-badge ${typeColors[base.type] || 'low'}">${escapeHtml(typeLabels[base.type] || base.type.toUpperCase())}</span>
+        <span class="popup-badge ${typeColors[base.type] || 'low'}">${escapeHtml(localizedType(base.type).toUpperCase())}</span>
         <button class="popup-close" aria-label="Close">×</button>
       </div>
       <div class="popup-body">
@@ -980,7 +986,7 @@ export class MapPopup {
         <div class="popup-stats">
           <div class="popup-stat">
             <span class="stat-label">${t('popups.type')}</span>
-            <span class="stat-value">${escapeHtml(typeLabels[base.type] || base.type)}</span>
+            <span class="stat-value">${escapeHtml(localizedType(base.type))}</span>
           </div>
           ${base.arm ? `<div class="popup-stat"><span class="stat-label">${t('popups.base.branch')}</span><span class="stat-value">${escapeHtml(tv(base.arm, 'popups.values.branches'))}</span></div>` : ''}
           ${base.country ? `<div class="popup-stat"><span class="stat-label">${t('popups.base.country')}</span><span class="stat-value">${escapeHtml(getLocalizedGeoName(base.country))}</span></div>` : ''}

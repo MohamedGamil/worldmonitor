@@ -1407,7 +1407,19 @@
       "types": {
         "us-nato": "VS/NAVO",
         "china": "CHINA",
-        "russia": "RUSLAND"
+        "russia": "RUSLAND",
+        "france": "Frankrijk",
+        "india": "India",
+        "italy": "Italië",
+        "japan": "Japan",
+        "uae": "VAE",
+        "uk": "VK",
+        "us": "VS",
+        "naval": "Marine",
+        "air": "Luchtmacht",
+        "marine": "Mariniers",
+        "space": "Ruimtemacht",
+        "other": "Overig"
       }
     },
     "protest": {

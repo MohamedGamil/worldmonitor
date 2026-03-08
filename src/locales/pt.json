@@ -1407,7 +1407,19 @@
       "types": {
         "us-nato": "EUA/OTAN",
         "china": "CHINA",
-        "russia": "RÚSSIA"
+        "russia": "RÚSSIA",
+        "france": "França",
+        "india": "Índia",
+        "italy": "Itália",
+        "japan": "Japão",
+        "uae": "EAU",
+        "uk": "RU",
+        "us": "EUA",
+        "naval": "Naval",
+        "air": "Força Aérea",
+        "marine": "Fuzileiros",
+        "space": "Força Espacial",
+        "other": "Outro"
       }
     },
     "protest": {

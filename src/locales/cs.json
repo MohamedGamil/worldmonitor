@@ -1558,7 +1558,19 @@
       "types": {
         "us-nato": "USA/NATO",
         "china": "ČÍNA",
-        "russia": "RUSKO"
+        "russia": "RUSKO",
+        "france": "Francie",
+        "india": "Indie",
+        "italy": "Itálie",
+        "japan": "Japonsko",
+        "uae": "SAE",
+        "uk": "UK",
+        "us": "USA",
+        "naval": "Námořní",
+        "air": "Letectvo",
+        "marine": "Mariňáci",
+        "space": "Kosmické",
+        "other": "Jiné"
       }
     },
     "protest": {

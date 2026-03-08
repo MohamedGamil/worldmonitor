@@ -1553,7 +1553,19 @@
       "types": {
         "us-nato": "USA/NATO",
         "china": "CHINY",
-        "russia": "ROSJA"
+        "russia": "ROSJA",
+        "france": "Francja",
+        "india": "Indie",
+        "italy": "Włochy",
+        "japan": "Japonia",
+        "uae": "ZEA",
+        "uk": "UK",
+        "us": "USA",
+        "naval": "Morski",
+        "air": "Lotnictwo",
+        "marine": "Marines",
+        "space": "Siły Kosmiczne",
+        "other": "Inne"
       }
     },
     "protest": {

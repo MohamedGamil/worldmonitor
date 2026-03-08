@@ -1555,7 +1555,19 @@
       "types": {
         "us-nato": "US/NATO",
         "china": "CHINA",
-        "russia": "RUSSIA"
+        "russia": "RUSSIA",
+        "france": "Pháp",
+        "india": "Ấn Độ",
+        "italy": "Ý",
+        "japan": "Nhật Bản",
+        "uae": "UAE",
+        "uk": "Anh",
+        "us": "Hoa Kỳ",
+        "naval": "Hải quân",
+        "air": "Không quân",
+        "marine": "Thủy quân lục chiến",
+        "space": "Lực lượng vũ trụ",
+        "other": "Khác"
       }
     },
     "protest": {

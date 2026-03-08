@@ -1562,7 +1562,19 @@
       "types": {
         "us-nato": "US/NATO",
         "china": "중국",
-        "russia": "러시아"
+        "russia": "러시아",
+        "france": "프랑스",
+        "india": "인도",
+        "italy": "이탈리아",
+        "japan": "일본",
+        "uae": "UAE",
+        "uk": "영국",
+        "us": "미국",
+        "naval": "해군",
+        "air": "공군",
+        "marine": "해병대",
+        "space": "우주군",
+        "other": "기타"
       }
     },
     "protest": {
