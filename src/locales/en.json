@@ -2599,7 +2599,8 @@
       "yemen_redsea": "Red Sea Crisis",
       "sudan": "Sudan Civil War",
       "myanmar": "Myanmar Civil War",
-      "korean_dmz": "Korean Demilitarized Zone"
+      "korean_dmz": "Korean Demilitarized Zone",
+      "pak_afghan": "Pakistan–Afghanistan Border Conflict"
     },
     "hotspots": {
       "sahel": "Sahel",
@@ -2629,7 +2630,8 @@
       "ankara": "Ankara",
       "beirut": "Beirut",
       "sanaa": "Sana'a",
-      "abudhabi": "Abu Dhabi"
+      "abudhabi": "Abu Dhabi",
+      "pak_afghan": "Pakistan–Afghanistan Border"
     }
   }
 }
