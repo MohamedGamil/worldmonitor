@@ -3681,6 +3681,8 @@ body.playback-mode .status-dot {
   /* Let the map library handle all touch gestures (pinch-zoom, pan)
      instead of the browser intercepting them on mobile/Android */
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .map-wrapper {
@@ -13299,6 +13301,8 @@ a.prediction-link:hover {
   flex-direction: column;
   overflow: hidden;
   flex-wrap: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .deckgl-layer-toggles .toggle-header {
@@ -13406,15 +13410,23 @@ a.prediction-link:hover {
 }
 
 .deckgl-layer-toggles .toggle-icon {
-  font-size: 12px;
   width: 16px;
   height: 16px;
   min-width: 16px;
+  max-width: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  flex-shrink: 0;
   overflow: hidden;
+  pointer-events: none;
+}
+
+.deckgl-layer-toggles .toggle-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .deckgl-layer-toggles .toggle-label {

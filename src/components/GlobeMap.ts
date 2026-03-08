@@ -1413,7 +1413,7 @@ export class GlobeMap {
         ${layers.map(({ key, label, icon }) => `
           <label class="layer-toggle" data-layer="${key}">
             <input type="checkbox" ${this.layers[key] ? 'checked' : ''}>
-            <span class="toggle-icon">${icon}</span>
+            <span class="toggle-icon">${svgIcon(icon, '#8899aa', 14)}</span>
             <span class="toggle-label">${label}</span>
           </label>`).join('')}
       </div>`;

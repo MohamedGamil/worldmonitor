@@ -3695,7 +3695,7 @@ export class DeckGLMap {
         ${layerConfig.map(({ key, label, icon }) => `
           <label class="layer-toggle" data-layer="${key}">
             <input type="checkbox" ${this.state.layers[key as keyof MapLayers] ? 'checked' : ''}>
-            <span class="toggle-icon">${icon}</span>
+            <span class="toggle-icon">${svgIcon(icon, '#8899aa', 14)}</span>
             <span class="toggle-label">${label}</span>
           </label>
         `).join('')}

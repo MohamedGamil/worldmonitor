@@ -1,11 +1,12 @@
 import type { MapLayers } from '@/types';
+import type { IconName } from '@/utils/icons';
 
 export type MapRenderer = 'flat' | 'globe';
 export type MapVariant = 'full' | 'tech' | 'finance' | 'happy';
 
 export interface LayerDefinition {
   key: keyof MapLayers;
-  icon: string;
+  icon: IconName;
   i18nSuffix: string;
   fallbackLabel: string;
   renderers: MapRenderer[];
@@ -13,60 +14,60 @@ export interface LayerDefinition {
 
 const def = (
   key: keyof MapLayers,
-  icon: string,
+  icon: IconName,
   i18nSuffix: string,
   fallbackLabel: string,
   renderers: MapRenderer[] = ['flat', 'globe'],
 ): LayerDefinition => ({ key, icon, i18nSuffix, fallbackLabel, renderers });
 
 export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
-  iranAttacks: def('iranAttacks', '&#127919;', 'iranAttacks', 'Iran Attacks'),
-  hotspots: def('hotspots', '&#127919;', 'intelHotspots', 'Intel Hotspots'),
-  conflicts: def('conflicts', '&#9876;', 'conflictZones', 'Conflict Zones'),
-  military: def('military', '&#9992;', 'militaryActivity', 'Military Activity'),
+  iranAttacks: def('iranAttacks', 'crosshair',        'iranAttacks',           'Iran Attacks'),
+  hotspots:    def('hotspots',    'hotspot',           'intelHotspots',         'Intel Hotspots'),
+  conflicts:   def('conflicts',   'sword',             'conflictZones',         'Conflict Zones'),
+  military:    def('military',    'plane',             'militaryActivity',      'Military Activity'),
 
-  bases: def('bases', '&#127963;', 'militaryBases', 'Military Bases'),
-  nuclear: def('nuclear', '&#9762;', 'nuclearSites', 'Nuclear Sites'),
-  irradiators: def('irradiators', '&#9888;', 'gammaIrradiators', 'Gamma Irradiators'),
-  spaceports: def('spaceports', '&#128640;', 'spaceports', 'Spaceports'),
-  cables: def('cables', '&#128268;', 'underseaCables', 'Undersea Cables'),
-  pipelines: def('pipelines', '&#128738;', 'pipelines', 'Pipelines'),
-  datacenters: def('datacenters', '&#128421;', 'aiDataCenters', 'AI Data Centers'),
-  ais: def('ais', '&#128674;', 'shipTraffic', 'Ship Traffic'),
-  tradeRoutes: def('tradeRoutes', '&#9875;', 'tradeRoutes', 'Trade Routes'),
-  flights: def('flights', '&#9992;', 'flightDelays', 'Flight Delays'),
-  protests: def('protests', '&#128226;', 'protests', 'Protests'),
-  ucdpEvents: def('ucdpEvents', '&#9876;', 'ucdpEvents', 'Armed Conflict Events'),
-  displacement: def('displacement', '&#128101;', 'displacementFlows', 'Displacement Flows'),
-  climate: def('climate', '&#127787;', 'climateAnomalies', 'Climate Anomalies'),
-  weather: def('weather', '&#9928;', 'weatherAlerts', 'Weather Alerts'),
-  outages: def('outages', '&#128225;', 'internetOutages', 'Internet Outages'),
-  cyberThreats: def('cyberThreats', '&#128737;', 'cyberThreats', 'Cyber Threats'),
-  natural: def('natural', '&#127755;', 'naturalEvents', 'Natural Events'),
-  fires: def('fires', '&#128293;', 'fires', 'Fires'),
-  waterways: def('waterways', '&#9875;', 'strategicWaterways', 'Strategic Waterways'),
-  economic: def('economic', '&#128176;', 'economicCenters', 'Economic Centers'),
-  minerals: def('minerals', '&#128142;', 'criticalMinerals', 'Critical Minerals'),
-  gpsJamming: def('gpsJamming', '&#128225;', 'gpsJamming', 'GPS Jamming'),
-  ciiChoropleth: def('ciiChoropleth', '&#127758;', 'ciiChoropleth', 'CII Instability'),
-  geopoliticalBoundaries: def('geopoliticalBoundaries', '&#127758;', 'geopoliticalBoundaries', 'Geopolitical Boundaries'),
-  dayNight: def('dayNight', '&#127763;', 'dayNight', 'Day/Night', ['flat']),
-  sanctions: def('sanctions', '&#128683;', 'sanctions', 'Sanctions', []),
-  startupHubs: def('startupHubs', '&#128640;', 'startupHubs', 'Startup Hubs'),
-  techHQs: def('techHQs', '&#127970;', 'techHQs', 'Tech HQs'),
-  accelerators: def('accelerators', '&#9889;', 'accelerators', 'Accelerators'),
-  cloudRegions: def('cloudRegions', '&#9729;', 'cloudRegions', 'Cloud Regions'),
-  techEvents: def('techEvents', '&#128197;', 'techEvents', 'Tech Events'),
-  stockExchanges: def('stockExchanges', '&#127963;', 'stockExchanges', 'Stock Exchanges'),
-  financialCenters: def('financialCenters', '&#128176;', 'financialCenters', 'Financial Centers'),
-  centralBanks: def('centralBanks', '&#127974;', 'centralBanks', 'Central Banks'),
-  commodityHubs: def('commodityHubs', '&#128230;', 'commodityHubs', 'Commodity Hubs'),
-  gulfInvestments: def('gulfInvestments', '&#127760;', 'gulfInvestments', 'GCC Investments'),
-  positiveEvents: def('positiveEvents', '&#127775;', 'positiveEvents', 'Positive Events'),
-  kindness: def('kindness', '&#128154;', 'kindness', 'Acts of Kindness'),
-  happiness: def('happiness', '&#128522;', 'happiness', 'World Happiness'),
-  speciesRecovery: def('speciesRecovery', '&#128062;', 'speciesRecovery', 'Species Recovery'),
-  renewableInstallations: def('renewableInstallations', '&#9889;', 'renewableInstallations', 'Clean Energy'),
+  bases:       def('bases',       'target',            'militaryBases',         'Military Bases'),
+  nuclear:     def('nuclear',     'nuclear',           'nuclearSites',          'Nuclear Sites'),
+  irradiators: def('irradiators', 'radiation',         'gammaIrradiators',      'Gamma Irradiators'),
+  spaceports:  def('spaceports',  'rocket',            'spaceports',            'Spaceports'),
+  cables:      def('cables',      'cable',             'underseaCables',        'Undersea Cables'),
+  pipelines:   def('pipelines',   'oil',               'pipelines',             'Pipelines'),
+  datacenters: def('datacenters', 'server',            'aiDataCenters',         'AI Data Centers'),
+  ais:         def('ais',         'vessel',            'shipTraffic',           'Ship Traffic'),
+  tradeRoutes: def('tradeRoutes', 'anchor',            'tradeRoutes',           'Trade Routes'),
+  flights:     def('flights',     'plane',             'flightDelays',          'Flight Delays'),
+  protests:    def('protests',    'megaphone',         'protests',              'Protests'),
+  ucdpEvents:  def('ucdpEvents',  'conflict',          'ucdpEvents',            'Armed Conflict Events'),
+  displacement:def('displacement','people',            'displacementFlows',     'Displacement Flows'),
+  climate:     def('climate',     'thermometer',       'climateAnomalies',      'Climate Anomalies'),
+  weather:     def('weather',     'storm',             'weatherAlerts',         'Weather Alerts'),
+  outages:     def('outages',     'satellite-dish',    'internetOutages',       'Internet Outages'),
+  cyberThreats:def('cyberThreats','shield',            'cyberThreats',          'Cyber Threats'),
+  natural:     def('natural',     'volcano',           'naturalEvents',         'Natural Events'),
+  fires:       def('fires',       'fire',              'fires',                 'Fires'),
+  waterways:   def('waterways',   'anchor',            'strategicWaterways',    'Strategic Waterways'),
+  economic:    def('economic',    'coin',              'economicCenters',       'Economic Centers'),
+  minerals:    def('minerals',    'diamond',           'criticalMinerals',      'Critical Minerals'),
+  gpsJamming:  def('gpsJamming',  'lightning',         'gpsJamming',            'GPS Jamming'),
+  ciiChoropleth:         def('ciiChoropleth',         'globe',   'ciiChoropleth',          'CII Instability'),
+  geopoliticalBoundaries:def('geopoliticalBoundaries','globe',   'geopoliticalBoundaries', 'Geopolitical Boundaries'),
+  dayNight:    def('dayNight',    'sun',               'dayNight',              'Day/Night',   ['flat']),
+  sanctions:   def('sanctions',   'stop',              'sanctions',             'Sanctions',   []),
+  startupHubs: def('startupHubs', 'lightbulb',         'startupHubs',           'Startup Hubs'),
+  techHQs:     def('techHQs',     'building',          'techHQs',               'Tech HQs'),
+  accelerators:def('accelerators','lightning',         'accelerators',          'Accelerators'),
+  cloudRegions:def('cloudRegions','server',            'cloudRegions',          'Cloud Regions'),
+  techEvents:  def('techEvents',  'chart',             'techEvents',            'Tech Events'),
+  stockExchanges:  def('stockExchanges',  'exchange',  'stockExchanges',        'Stock Exchanges'),
+  financialCenters:def('financialCenters','bank',      'financialCenters',      'Financial Centers'),
+  centralBanks:    def('centralBanks',    'bank',      'centralBanks',          'Central Banks'),
+  commodityHubs:   def('commodityHubs',   'package',   'commodityHubs',         'Commodity Hubs'),
+  gulfInvestments: def('gulfInvestments', 'coin',      'gulfInvestments',       'GCC Investments'),
+  positiveEvents:      def('positiveEvents',      'flag',      'positiveEvents',      'Positive Events'),
+  kindness:            def('kindness',            'heart',     'kindness',            'Acts of Kindness'),
+  happiness:           def('happiness',           'globe',     'happiness',           'World Happiness'),
+  speciesRecovery:     def('speciesRecovery',     'leaf',      'speciesRecovery',     'Species Recovery'),
+  renewableInstallations: def('renewableInstallations', 'lightning', 'renewableInstallations', 'Clean Energy'),
 };
 
 const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {

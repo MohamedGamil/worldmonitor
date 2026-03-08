@@ -23,7 +23,8 @@ export type IconName =
   | 'port' | 'oil' | 'factory' | 'package' | 'ferry' | 'carrier'
   | 'alert' | 'nuclear' | 'radiation'
   | 'news' | 'globe' | 'unicorn' | 'diamond' | 'repair-ship'
-  | 'stop' | 'flag' | 'satellite2' | 'hotspot' | 'compass';
+  | 'stop' | 'flag' | 'satellite2' | 'hotspot' | 'compass'
+  | 'sun' | 'heart' | 'leaf';
 
 /**
  * Returns an inline SVG string for the given icon name.
@@ -483,6 +484,29 @@ export function svgIcon(name: IconName, color: string, size = 12, extra = ''): s
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 16 16" style="${shadow}" ${extra}>
         <path fill="${c}" d="M11.3 1.37C10.42.49 9.26 0 8 0S5.58.49 4.7 1.37C2.88 3.19 2.88 6.17 5.21 8.48L6.87 10.1c.45.44 1.04.66 1.63.66s1.18-.22 1.63-.66l1.67-1.63C12.82 6.82 13.33 5.6 13.33 4.33s-.49-2.42-2.03-2.96zM8 6.63A2 2 0 0 1 6 4.63a2 2 0 0 1 4 0 2 2 0 0 1-2 2z"/>
         <path fill="${c}" fill-opacity="0.55" d="M16 11.18c0 .24-.12.45-.32.58l-6.57 3.94c-.34.2-.72.3-1.1.3s-.77-.1-1.1-.3L.32 11.75A.67.67 0 0 1 0 11.18c0-.23.13-.45.33-.57l3.24-1.9c.06.07.13.15.2.22l1.66 1.63c.69.67 1.6 1.04 2.56 1.04s1.88-.37 2.57-1.04l1.68-1.64c.06-.06.13-.13.19-.2l3.23 1.89c.2.12.33.34.33.57z"/>
+      </svg>`;
+
+    case 'sun':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 16 16" style="${shadow}" ${extra}>
+        <circle fill="${c}" cx="8" cy="8" r="3"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="8" y1="1" x2="8" y2="3"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="8" y1="13" x2="8" y2="15"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="1" y1="8" x2="3" y2="8"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="13" y1="8" x2="15" y2="8"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="3.05" y1="3.05" x2="4.46" y2="4.46"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="11.54" y1="11.54" x2="12.95" y2="12.95"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="12.95" y1="3.05" x2="11.54" y2="4.46"/>
+        <line stroke="${c}" stroke-width="1.5" stroke-linecap="round" x1="4.46" y1="11.54" x2="3.05" y2="12.95"/>
+      </svg>`;
+
+    case 'heart':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 16 16" style="${shadow}" ${extra}>
+        <path fill="${c}" d="M8 13.5 C8 13.5 1.5 9 1.5 5 C1.5 3 3 1.5 5 1.5 C6.2 1.5 7.2 2.1 8 3 C8.8 2.1 9.8 1.5 11 1.5 C13 1.5 14.5 3 14.5 5 C14.5 9 8 13.5 8 13.5 Z"/>
+      </svg>`;
+
+    case 'leaf':
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 16 16" style="${shadow}" ${extra}>
+        <path fill="${c}" d="M13 2 C13 2 5 2 3 8 C1.5 12 4 14 4 14 C4 14 4 10 8 8 C6 11 6 14 6 14 L8 14 C10 14 13 11 13 7 C13 7 14 5 13 2 Z"/>
       </svg>`;
 
     default:
