@@ -34,6 +34,10 @@ body .map-popup {
     display: none !important;
 }
 
+.map-popup .popup-attribution a {
+    color: var(--text-dim);
+}
+
 .live-mute-btn.live-toggle-mute-btn {
     color: var(--text-danger);
     border-radius: 100%;
