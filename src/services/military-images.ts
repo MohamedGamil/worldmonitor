@@ -16,6 +16,14 @@ const _imageCache = new Map<string, string | null>();
 // ─── In-memory cache (hex code → Wikipedia title | null) ─────────────────────
 const _hexCache = new Map<string, string | null>();
 
+// ─── In-memory cache (hex code → Planespotters photo | null) ─────────────────
+interface PlanespottersPhoto {
+  largeUrl: string;
+  pageUrl: string;
+  photographer: string;
+}
+const _planespottersCache = new Map<string, PlanespottersPhoto | null>();
+
 // ─── ICAO aircraft type code → Wikipedia article title ───────────────────────
 // Keys are ICAO designators as returned by adsbdb (case-normalised to uppercase)
 const ICAO_TYPE_TO_WIKI: Record<string, string> = {
@@ -476,6 +484,63 @@ export async function fetchWikipediaImage(wikiTitle: string): Promise<string | n
     return imgUrl;
   } catch {
     _imageCache.set(wikiTitle, null);
+    return null;
+  }
+}
+
+// ─── Hex code → Planespotters photo ──────────────────────────────────────────
+
+/**
+ * Fetch a real photo of the exact aircraft (by ICAO24 hex code) from the
+ * Planespotters.net public API.
+ *
+ * API: GET https://api.planespotters.net/pub/photos/hex/{icao24}
+ * - No API key required
+ * - CORS: Access-Control-Allow-Origin: *
+ * - Rate limit: reasonable (cached with CDN, max-age=3600)
+ * - Returns photos of the specific tail number — far more relevant than a
+ *   generic Wikipedia article image of the aircraft type.
+ *
+ * Results are cached for the lifetime of the page.
+ * Returns null when the hex is unknown, has no indexed photos, or the request
+ * fails.
+ */
+export async function fetchPlanespottersImage(hexCode: string): Promise<PlanespottersPhoto | null> {
+  if (!hexCode) return null;
+  const key = hexCode.toUpperCase();
+  if (_planespottersCache.has(key)) return _planespottersCache.get(key)!;
+
+  try {
+    const res = await fetch(`https://api.planespotters.net/pub/photos/hex/${key}`, {
+      signal: AbortSignal.timeout(6_000),
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) { _planespottersCache.set(key, null); return null; }
+
+    const data = (await res.json()) as {
+      photos?: Array<{
+        thumbnail_large?: { src?: string };
+        thumbnail?: { src?: string };
+        link?: string;
+        photographer?: string;
+      }>;
+    };
+
+    const photo = data?.photos?.[0];
+    if (!photo) { _planespottersCache.set(key, null); return null; }
+
+    const largeUrl = photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? '';
+    if (!largeUrl) { _planespottersCache.set(key, null); return null; }
+
+    const result: PlanespottersPhoto = {
+      largeUrl,
+      pageUrl: photo.link ?? `https://www.planespotters.net`,
+      photographer: photo.photographer ?? '',
+    };
+    _planespottersCache.set(key, result);
+    return result;
+  } catch {
+    _planespottersCache.set(key, null);
     return null;
   }
 }

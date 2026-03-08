@@ -14,7 +14,7 @@ import { fetchHotspotContext, formatArticleDate, extractDomain, type GdeltArticl
 import { getNaturalEventIcon } from '@/services/eonet';
 import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot-escalation';
 import { getCableHealthRecord } from '@/services/cable-health';
-import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle } from '@/services/military-images';
+import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle, fetchPlanespottersImage } from '@/services/military-images';
 
 export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'gpsJamming' | 'ucdpEvent';
 interface TechEventPopupData {
@@ -261,16 +261,41 @@ export class MapPopup {
     if (mediaEls.length === 0) return;
 
     for (const el of mediaEls) {
-      // Resolve the Wikipedia title: prefer explicit data-wiki-query; fall back
-      // to a live hex lookup via adsbdb when only data-hex-code is set.
-      let wikiTitle: string | null = null;
+      // ── Priority 1: Planespotters (tail-specific photo, most relevant) ──────
+      // Tried first whenever a hex code is present, regardless of whether a
+      // wiki-query is also set. Planespotters indexes by ICAO24 hex and returns
+      // actual photos of that specific aircraft tail number.
+      const hexCode = el.getAttribute('data-hex-code') || '';
+      if (hexCode) {
+        const photo = await fetchPlanespottersImage(hexCode);
+        if (!this.popup || !this.popup.isConnected) return;
+        if (!el.isConnected) continue;
+        if (photo) {
+          el.classList.remove('popup-media--loading');
+          const creditHtml = photo.photographer
+            ? `📸 <a href="${escapeHtml(photo.pageUrl)}" target="_blank" rel="noopener noreferrer">Planespotters</a> · ${escapeHtml(photo.photographer)}`
+            : `📸 <a href="${escapeHtml(photo.pageUrl)}" target="_blank" rel="noopener noreferrer">Planespotters.net</a>`;
+          el.innerHTML = `
+            <img
+              src="${escapeHtml(photo.largeUrl)}"
+              alt="${el.getAttribute('aria-label') ?? ''}"
+              class="popup-media__img"
+              decoding="async"
+            />
+            <div class="popup-media__caption">${creditHtml}</div>
+          `;
+          continue;
+        }
+      }
 
+      // ── Priority 2: Wikipedia (type-level article image) ─────────────────
+      let wikiTitle: string | null = null;
       const encoded = el.getAttribute('data-wiki-query') || '';
       if (encoded) {
         wikiTitle = decodeURIComponent(encoded) || null;
-      } else {
-        const hexCode = el.getAttribute('data-hex-code') || '';
-        if (hexCode) wikiTitle = await fetchHexWikiTitle(hexCode);
+      } else if (hexCode) {
+        // No wiki-query and Planespotters returned nothing — try adsbdb type lookup
+        wikiTitle = await fetchHexWikiTitle(hexCode);
       }
 
       if (!wikiTitle) { el.hidden = true; continue; }
@@ -2187,16 +2212,15 @@ export class MapPopup {
     //   2. Callsign prefix → known aircraft type
     //   3. Aircraft model → Wikipedia title
     //   4. Aircraft category fallback
-    // If sync resolution succeeds → embed data-wiki-query for the standard async loader.
-    // If it fails (e.g. type is "unknown" with no model/callsign match) → embed
-    // data-hex-code so the async loader can do a live adsbdb hex lookup as a
-    // last resort.
+    // Planespotters is tried first (actual tail-number photos, most relevant).
+    // Wikipedia is the fallback for type-level images when no photo is indexed.
+    // Always include data-hex-code when available so the loader can always
+    // attempt Planespotters regardless of whether a wiki title was resolved.
     const wikiTitle = getMilitaryFlightWikiTitle(flight);
-    const mediaHtml = wikiTitle
-      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(wikiTitle)}" role="img" aria-label="${escapeHtml(wikiTitle)}"><div class="popup-media__skeleton"></div></div>`
-      : flight.hexCode
-        ? `<div class="popup-media popup-media--loading" data-hex-code="${escapeHtml(flight.hexCode)}" role="img" aria-label="${escapeHtml(flight.callsign || flight.hexCode || '')}"><div class="popup-media__skeleton"></div></div>`
-        : '';
+    const hexAttr = flight.hexCode ? ` data-hex-code="${escapeHtml(flight.hexCode)}"` : '';
+    const mediaHtml = (wikiTitle || flight.hexCode)
+      ? `<div class="popup-media popup-media--loading"${wikiTitle ? ` data-wiki-query="${encodeURIComponent(wikiTitle)}"` : ''}${hexAttr} role="img" aria-label="${escapeHtml(wikiTitle || flight.callsign || flight.hexCode || '')}"><div class="popup-media__skeleton"></div></div>`
+      : '';
 
     return `
       <div class="popup-header military-flight ${flight.operator}${flight.isInteresting ? ' interesting' : ''}">
