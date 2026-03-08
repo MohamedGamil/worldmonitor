@@ -2279,6 +2279,7 @@ export class MapPopup {
             <span class="stat-value">${squawk}</span>
           </div>
           ` : ''}
+          ${flight.callsign ? `<div class="popup-actions" style="margin-top:8px;"><a href="https://www.flightaware.com/live/flight/${encodeURIComponent(flight.callsign)}" target="_blank" rel="noopener noreferrer" class="popup-action-link" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent,#60a5fa);text-decoration:none;">↗ ${escapeHtml(t('popups.militaryFlight.trackFlight'))}</a></div>` : ''}
         </div>
         ${flight.note ? `<p class="popup-description">${note}</p>` : ''}
         <div class="popup-attribution">${t('popups.militaryFlight.attribution')}</div>

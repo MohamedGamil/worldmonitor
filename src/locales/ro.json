@@ -1994,7 +1994,8 @@
       "heading": "TITUL",
       "hexCode": "COD HEX",
       "squawk": "SQUAWK",
-      "attribution": "Sursa: OpenSky Network"
+      "attribution": "Sursa: OpenSky Network",
+      "trackFlight": "Urmărește pe FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS ÎNTUNEC",

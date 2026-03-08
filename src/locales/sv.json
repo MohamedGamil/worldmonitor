@@ -1725,7 +1725,8 @@
       "heading": "RUBRIK",
       "hexCode": "HEXKOD",
       "squawk": "SKRIANDE",
-      "attribution": "Källa: OpenSky Network"
+      "attribution": "Källa: OpenSky Network",
+      "trackFlight": "Spåra på FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS MÖRK",

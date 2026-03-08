@@ -2278,7 +2278,8 @@
         "medium": "متوسط",
         "low": "منخفض"
       },
-      "attribution": "المصدر: شبكة OpenSky"
+      "attribution": "المصدر: شبكة OpenSky",
+      "trackFlight": "تتبع على FlightAware"
     },
     "militaryVessel": {
       "types": {

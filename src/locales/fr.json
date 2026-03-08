@@ -1881,7 +1881,8 @@
       "heading": "TITRE",
       "hexCode": "CODE HEXICAL",
       "squawk": "CRI",
-      "attribution": "Source : Réseau OpenSky"
+      "attribution": "Source : Réseau OpenSky",
+      "trackFlight": "Suivre sur FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS FONCÉ",

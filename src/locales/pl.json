@@ -1871,7 +1871,8 @@
       "heading": "NAGŁÓWEK",
       "hexCode": "KOD szesnastkowy",
       "squawk": "SKRZEK",
-      "attribution": "Źródło: Sieć OpenSky"
+      "attribution": "Źródło: Sieć OpenSky",
+      "trackFlight": "Śledź na FlightAware"
     },
     "militaryVessel": {
       "aisDark": "JEST CIEMNO",

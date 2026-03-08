@@ -1725,7 +1725,8 @@
       "heading": "RUBRIEK",
       "hexCode": "HEX-CODE",
       "squawk": "SQUAWK",
-      "attribution": "Bron: OpenSky-netwerk"
+      "attribution": "Bron: OpenSky-netwerk",
+      "trackFlight": "Volgen op FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS DONKER",

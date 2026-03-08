@@ -1875,7 +1875,8 @@
       "heading": "KURS",
       "hexCode": "HEX-CODE",
       "squawk": "SQUAWK",
-      "attribution": "Quelle: OpenSky Network"
+      "attribution": "Quelle: OpenSky Network",
+      "trackFlight": "Auf FlightAware verfolgen"
     },
     "militaryVessel": {
       "aisDark": "AIS DUNKEL",

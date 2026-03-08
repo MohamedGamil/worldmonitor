@@ -1871,7 +1871,8 @@
       "heading": "КУРС",
       "hexCode": "HEX-КОД",
       "squawk": "СКВОК",
-      "attribution": "Источник: OpenSky Network"
+      "attribution": "Источник: OpenSky Network",
+      "trackFlight": "Отследить на FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS ВЫКЛЮЧЕН",

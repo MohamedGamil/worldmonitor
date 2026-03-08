@@ -1871,7 +1871,8 @@
       "heading": "INTESTAZIONE",
       "hexCode": "CODICE ESAGONALE",
       "squawk": "SQUAWK",
-      "attribution": "Fonte: rete OpenSky"
+      "attribution": "Fonte: rete OpenSky",
+      "trackFlight": "Segui su FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS OSCURO",

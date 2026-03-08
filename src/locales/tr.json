@@ -1880,7 +1880,8 @@
       "heading": "YON",
       "hexCode": "HEX KODU",
       "squawk": "SQUAWK",
-      "attribution": "Kaynak: OpenSky Network"
+      "attribution": "Kaynak: OpenSky Network",
+      "trackFlight": "FlightAware'da takip et"
     },
     "militaryVessel": {
       "aisDark": "AIS KARANLIK",

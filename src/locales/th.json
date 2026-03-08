@@ -1871,7 +1871,8 @@
       "heading": "ทิศทาง",
       "hexCode": "รหัส HEX",
       "squawk": "รหัส SQUAWK",
-      "attribution": "แหล่งที่มา: OpenSky Network"
+      "attribution": "แหล่งที่มา: OpenSky Network",
+      "trackFlight": "ติดตามบน FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS มืด",

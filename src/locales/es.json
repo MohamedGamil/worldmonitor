@@ -1871,7 +1871,8 @@
       "heading": "TÍTULO",
       "hexCode": "CÓDIGO HEXAGONAL",
       "squawk": "GRAZNIDO",
-      "attribution": "Fuente: Red OpenSky"
+      "attribution": "Fuente: Red OpenSky",
+      "trackFlight": "Seguir en FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS OSCURO",

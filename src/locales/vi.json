@@ -1872,7 +1872,8 @@
       "heading": "HƯỚNG BAY",
       "hexCode": "MÃ HEX",
       "squawk": "SQUAWK",
-      "attribution": "Nguồn: OpenSky Network"
+      "attribution": "Nguồn: OpenSky Network",
+      "trackFlight": "Theo dõi trên FlightAware"
     },
     "militaryVessel": {
       "aisDark": "MẤT TÍN HIỆU AIS",

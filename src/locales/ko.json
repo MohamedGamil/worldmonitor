@@ -1879,7 +1879,8 @@
       "heading": "방위",
       "hexCode": "HEX 코드",
       "squawk": "스쿼크",
-      "attribution": "출처: OpenSky Network"
+      "attribution": "출처: OpenSky Network",
+      "trackFlight": "FlightAware에서 추적"
     },
     "militaryVessel": {
       "aisDark": "AIS 소실",

@@ -1911,7 +1911,8 @@
       "heading": "ПОСОКА",
       "hexCode": "HEX КОД",
       "squawk": "SQUAWK",
-      "attribution": "Източник: OpenSky Network"
+      "attribution": "Източник: OpenSky Network",
+      "trackFlight": "Проследи в FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS ТЪМНО",

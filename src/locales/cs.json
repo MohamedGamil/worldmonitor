@@ -1875,7 +1875,8 @@
       "heading": "SMĚR",
       "hexCode": "HEX KÓD",
       "squawk": "SQUAWK",
-      "attribution": "Zdroj: Síť OpenSky"
+      "attribution": "Zdroj: Síť OpenSky",
+      "trackFlight": "Sledovat na FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS VYP",

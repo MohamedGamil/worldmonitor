@@ -1871,7 +1871,8 @@
       "heading": "方位",
       "hexCode": "HEXコード",
       "squawk": "スコーク",
-      "attribution": "ソース: OpenSky Network"
+      "attribution": "ソース: OpenSky Network",
+      "trackFlight": "FlightAwareで追跡"
     },
     "militaryVessel": {
       "aisDark": "AIS消失",

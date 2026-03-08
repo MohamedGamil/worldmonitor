@@ -1725,7 +1725,8 @@
       "heading": "CABEÇALHO",
       "hexCode": "CÓDIGO HEX.",
       "squawk": "GRANDE",
-      "attribution": "Fonte: Rede OpenSky"
+      "attribution": "Fonte: Rede OpenSky",
+      "trackFlight": "Rastrear no FlightAware"
     },
     "militaryVessel": {
       "aisDark": "AIS ESCURO",
