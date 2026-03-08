@@ -516,7 +516,7 @@
       "worldMonitor": {
         "apiKey": {
           "description": "Wklej swoją licencję, aby natychmiast odblokować wszystkie źródła danych i funkcje AI.",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "statusMissing": "BRAK LICENCJI",
           "statusValid": "LICENCJONOWANE",
           "title": "Klucz licencyjny"

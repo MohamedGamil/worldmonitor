@@ -425,7 +425,7 @@
         "heroDescription": "Tek bir Marsd lisansı, kendiniz yapılandıracağınız tüm API anahtarlarını ve LLM sağlayıcılarını değiştirir. AI özetleri, gerçek zamanlı istihbarat, piyasa verileri, çatışma takibi, yangın tespiti, uydu görüntüleri — hepsi aktif, hepsi yönetilen, sıfır kurulum.",
         "apiKey": {
           "title": "Lisans Anahtarı",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "description": "Tüm veri kaynaklarını ve AI özelliklerini anında açmak için lisansınızı yapıştırın.",
           "statusValid": "LİSANSLI",
           "statusMissing": "LİSANS YOK"

@@ -524,7 +524,7 @@
         "heroDescription": "O o singură licență Marsd înlocuiește toate cheile API. Analize AI, informații în timp real, date de piață, satelit și incendii.",
         "apiKey": {
           "title": "Cheie de licență",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "description": "Lipiți-vă licența pentru a debloca instantaneu fiecare sursă de date și funcția AI.",
           "statusValid": "LICENȚAT",
           "statusMissing": "FĂRĂ LICENȚĂ"

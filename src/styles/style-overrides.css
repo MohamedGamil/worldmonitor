@@ -25,6 +25,11 @@ body .map-popup {
     transform: none !important;
 }
 
+.map-popup .stat-value.popup-badge.elevated {
+    /* background-color: var(--bg-elevated); */
+    color: var(--text-inverted);
+}
+
 .panel[data-panel="live-news"] .panel-header .panel-header-left {
     display: none !important;
 }

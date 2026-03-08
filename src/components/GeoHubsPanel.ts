@@ -3,6 +3,7 @@ import type { GeoHubActivity } from '@/services/geo-activity';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { getCSSColor } from '@/utils';
+import { svgIcon } from '@/utils/icons';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'USA': '🇺🇸', 'Russia': '🇷🇺', 'China': '🇨🇳', 'UK': '🇬🇧', 'Belgium': '🇧🇪',
@@ -14,11 +15,11 @@ const COUNTRY_FLAGS: Record<string, string> = {
   'International': '🌐',
 };
 
-const TYPE_ICONS: Record<string, string> = {
-  capital: '🏛️',
-  conflict: '⚔️',
-  strategic: '⚓',
-  organization: '🏢',
+const TYPE_ICONS: Record<string, () => string> = {
+  capital: () => svgIcon('bank', '#ffd700', 12),
+  conflict: () => svgIcon('conflict', '#ff4444', 12),
+  strategic: () => svgIcon('anchor', '#44aadd', 12),
+  organization: () => svgIcon('building', '#aaaaaa', 12),
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -57,11 +58,11 @@ export class GeoHubsPanel extends Panel {
   }
 
   private getFlag(country: string): string {
-    return COUNTRY_FLAGS[country] || '🌐';
+    return COUNTRY_FLAGS[country] || svgIcon('globe', '#aaaaaa', 12);
   }
 
   private getTypeIcon(type: string): string {
-    return TYPE_ICONS[type] || '📍';
+    return TYPE_ICONS[type]?.() || svgIcon('globe', '#aaaaaa', 12);
   }
 
   private getTypeLabel(type: string): string {

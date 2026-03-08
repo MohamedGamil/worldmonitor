@@ -10,6 +10,7 @@ import { getTheaterPostureSummaries } from '@/services/military-surge';
 import { isMobileDevice } from '@/utils';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { SITE_VARIANT } from '@/config';
+import { svgIcon } from '@/utils/icons';
 import { deletePersistentCache, getPersistentCache, setPersistentCache } from '@/services/persistent-cache';
 import { t, getCurrentLanguage } from '@/services/i18n';
 import { isDesktopRuntime } from '@/services/runtime';
@@ -579,7 +580,7 @@ export class InsightsPanel extends Panel {
       }
 
       if (story.isAlert) {
-        badges.push('<span class="insight-badge alert">⚠ ALERT</span>');
+        badges.push(`<span class="insight-badge alert">${svgIcon('warning', '#ffaa00', 10)} ALERT</span>`);
       }
 
       const VALID_THREAT_LEVELS = ['critical', 'high', 'elevated', 'moderate'];
@@ -651,7 +652,7 @@ export class InsightsPanel extends Panel {
       }
 
       if (cluster.isAlert) {
-        badges.push('<span class="insight-badge alert">⚠ ALERT</span>');
+        badges.push(`<span class="insight-badge alert">${svgIcon('warning', '#ffaa00', 10)} ALERT</span>`);
       }
 
       return `
@@ -752,7 +753,7 @@ export class InsightsPanel extends Panel {
             <span class="insight-story-title">${escapeHtml(story.title.slice(0, 80))}${story.title.length > 80 ? '...' : ''}</span>
           </div>
           <div class="insight-badges">
-            <span class="insight-badge ml-detected">🔬 ${perspectiveName}: ${(perspectiveScore * 100).toFixed(0)}%</span>
+            <span class="insight-badge ml-detected">${svgIcon('microscope', '#44ccaa', 10)} ${perspectiveName}: ${(perspectiveScore * 100).toFixed(0)}%</span>
           </div>
         </div>
       `;
@@ -773,14 +774,14 @@ export class InsightsPanel extends Panel {
 
     const zonesHtml = this.lastConvergenceZones.slice(0, 3).map(zone => {
       const signalIcons: Record<string, string> = {
-        internet_outage: '🌐',
-        military_flight: '✈️',
-        military_vessel: '🚢',
-        protest: '🪧',
-        ais_disruption: '⚓',
+        internet_outage: svgIcon('globe', '#44aaff', 11),
+        military_flight: svgIcon('plane', '#88aaff', 11),
+        military_vessel: svgIcon('vessel', '#44ccff', 11),
+        protest: svgIcon('megaphone', '#ffaa00', 11),
+        ais_disruption: svgIcon('anchor', '#44aadd', 11),
       };
 
-      const icons = zone.signalTypes.map(t => signalIcons[t] || '📍').join('');
+      const icons = zone.signalTypes.map(t => signalIcons[t] || '').join('');
 
       return `
         <div class="convergence-zone">
@@ -811,12 +812,12 @@ export class InsightsPanel extends Panel {
     }
 
     const signalIcons: Record<string, string> = {
-      internet_outage: '🌐',
-      military_flight: '✈️',
-      military_vessel: '⚓',
-      protest: '📢',
-      ais_disruption: '🚢',
-      active_strike: '💥',
+      internet_outage: svgIcon('globe', '#44aaff', 11),
+      military_flight: svgIcon('plane', '#88aaff', 11),
+      military_vessel: svgIcon('anchor', '#44ccff', 11),
+      protest: svgIcon('megaphone', '#ffaa00', 11),
+      ais_disruption: svgIcon('vessel', '#44aadd', 11),
+      active_strike: svgIcon('lightning', '#ff4400', 11),
     };
 
     const focalPointsHtml = correlatedFPs.map(fp => {
@@ -852,7 +853,7 @@ export class InsightsPanel extends Panel {
   private renderDisabledState(): void {
     this.setContent(`
       <div class="insights-disabled">
-        <div class="insights-disabled-icon">⚡</div>
+        <div class="insights-disabled-icon">${svgIcon('lightning', '#ffcc00', 28)}</div>
         <div class="insights-disabled-title">${t('components.insights.insightsDisabledTitle')}</div>
         <div class="insights-disabled-hint">${t('components.insights.insightsDisabledHint')}</div>
       </div>

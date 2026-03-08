@@ -422,7 +422,7 @@
       "worldMonitor": {
         "apiKey": {
           "description": "วางใบอนุญาตของคุณเพื่อปลดล็อกแหล่งข้อมูลและฟีเจอร์ AI ทั้งหมดทันที",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "statusMissing": "ไม่มีใบอนุญาต",
           "statusValid": "ได้รับอนุญาต",
           "title": "คีย์ใบอนุญาต"

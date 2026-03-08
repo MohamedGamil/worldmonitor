@@ -13,6 +13,170 @@ import type { MilitaryAircraftType, MilitaryVesselType } from '@/types';
 // ─── In-memory cache (Wikipedia title → image URL | null) ────────────────────
 const _imageCache = new Map<string, string | null>();
 
+// ─── In-memory cache (hex code → Wikipedia title | null) ─────────────────────
+const _hexCache = new Map<string, string | null>();
+
+// ─── In-memory cache (hex code → Planespotters photo | null) ─────────────────
+interface PlanespottersPhoto {
+  largeUrl: string;
+  pageUrl: string;
+  photographer: string;
+}
+const _planespottersCache = new Map<string, PlanespottersPhoto | null>();
+
+// ─── ICAO aircraft type code → Wikipedia article title ───────────────────────
+// Keys are ICAO designators as returned by adsbdb (case-normalised to uppercase)
+const ICAO_TYPE_TO_WIKI: Record<string, string> = {
+  // US – Fighters
+  'F15':   'McDonnell Douglas F-15 Eagle',
+  'F15E':  'McDonnell Douglas F-15E Strike Eagle',
+  'F16':   'General Dynamics F-16 Fighting Falcon',
+  'F16C':  'General Dynamics F-16 Fighting Falcon',
+  'F16D':  'General Dynamics F-16 Fighting Falcon',
+  'F22':   'Lockheed Martin F-22 Raptor',
+  'F22A':  'Lockheed Martin F-22 Raptor',
+  'F35':   'Lockheed Martin F-35 Lightning II',
+  'F35A':  'Lockheed Martin F-35 Lightning II',
+  'F35B':  'Lockheed Martin F-35 Lightning II',
+  'F35C':  'Lockheed Martin F-35 Lightning II',
+  'F18':   'McDonnell Douglas F/A-18 Hornet',
+  'F18S':  'Boeing F/A-18E/F Super Hornet',
+  'F18E':  'Boeing F/A-18E/F Super Hornet',
+  'F18F':  'Boeing F/A-18E/F Super Hornet',
+  'F14':   'Grumman F-14 Tomcat',
+  'A10':   'Fairchild Republic A-10 Thunderbolt II',
+  'A10C':  'Fairchild Republic A-10 Thunderbolt II',
+  // US – Bombers
+  'B52':   'Boeing B-52 Stratofortress',
+  'B52H':  'Boeing B-52 Stratofortress',
+  'B1':    'Rockwell B-1 Lancer',
+  'B1B':   'Rockwell B-1 Lancer',
+  'B2':    'Northrop Grumman B-2 Spirit',
+  'B2A':   'Northrop Grumman B-2 Spirit',
+  'B21':   'Northrop Grumman B-21 Raider',
+  // US – Transports
+  'C130':  'Lockheed C-130 Hercules',
+  'C130J': 'Lockheed C-130 Hercules',
+  'C17':   'Boeing C-17 Globemaster III',
+  'C17A':  'Boeing C-17 Globemaster III',
+  'C5':    'Lockheed C-5 Galaxy',
+  'C5M':   'Lockheed C-5 Galaxy',
+  'C27':   'Alenia C-27J Spartan',
+  'C27J':  'Alenia C-27J Spartan',
+  'C40':   'Boeing C-40 Clipper',
+  'C40B':  'Boeing C-40 Clipper',
+  'C40C':  'Boeing C-40 Clipper',
+  'C32':   'Boeing C-32',
+  'C32A':  'Boeing C-32',
+  'C37':   'Gulfstream C-37',
+  'C37A':  'Gulfstream C-37',
+  'C37B':  'Gulfstream C-37',
+  'C12':   'Beechcraft Super King Air',
+  'C12C':  'Beechcraft Super King Air',
+  'C12D':  'Beechcraft Super King Air',
+  'C12F':  'Beechcraft Super King Air',
+  'C12J':  'Beechcraft Super King Air',
+  'C12R':  'Beechcraft Super King Air',
+  'C23':   'Short C-23 Sherpa',
+  'C26':   'Fairchild Metro',
+  // US – Tankers
+  'KC135': 'Boeing KC-135 Stratotanker',
+  'K35R':  'Boeing KC-135 Stratotanker',
+  'KC10':  'McDonnell Douglas KC-10 Extender',
+  'KC46':  'Boeing KC-46 Pegasus',
+  'KC46A': 'Boeing KC-46 Pegasus',
+  // US – Surveillance / AWACS
+  'E3':    'Boeing E-3 Sentry',
+  'E3CF':  'Boeing E-3 Sentry',
+  'E3TF':  'Boeing E-3 Sentry',
+  'E7':    'Boeing E-7',
+  'E7A':   'Boeing E-7',
+  'E2':    'Northrop Grumman E-2 Hawkeye',
+  'E2C':   'Northrop Grumman E-2 Hawkeye',
+  'E2D':   'Northrop Grumman E-2 Hawkeye',
+  'E4':    'Boeing E-4 Nightwatch',
+  'E4B':   'Boeing E-4 Nightwatch',
+  'E6':    'Boeing E-6 Mercury',
+  'E6B':   'Boeing E-6 Mercury',
+  'RC135': 'Boeing RC-135',
+  'RC35':  'Boeing RC-135',
+  'U2':    'Lockheed U-2',
+  'TR1':   'Lockheed U-2',
+  // US – Maritime Patrol
+  'P8':    'Boeing P-8 Poseidon',
+  'P8A':   'Boeing P-8 Poseidon',
+  'P3':    'Lockheed P-3 Orion',
+  'P3C':   'Lockheed P-3 Orion',
+  // US – Drones
+  'RQ4':   'Northrop Grumman RQ-4 Global Hawk',
+  'MQ9':   'General Atomics MQ-9 Reaper',
+  'MQ1':   'General Atomics MQ-1 Predator',
+  // US – Helicopters
+  'UH60':  'Sikorsky UH-60 Black Hawk',
+  'UH60L': 'Sikorsky UH-60 Black Hawk',
+  'UH60M': 'Sikorsky UH-60 Black Hawk',
+  'MH60':  'Sikorsky MH-60 Jayhawk',
+  'MH60S': 'Sikorsky MH-60 Jayhawk',
+  'AH64':  'Boeing AH-64 Apache',
+  'AH64D': 'Boeing AH-64 Apache',
+  'AH64E': 'Boeing AH-64 Apache',
+  'CH47':  'Boeing CH-47 Chinook',
+  'CH47F': 'Boeing CH-47 Chinook',
+  'CH53':  'Sikorsky CH-53E Super Stallion',
+  'MH53':  'Sikorsky CH-53E Super Stallion',
+  'AH1':   'Bell AH-1 SuperCobra',
+  'AH1Z':  'Bell AH-1 SuperCobra',
+  // US – Special Ops / Tiltrotor
+  'V22':   'Bell Boeing V-22 Osprey',
+  'CV22':  'Bell Boeing V-22 Osprey',
+  'MV22':  'Bell Boeing V-22 Osprey',
+  'MV22B': 'Bell Boeing V-22 Osprey',
+  'AC130': 'Lockheed AC-130',
+  'AC13J': 'Lockheed AC-130',
+  'MC130': 'Lockheed MC-130',
+  'MC13J': 'Lockheed MC-130',
+  // US – VIP
+  'VC25':  'Boeing VC-25',
+  'VC25A': 'Boeing VC-25',
+  // Russia – Fighters
+  'SU27':  'Sukhoi Su-27',
+  'SU30':  'Sukhoi Su-30',
+  'SU33':  'Sukhoi Su-33',
+  'SU34':  'Sukhoi Su-34',
+  'SU35':  'Sukhoi Su-35',
+  'SU57':  'Sukhoi Su-57',
+  'MG29':  'Mikoyan MiG-29',
+  'MG31':  'Mikoyan MiG-31',
+  // Russia – Bombers
+  'TU95':  'Tupolev Tu-95',
+  'TU16':  'Tupolev Tu-160',
+  'TU22':  'Tupolev Tu-22M',
+  // Russia – Transports
+  'IL76':  'Ilyushin Il-76',
+  'IL78':  'Ilyushin Il-78',
+  'AN12':  'Antonov An-12',
+  'AN124': 'Antonov An-124 Ruslan',
+  // China
+  'J20':   'Chengdu J-20',
+  'J16':   'Shenyang J-16',
+  'J11':   'Shenyang J-11',
+  'H6':    'Xian H-6',
+  'Y20':   'Xian Y-20',
+  // Europe
+  'EUFI':  'Eurofighter Typhoon',
+  'TYFN':  'Eurofighter Typhoon',
+  'RFAL':  'Dassault Rafale',
+  'GRPS':  'Saab JAS 39 Gripen',
+  'TORNA': 'Panavia Tornado',
+  'A400':  'Airbus A400M Atlas',
+  // Training
+  'T38':   'Northrop T-38 Talon',
+  'T38A':  'Northrop T-38 Talon',
+  'T6':    'Beechcraft T-6 Texan II',
+  'T6A':   'Beechcraft T-6 Texan II',
+  'T6B':   'Beechcraft T-6 Texan II',
+};
+
 // ─── Aircraft model prefix → Wikipedia article title ─────────────────────────
 const AIRCRAFT_MODEL_TO_WIKI: Record<string, string> = {
   // US – Fighters
@@ -322,6 +486,134 @@ export async function fetchWikipediaImage(wikiTitle: string): Promise<string | n
     _imageCache.set(wikiTitle, null);
     return null;
   }
+}
+
+// ─── Hex code → Planespotters photo ──────────────────────────────────────────
+
+/**
+ * Fetch a real photo of the exact aircraft (by ICAO24 hex code) from the
+ * Planespotters.net public API.
+ *
+ * API: GET https://api.planespotters.net/pub/photos/hex/{icao24}
+ * - No API key required
+ * - CORS: Access-Control-Allow-Origin: *
+ * - Rate limit: reasonable (cached with CDN, max-age=3600)
+ * - Returns photos of the specific tail number — far more relevant than a
+ *   generic Wikipedia article image of the aircraft type.
+ *
+ * Results are cached for the lifetime of the page.
+ * Returns null when the hex is unknown, has no indexed photos, or the request
+ * fails.
+ */
+export async function fetchPlanespottersImage(hexCode: string): Promise<PlanespottersPhoto | null> {
+  if (!hexCode) return null;
+  const key = hexCode.toUpperCase();
+  if (_planespottersCache.has(key)) return _planespottersCache.get(key)!;
+
+  try {
+    const res = await fetch(`https://api.planespotters.net/pub/photos/hex/${key}`, {
+      signal: AbortSignal.timeout(6_000),
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) { _planespottersCache.set(key, null); return null; }
+
+    const data = (await res.json()) as {
+      photos?: Array<{
+        thumbnail_large?: { src?: string };
+        thumbnail?: { src?: string };
+        link?: string;
+        photographer?: string;
+      }>;
+    };
+
+    const photo = data?.photos?.[0];
+    if (!photo) { _planespottersCache.set(key, null); return null; }
+
+    const largeUrl = photo.thumbnail_large?.src ?? photo.thumbnail?.src ?? '';
+    if (!largeUrl) { _planespottersCache.set(key, null); return null; }
+
+    const result: PlanespottersPhoto = {
+      largeUrl,
+      pageUrl: photo.link ?? `https://www.planespotters.net`,
+      photographer: photo.photographer ?? '',
+    };
+    _planespottersCache.set(key, result);
+    return result;
+  } catch {
+    _planespottersCache.set(key, null);
+    return null;
+  }
+}
+
+// ─── Hex code → Wikipedia title via adsbdb ───────────────────────────────────
+
+/**
+ * Look up the aircraft type for an ICAO hex code via the adsbdb public API,
+ * then map the returned ICAO type designator to a Wikipedia article title.
+ *
+ * Results are cached in memory for the lifetime of the page.
+ * Returns null when the hex is unknown, the type has no mapping, or the
+ * request fails or times out.
+ */
+export async function fetchHexWikiTitle(hexCode: string): Promise<string | null> {
+  if (!hexCode) return null;
+  const key = hexCode.toUpperCase();
+  if (_hexCache.has(key)) return _hexCache.get(key)!;
+
+  try {
+    const res = await fetch(`https://api.adsbdb.com/v0/aircraft/${key}`, {
+      signal: AbortSignal.timeout(5_000),
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) { _hexCache.set(key, null); return null; }
+
+    const data = (await res.json()) as {
+      response?: { aircraft?: { type?: string; manufacturer?: string } };
+    };
+    const icaoType = data?.response?.aircraft?.type?.toUpperCase() ?? '';
+    if (!icaoType) { _hexCache.set(key, null); return null; }
+
+    const wikiTitle = ICAO_TYPE_TO_WIKI[icaoType] ?? null;
+    _hexCache.set(key, wikiTitle);
+    return wikiTitle;
+  } catch {
+    _hexCache.set(key, null);
+    return null;
+  }
+}
+
+/**
+ * Synchronously return the best Wikipedia article title for a military flight,
+ * using the cached hex lookup result if available, then callsign, then
+ * model/type — all without making any network requests.
+ *
+ * Use this when building the popup HTML. If none of the synchronous strategies
+ * succeed, the caller should emit a `data-hex-code` attribute so the async
+ * loader (`loadPopupImages`) can do a live hex lookup as a final fallback.
+ */
+export function getMilitaryFlightWikiTitle(flight: {
+  callsign?: string;
+  hexCode?: string;
+  aircraftType: string;
+  aircraftModel?: string;
+}): string | null {
+  // 1. Hex cache (populated by a previous fetchHexWikiTitle call)
+  if (flight.hexCode) {
+    const cached = _hexCache.get(flight.hexCode.toUpperCase());
+    if (cached) return cached;
+  }
+
+  // 2. Callsign prefix lookup
+  if (flight.callsign) {
+    const byCallsign = getCallsignWikiTitle(flight.callsign);
+    if (byCallsign) return byCallsign;
+  }
+
+  // 3. Model + type (existing logic)
+  return getAircraftWikiTitle(
+    flight.aircraftType as MilitaryAircraftType,
+    flight.aircraftModel,
+  );
 }
 
 // ─── Named naval vessel → Wikipedia article title ────────────────────────────

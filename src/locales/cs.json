@@ -418,7 +418,7 @@
         "heroDescription": "Jediná licence Marsd nahradí všechny API klíče a poskytovatele LLM, které byste jinak museli konfigurovat sami. AI souhrny, zpravodajství v reálném čase, tržní data, sledování konfliktů, detekce požárů, satelitní snímky — vše poháněno, vše spravováno, nulové nastavení.",
         "apiKey": {
           "title": "Licenční klíč",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "description": "Vložte svou licenci a okamžitě odemkněte všechny datové zdroje a AI funkce.",
           "statusValid": "LICENCOVÁNO",
           "statusMissing": "BEZ LICENCE"

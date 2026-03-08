@@ -11,8 +11,9 @@
  *  - Posts 'static-ready' with all prepared data
  */
 
-import { MILITARY_BASES, NUCLEAR_FACILITIES, SPACEPORTS, ECONOMIC_CENTERS, STRATEGIC_WATERWAYS, CRITICAL_MINERALS, UNDERSEA_CABLES, GEOPOLITICAL_BOUNDARIES } from '@/config/geo';
-import type { GeopoliticalBoundary } from '@/config/geo';
+import { MILITARY_BASES, NUCLEAR_FACILITIES, SPACEPORTS, ECONOMIC_CENTERS, STRATEGIC_WATERWAYS, CRITICAL_MINERALS, UNDERSEA_CABLES } from '@/config/geo';
+import { GEOPOLITICAL_BOUNDARIES } from '@/config/geopolitical-boundaries';
+import type { GeopoliticalBoundary } from '@/config/geopolitical-boundaries';
 import { PIPELINES } from '@/config/pipelines';
 import { GAMMA_IRRADIATORS } from '@/config/irradiators';
 import { AI_DATA_CENTERS } from '@/config/ai-datacenters';

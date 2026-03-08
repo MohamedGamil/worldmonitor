@@ -68,8 +68,10 @@ export {
   SANCTIONED_COUNTRIES,
   SPACEPORTS,
   CRITICAL_MINERALS,
-  GEOPOLITICAL_BOUNDARIES,
 } from './geo';
+
+export type { GeopoliticalBoundaryType, GeopoliticalBoundary } from './geopolitical-boundaries';
+export { GEOPOLITICAL_BOUNDARIES } from './geopolitical-boundaries';
 
 export { GAMMA_IRRADIATORS } from './irradiators';
 export { PIPELINES, PIPELINE_COLORS } from './pipelines';

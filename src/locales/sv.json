@@ -370,7 +370,7 @@
       "worldMonitor": {
         "apiKey": {
           "description": "Klistra in din licens för att omedelbart låsa upp alla datakällor och AI-funktioner.",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "statusMissing": "INGEN LICENS",
           "statusValid": "LICENSIERAD",
           "title": "Licensnyckel"

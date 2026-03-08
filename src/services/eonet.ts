@@ -6,25 +6,44 @@ import {
 } from '@/generated/client/marsd/natural/v1/service_client';
 import { createCircuitBreaker } from '@/utils';
 import { getHydratedData } from '@/services/bootstrap';
+import { svgIcon, type IconName } from '@/utils/icons';
 
-const CATEGORY_ICONS: Record<NaturalEventCategory, string> = {
-  severeStorms: '🌀',
-  wildfires: '🔥',
-  volcanoes: '🌋',
-  earthquakes: '🔴',
-  floods: '🌊',
-  landslides: '⛰️',
-  drought: '☀️',
-  dustHaze: '🌫️',
-  snow: '❄️',
-  tempExtremes: '🌡️',
-  seaLakeIce: '🧊',
-  waterColor: '🦠',
-  manmade: '⚠️',
+const CATEGORY_ICON_NAMES: Record<NaturalEventCategory, IconName> = {
+  severeStorms: 'storm',
+  wildfires: 'fire',
+  volcanoes: 'volcano',
+  earthquakes: 'earthquake',
+  floods: 'flood',
+  landslides: 'landslide',
+  drought: 'drought',
+  dustHaze: 'fog',
+  snow: 'snow',
+  tempExtremes: 'thermometer',
+  seaLakeIce: 'ice',
+  waterColor: 'water-color',
+  manmade: 'warning',
 };
 
-export function getNaturalEventIcon(category: NaturalEventCategory): string {
-  return CATEGORY_ICONS[category] || '⚠️';
+const CATEGORY_COLORS: Record<NaturalEventCategory, string> = {
+  severeStorms: '#88aaff',
+  wildfires: '#ff6600',
+  volcanoes: '#ff2020',
+  earthquakes: '#ff4400',
+  floods: '#44aaff',
+  landslides: '#cc8844',
+  drought: '#ffcc00',
+  dustHaze: '#ccaa88',
+  snow: '#ccddff',
+  tempExtremes: '#ff6600',
+  seaLakeIce: '#88ddff',
+  waterColor: '#44dd88',
+  manmade: '#ffaa00',
+};
+
+export function getNaturalEventIcon(category: NaturalEventCategory, size = 12): string {
+  const name = CATEGORY_ICON_NAMES[category] ?? 'warning';
+  const color = CATEGORY_COLORS[category] ?? '#ffaa00';
+  return svgIcon(name, color, size);
 }
 
 function normalizeNaturalCategory(category: string | undefined): NaturalEventCategory {

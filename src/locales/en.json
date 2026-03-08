@@ -525,7 +525,7 @@
         "heroDescription": "A single Marsd license replaces every API key and LLM provider you'd otherwise configure yourself. AI summaries, real-time intelligence, market data, conflict tracking, fire detection, satellite imagery — all powered, all managed, zero setup.",
         "apiKey": {
           "title": "License Key",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "description": "Paste your license to unlock every data source and AI feature instantly.",
           "statusValid": "LICENSED",
           "statusMissing": "NO LICENSE"
@@ -1074,7 +1074,18 @@
         "stake": "stake",
         "basesCount": "{{count}} bases",
         "positiveEvent": "Positive Event",
-        "sourcesReporting": "sources reporting"
+        "sourcesReporting": "sources reporting",
+        "wildfire": "Wildfire",
+        "brightness": "Brightness",
+        "deaths": "Deaths",
+        "displacement": "Displacement",
+        "refugees": "Refugees",
+        "vsLabel": "vs",
+        "happiness": "Happiness",
+        "noData": "No data",
+        "cii": "CII",
+        "status": "Status",
+        "renewable": "Renewable"
       },
       "layerHelp": {
         "title": "Map Layers Guide",
@@ -1725,7 +1736,7 @@
         "alarabiya": "AlArabiya",
         "aljazeera-arabic": "AlJazeera Arabic",
         "sky-news-arabia": "Sky News Arabia",
-        "trt-world": "TRT World",
+        "dw-arabia": "DW Arabia",
         "iran-intl": "Iran International",
         "asharq-news": "Asharq News",
         "alaraby": "Alaraby",
@@ -2021,6 +2032,8 @@
     "country": "COUNTRY",
     "malware": "MALWARE",
     "lastSeen": "LAST SEEN",
+    "status": "STATUS",
+    "confidence": "CONFIDENCE",
     "open": "OPEN",
     "tradingHours": "TRADING HOURS",
     "gamma": "GAMMA",
@@ -2224,6 +2237,12 @@
       "heading": "HEADING",
       "hexCode": "HEX CODE",
       "squawk": "SQUAWK",
+      "highInterest": "High Interest Flight",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      },
       "attribution": "Source: OpenSky Network"
     },
     "militaryVessel": {
@@ -2580,7 +2599,8 @@
       "yemen_redsea": "Red Sea Crisis",
       "sudan": "Sudan Civil War",
       "myanmar": "Myanmar Civil War",
-      "korean_dmz": "Korean Demilitarized Zone"
+      "korean_dmz": "Korean Demilitarized Zone",
+      "pak_afghan": "Pakistan–Afghanistan Border Conflict"
     },
     "hotspots": {
       "sahel": "Sahel",
@@ -2610,7 +2630,8 @@
       "ankara": "Ankara",
       "beirut": "Beirut",
       "sanaa": "Sana'a",
-      "abudhabi": "Abu Dhabi"
+      "abudhabi": "Abu Dhabi",
+      "pak_afghan": "Pakistan–Afghanistan Border"
     }
   }
 }

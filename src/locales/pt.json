@@ -373,7 +373,7 @@
         "heroDescription": "Uma única licença Marsd substitui cada chave API e provedor de LLM que você precisaria configurar sozinho. Resumos de IA, inteligência em tempo real, dados de mercado, rastreamento de conflitos, detecção de incêndios, imagens de satélite — tudo alimentado, tudo gerenciado, configuração zero.",
         "apiKey": {
           "title": "Chave de licença",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "description": "Cole sua licença para desbloquear instantaneamente todas as fontes de dados e recursos de IA.",
           "statusValid": "LICENCIADO",
           "statusMissing": "SEM LICENÇA"

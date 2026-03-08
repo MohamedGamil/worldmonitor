@@ -422,7 +422,7 @@
       "worldMonitor": {
         "apiKey": {
           "description": "Dán giấy phép của bạn để mở khóa mọi nguồn dữ liệu và tính năng AI ngay lập tức.",
-          "placeholder": "wm_xxxxxxxxxxxxxxxxxxxxxxxx",
+          "placeholder": "marsd_xxxxxxxxxxxxxxxxxxxxxxxx",
           "statusMissing": "CHƯA CÓ GIẤY PHÉP",
           "statusValid": "ĐÃ CẤP PHÉP",
           "title": "Khóa Giấy phép"

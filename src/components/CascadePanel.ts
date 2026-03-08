@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { getCSSColor } from '@/utils';
+import { svgIcon } from '@/utils/icons';
 import {
   buildDependencyGraph,
   calculateCascade,
@@ -55,22 +56,18 @@ export class CascadePanel extends Panel {
   }
 
   private getImpactEmoji(level: CascadeImpactLevel): string {
-    switch (level) {
-      case 'critical': return '🔴';
-      case 'high': return '🟠';
-      case 'medium': return '🟡';
-      case 'low': return '🟢';
-    }
+    const color = this.getImpactColor(level);
+    return svgIcon('warning', color, 11);
   }
 
   private getNodeTypeEmoji(type: string): string {
     switch (type) {
-      case 'cable': return '🔌';
-      case 'pipeline': return '🛢️';
-      case 'port': return '⚓';
-      case 'chokepoint': return '🚢';
-      case 'country': return '🏳️';
-      default: return '📍';
+      case 'cable': return svgIcon('plug', '#ff8800', 11);
+      case 'pipeline': return svgIcon('oil', '#ff6600', 11);
+      case 'port': return svgIcon('anchor', '#44aadd', 11);
+      case 'chokepoint': return svgIcon('anchor', '#44aaff', 11);
+      case 'country': return svgIcon('flag', '#aaaaaa', 11);
+      default: return svgIcon('globe', '#888888', 11);
     }
   }
 
@@ -181,12 +178,12 @@ export class CascadePanel extends Panel {
     const stats = getGraphStats();
     const statsHtml = `
       <div class="cascade-stats">
-        <span>🔌 ${stats.cables}</span>
-        <span>🛢️ ${stats.pipelines}</span>
-        <span>⚓ ${stats.ports}</span>
-        <span>🌊 ${stats.chokepoints}</span>
-        <span>🏳️ ${stats.countries}</span>
-        <span>📊 ${stats.edges} ${t('components.cascade.links')}</span>
+        <span>${svgIcon('plug', '#ff8800', 11)} ${stats.cables}</span>
+        <span>${svgIcon('oil', '#ff6600', 11)} ${stats.pipelines}</span>
+        <span>${svgIcon('anchor', '#44aadd', 11)} ${stats.ports}</span>
+        <span>${svgIcon('flood', '#44aaff', 11)} ${stats.chokepoints}</span>
+        <span>${svgIcon('flag', '#aaaaaa', 11)} ${stats.countries}</span>
+        <span>${svgIcon('chart', '#88aaff', 11)} ${stats.edges} ${t('components.cascade.links')}</span>
       </div>
     `;
 
