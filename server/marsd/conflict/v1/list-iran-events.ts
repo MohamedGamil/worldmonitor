@@ -13,7 +13,7 @@ export async function listIranEvents(
   _req: ListIranEventsRequest,
 ): Promise<ListIranEventsResponse> {
   try {
-    const cached = await getCachedJson(REDIS_KEY);
+    const cached = await getCachedJson(REDIS_KEY, true);
     if (cached && typeof cached === 'object' && 'events' in (cached as Record<string, unknown>)) {
       return cached as ListIranEventsResponse;
     }
