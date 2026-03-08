@@ -3152,6 +3152,7 @@ export class DeckGLMap {
       }
       case 'earthquakes-layer':
         return { html: `<div class="deckgl-tooltip"><strong>M${(obj.magnitude || 0).toFixed(1)} ${t('components.deckgl.tooltip.earthquake')}</strong><br/>${text(obj.place)}</div>` };
+      case 'military-carriers-layer':
       case 'military-vessels-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${text(getLocalizedGeoName(obj.operatorCountry))}</div>` };
       case 'military-flights-layer':
