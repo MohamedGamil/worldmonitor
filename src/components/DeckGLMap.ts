@@ -1195,14 +1195,14 @@ export class DeckGLMap {
 
       // Pipelines layer
       if (mapLayers.pipelines) {
-        layers.push(this.createPipelinesLayer());
+        layers.push(this.getCachedLayer('pipelines', 'pipelines-layer', () => this.createPipelinesLayer()));
       } else {
         this.layerCache.delete('pipelines-layer');
       }
 
       // Conflict zones layer
       if (mapLayers.conflicts) {
-        layers.push(this.createConflictZonesLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'conflict-zones-layer', () => this.createConflictZonesLayer()));
       }
 
       // Geopolitical boundaries layer
@@ -1216,23 +1216,24 @@ export class DeckGLMap {
     if (this.progressiveLoadStep >= 2) {
       // Military bases layer — hidden at low zoom (E: progressive disclosure) + ghost + clusters
       if (mapLayers.bases && this.isLayerVisible('bases')) {
-        layers.push(this.createBasesLayer());
-        layers.push(...this.createBasesClusterLayer());
+        layers.push(this.getCachedLayer('bases', 'bases-layer', () => this.createBasesLayer()));
+        const baseClusters = this.getCachedLayer('bases', 'bases-cluster-group', () => this.createBasesClusterLayer() as any);
+        layers.push(...((Array.isArray(baseClusters) ? baseClusters : [baseClusters]) as any));
       }
 
       // Nuclear facilities layer — hidden at low zoom + ghost
       if (mapLayers.nuclear && this.isLayerVisible('nuclear')) {
-        layers.push(this.createNuclearLayer());
+        layers.push(this.getCachedLayer('nuclear', 'nuclear-layer', () => this.createNuclearLayer()));
       }
 
       // Gamma irradiators layer — hidden at low zoom
       if (mapLayers.irradiators && this.isLayerVisible('irradiators')) {
-        layers.push(this.createIrradiatorsLayer());
+        layers.push(this.getCachedLayer('nuclear', 'irradiators-layer', () => this.createIrradiatorsLayer()));
       }
 
       // Spaceports layer — hidden at low zoom
       if (mapLayers.spaceports && this.isLayerVisible('spaceports')) {
-        layers.push(this.createSpaceportsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'spaceports-layer', () => this.createSpaceportsLayer()));
       }
 
       // Hotspots layer (all hotspots including high/breaking, with pulse + ghost)
@@ -1244,9 +1245,10 @@ export class DeckGLMap {
       const currentZoom = this.maplibreMap?.getZoom() || 2;
       if (mapLayers.datacenters) {
         if (currentZoom >= 5) {
-          layers.push(this.createDatacentersLayer());
+          layers.push(this.getCachedLayer('datacenters', 'datacenters-layer', () => this.createDatacentersLayer()));
         } else {
-          layers.push(...this.createDatacenterClusterLayers());
+          const dcClusters = this.getCachedLayer('datacenters', 'datacenter-cluster-group', () => this.createDatacenterClusterLayers() as any);
+          layers.push(...((Array.isArray(dcClusters) ? dcClusters : [dcClusters]) as any));
         }
       }
 
@@ -1264,7 +1266,7 @@ export class DeckGLMap {
 
       // Natural events layer
       if (mapLayers.natural && filteredNaturalEvents.length > 0) {
-        layers.push(this.createNaturalEventsLayer(filteredNaturalEvents));
+        layers.push(this.getCachedLayer('natural', 'natural-events-layer', () => this.createNaturalEventsLayer(filteredNaturalEvents)));
       }
 
       // Satellite fires layer (NASA FIRMS)
@@ -1274,22 +1276,22 @@ export class DeckGLMap {
 
       // Iran events layer
       if (mapLayers.iranAttacks && this.iranEvents.length > 0) {
-        layers.push(this.createIranEventsLayer());
+        layers.push(this.getCachedLayer('iranAttacks', 'iran-events-layer', () => this.createIranEventsLayer()));
       }
 
       // Weather alerts layer
       if (mapLayers.weather && filteredWeatherAlerts.length > 0) {
-        layers.push(this.createWeatherLayer(filteredWeatherAlerts));
+        layers.push(this.getCachedLayer('weather', 'weather-layer', () => this.createWeatherLayer(filteredWeatherAlerts)));
       }
 
       // Internet outages layer + ghost for easier picking
       if (mapLayers.outages && filteredOutages.length > 0) {
-        layers.push(this.createOutagesLayer(filteredOutages));
+        layers.push(this.getCachedLayer('outages', 'outages-layer', () => this.createOutagesLayer(filteredOutages)));
       }
 
       // Cyber threat IOC layer
       if (mapLayers.cyberThreats && this.cyberThreats.length > 0) {
-        layers.push(this.createCyberThreatsLayer());
+        layers.push(this.getCachedLayer('cyberThreats', 'cyber-threats-layer', () => this.createCyberThreatsLayer()));
       }
 
     }
@@ -1298,42 +1300,42 @@ export class DeckGLMap {
     if (this.progressiveLoadStep >= 4) {
       // AIS density layer
       if (mapLayers.ais && this.aisDensity.length > 0) {
-        layers.push(this.createAisDensityLayer());
+        layers.push(this.getCachedLayer('ais', 'ais-density-layer', () => this.createAisDensityLayer()));
       }
 
       // AIS disruptions layer (spoofing/jamming)
       if (mapLayers.ais && this.aisDisruptions.length > 0) {
-        layers.push(this.createAisDisruptionsLayer());
+        layers.push(this.getCachedLayer('ais', 'ais-disruptions-layer', () => this.createAisDisruptionsLayer()));
       }
 
       // GPS/GNSS jamming layer
       if (mapLayers.gpsJamming && this.gpsJammingHexes.length > 0) {
-        layers.push(this.createGpsJammingLayer());
+        layers.push(this.getCachedLayer('gpsJamming', 'gps-jamming-layer', () => this.createGpsJammingLayer()));
       }
 
       // Strategic ports layer (shown with AIS)
       if (mapLayers.ais) {
-        layers.push(this.createPortsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'ports-layer', () => this.createPortsLayer()));
       }
 
       // Cable advisories layer (shown with cables)
       if (mapLayers.cables && filteredCableAdvisories.length > 0) {
-        layers.push(this.createCableAdvisoriesLayer(filteredCableAdvisories));
+        layers.push(this.getCachedLayer('cables', 'cable-advisories-layer', () => this.createCableAdvisoriesLayer(filteredCableAdvisories)));
       }
 
       // Repair ships layer (shown with cables)
       if (mapLayers.cables && this.repairShips.length > 0) {
-        layers.push(this.createRepairShipsLayer());
+        layers.push(this.getCachedLayer('cables', 'repair-ships-layer', () => this.createRepairShipsLayer()));
       }
 
       // Flight delays layer
       if (mapLayers.flights && filteredFlightDelays.length > 0) {
-        layers.push(this.createFlightDelaysLayer(filteredFlightDelays));
+        layers.push(this.getCachedLayer('flights', 'flight-delays-layer', () => this.createFlightDelaysLayer(filteredFlightDelays)));
       }
 
       // Aircraft positions layer (live tracking, under flights toggle)
       if (mapLayers.flights && this.aircraftPositions.length > 0) {
-        layers.push(this.createAircraftPositionsLayer());
+        layers.push(this.getCachedLayer('flights', 'aircraft-positions-layer', () => this.createAircraftPositionsLayer()));
       }
 
     }
@@ -1348,17 +1350,19 @@ export class DeckGLMap {
 
       // Military vessels layer
       if (mapLayers.military && filteredMilitaryVessels.length > 0) {
-        layers.push(...this.createMilitaryVesselsLayer(filteredMilitaryVessels));
+        const vesselLayers = this.getCachedLayer('military', 'military-vessels-group', () => this.createMilitaryVesselsLayer(filteredMilitaryVessels) as any);
+        layers.push(...((Array.isArray(vesselLayers) ? vesselLayers : [vesselLayers]) as any));
       }
 
       // Military vessel clusters layer
       if (mapLayers.military && filteredMilitaryVesselClusters.length > 0) {
-        layers.push(this.createMilitaryVesselClustersLayer(filteredMilitaryVesselClusters));
+        layers.push(this.getCachedLayer('military', 'military-vessel-clusters-layer', () => this.createMilitaryVesselClustersLayer(filteredMilitaryVesselClusters)));
       }
 
       // Military flights layer (returns Layer[] for interesting-pulse support)
       if (mapLayers.military && filteredMilitaryFlights.length > 0) {
-        layers.push(...this.createMilitaryFlightsLayer(filteredMilitaryFlights));
+        const flightLayers = this.getCachedLayer('military', 'military-flights-group', () => this.createMilitaryFlightsLayer(filteredMilitaryFlights) as any);
+        layers.push(...((Array.isArray(flightLayers) ? flightLayers : [flightLayers]) as any));
       }
 
       // Military flight clusters layer
@@ -1368,51 +1372,51 @@ export class DeckGLMap {
 
       // Strategic waterways layer
       if (mapLayers.waterways) {
-        layers.push(this.createWaterwaysLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'waterways-layer', () => this.createWaterwaysLayer()));
       }
 
       // Economic centers layer — hidden at low zoom
       if (mapLayers.economic && this.isLayerVisible('economic')) {
-        layers.push(this.createEconomicCentersLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'economic-centers-layer', () => this.createEconomicCentersLayer()));
       }
 
       // Finance variant layers
       if (mapLayers.stockExchanges) {
-        layers.push(this.createStockExchangesLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'stock-exchanges-layer', () => this.createStockExchangesLayer()));
       }
       if (mapLayers.financialCenters) {
-        layers.push(this.createFinancialCentersLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'financial-centers-layer', () => this.createFinancialCentersLayer()));
       }
       if (mapLayers.centralBanks) {
-        layers.push(this.createCentralBanksLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'central-banks-layer', () => this.createCentralBanksLayer()));
       }
       if (mapLayers.commodityHubs) {
-        layers.push(this.createCommodityHubsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'commodity-hubs-layer', () => this.createCommodityHubsLayer()));
       }
 
       // Critical minerals layer
       if (mapLayers.minerals) {
-        layers.push(this.createMineralsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'minerals-layer', () => this.createMineralsLayer()));
       }
 
       // APT Groups layer (geopolitical variant only - always shown, no toggle)
       if (SITE_VARIANT !== 'tech' && SITE_VARIANT !== 'happy') {
-        layers.push(this.createAPTGroupsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'apt-groups-layer', () => this.createAPTGroupsLayer()));
       }
 
       // UCDP georeferenced events layer — historical annual data, not time-filtered
       if (mapLayers.ucdpEvents && this.ucdpEvents.length > 0) {
-        layers.push(this.createUcdpEventsLayer(this.ucdpEvents));
+        layers.push(this.getCachedLayer('ucdp', 'ucdp-events-layer', () => this.createUcdpEventsLayer(this.ucdpEvents)));
       }
 
       // Displacement flows arc layer
       if (mapLayers.displacement && this.displacementFlows.length > 0) {
-        layers.push(this.createDisplacementArcsLayer());
+        layers.push(this.getCachedLayer('displacement', 'displacement-arcs-layer', () => this.createDisplacementArcsLayer()));
       }
 
       // Climate anomalies heatmap layer
       if (mapLayers.climate && this.climateAnomalies.length > 0) {
-        layers.push(this.createClimateHeatmapLayer());
+        layers.push(this.getCachedLayer('climate', 'climate-heatmap-layer', () => this.createClimateHeatmapLayer()));
       }
 
       // Trade routes layer
@@ -1427,16 +1431,16 @@ export class DeckGLMap {
       // Tech variant layers (Supercluster-based deck.gl layers for HQs and events)
       if (SITE_VARIANT === 'tech') {
         if (mapLayers.startupHubs) {
-          layers.push(this.createStartupHubsLayer());
+          layers.push(this.getCachedLayer('baseInfra', 'startup-hubs-layer', () => this.createStartupHubsLayer()));
         }
         if (mapLayers.techHQs) {
           layers.push(...this.createTechHQClusterLayers());
         }
         if (mapLayers.accelerators) {
-          layers.push(this.createAcceleratorsLayer());
+          layers.push(this.getCachedLayer('baseInfra', 'accelerators-layer', () => this.createAcceleratorsLayer()));
         }
         if (mapLayers.cloudRegions) {
-          layers.push(this.createCloudRegionsLayer());
+          layers.push(this.getCachedLayer('baseInfra', 'cloud-regions-layer', () => this.createCloudRegionsLayer()));
         }
         if (mapLayers.techEvents && this.techEvents.length > 0) {
           layers.push(...this.createTechEventClusterLayers());
@@ -1445,41 +1449,44 @@ export class DeckGLMap {
 
       // Gulf FDI investments layer
       if (mapLayers.gulfInvestments) {
-        layers.push(this.createGulfInvestmentsLayer());
+        layers.push(this.getCachedLayer('baseInfra', 'gulf-investments-layer', () => this.createGulfInvestmentsLayer()));
       }
 
       // Positive events layer (happy variant)
       if (mapLayers.positiveEvents && this.positiveEvents.length > 0) {
-        layers.push(...this.createPositiveEventsLayers());
+        const posLayers = this.getCachedLayer('positiveEvents', 'positive-events-group', () => this.createPositiveEventsLayers() as any);
+        layers.push(...((Array.isArray(posLayers) ? posLayers : [posLayers]) as any));
       }
 
       // Kindness layer (happy variant -- green baseline pulses + real kindness events)
       if (mapLayers.kindness && this.kindnessPoints.length > 0) {
-        layers.push(...this.createKindnessLayers());
+        const kindLayers = this.getCachedLayer('kindness', 'kindness-group', () => this.createKindnessLayers() as any);
+        layers.push(...((Array.isArray(kindLayers) ? kindLayers : [kindLayers]) as any));
       }
 
       // Phase 8: Happiness choropleth (rendered below point markers)
       if (mapLayers.happiness) {
-        const choropleth = this.createHappinessChoroplethLayer();
+        const choropleth = this.getCachedLayer('happiness', 'happiness-choropleth-layer', () => this.createHappinessChoroplethLayer());
         if (choropleth) layers.push(choropleth);
       }
       // CII choropleth (country instability heat-map)
       if (mapLayers.ciiChoropleth) {
-        const ciiLayer = this.createCIIChoroplethLayer();
+        const ciiLayer = this.getCachedLayer('baseInfra', 'cii-choropleth-layer', () => this.createCIIChoroplethLayer());
         if (ciiLayer) layers.push(ciiLayer);
       }
       // Phase 8: Species recovery zones
       if (mapLayers.speciesRecovery && this.speciesRecoveryZones.length > 0) {
-        layers.push(this.createSpeciesRecoveryLayer());
+        layers.push(this.getCachedLayer('speciesRecovery', 'species-recovery-layer', () => this.createSpeciesRecoveryLayer()));
       }
       // Phase 8: Renewable energy installations
       if (mapLayers.renewableInstallations && this.renewableInstallations.length > 0) {
-        layers.push(this.createRenewableInstallationsLayer());
+        layers.push(this.getCachedLayer('renewables', 'renewable-installations-layer', () => this.createRenewableInstallationsLayer()));
       }
 
       // News geo-locations (always shown if data exists)
       if (this.newsLocations.length > 0) {
-        layers.push(...this.createNewsLocationsLayer());
+        const newsLayers = this.getCachedLayer('news', 'news-locations-group', () => this.createNewsLocationsLayer() as any);
+        layers.push(...((Array.isArray(newsLayers) ? newsLayers : [newsLayers]) as any));
       }
     } // End of Step 5
 
@@ -3514,6 +3521,7 @@ export class DeckGLMap {
       'iran-events-layer': 'iranEvent',
       'protests-layer': 'protest',
       'military-flights-layer': 'militaryFlight',
+      'military-carriers-layer': 'militaryVessel',
       'military-vessels-layer': 'militaryVessel',
       'military-vessel-clusters-layer': 'militaryVesselCluster',
       'military-flight-clusters-layer': 'militaryFlightCluster',
@@ -4560,6 +4568,7 @@ export class DeckGLMap {
 
   public setGpsJamming(hexes: GpsJamHex[]): void {
     this.gpsJammingHexes = hexes;
+    this.markDirty('gpsJamming');
     this.render();
   }
 
