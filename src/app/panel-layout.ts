@@ -712,13 +712,15 @@ export class PanelLayoutManager implements AppModule {
         }),
       );
 
-      this.lazyPanel('oref-sirens', () =>
-        import('@/components/OrefSirensPanel').then(m => new m.OrefSirensPanel()),
-      );
+      // Disabled until ready
+      // this.lazyPanel('oref-sirens', () =>
+      //   import('@/components/OrefSirensPanel').then(m => new m.OrefSirensPanel()),
+      // );
 
-      this.lazyPanel('telegram-intel', () =>
-        import('@/components/TelegramIntelPanel').then(m => new m.TelegramIntelPanel()),
-      );
+      // Disabled until ready
+      // this.lazyPanel('telegram-intel', () =>
+      //   import('@/components/TelegramIntelPanel').then(m => new m.TelegramIntelPanel()),
+      // );
     }
 
     if (SITE_VARIANT === 'finance') {
@@ -757,9 +759,9 @@ export class PanelLayoutManager implements AppModule {
       const serviceStatusPanel = new ServiceStatusPanel();
       this.ctx.panels['service-status'] = serviceStatusPanel;
 
-      this.lazyPanel('tech-readiness', () =>
-        import('@/components/TechReadinessPanel').then(m => new m.TechReadinessPanel()),
-      );
+      // this.lazyPanel('tech-readiness', () =>
+      //   import('@/components/TechReadinessPanel').then(m => new m.TechReadinessPanel()),
+      // );
 
       this.ctx.panels['macro-signals'] = new MacroSignalsPanel();
       this.ctx.panels['etf-flows'] = new ETFFlowsPanel();
