@@ -1602,14 +1602,14 @@ export class DeckGLMap {
 
   private getBaseColor(type: string, a: number): [number, number, number, number] {
     switch (type) {
-      case 'us-nato': return [68, 136, 255, a];
-      case 'russia': return [255, 68, 68, a];
-      case 'china': return [255, 136, 68, a];
-      case 'uk': return [68, 170, 255, a];
-      case 'france': return [0, 85, 164, a];
-      case 'india': return [255, 153, 51, a];
-      case 'japan': return [188, 0, 45, a];
-      default: return [136, 136, 136, a];
+      case 'us-nato': return [130, 185, 255, a];
+      case 'russia': return [255, 130, 130, a];
+      case 'china': return [255, 185, 120, a];
+      case 'uk': return [130, 210, 255, a];
+      case 'france': return [90, 155, 225, a];
+      case 'india': return [255, 195, 100, a];
+      case 'japan': return [235, 90, 110, a];
+      default: return [195, 195, 195, a];
     }
   }
 
@@ -1617,7 +1617,7 @@ export class DeckGLMap {
     const highlightedBases = this.highlightedAssets.base;
     const zoom = this.maplibreMap?.getZoom() || 3;
     const alphaScale = Math.min(1, (zoom - 2.5) / 2.5);
-    const a = Math.round(160 * Math.max(0.3, alphaScale));
+    const a = Math.round(220 * Math.max(0.5, alphaScale));
     const data = this.getBasesData();
 
     return new IconLayer({
