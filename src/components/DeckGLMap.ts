@@ -3951,7 +3951,7 @@ export class DeckGLMap {
             { shape: shapes.square('rgb(34, 180, 100)'), label: 'Happy Country' },
             { shape: shapes.circle('rgb(74, 222, 128)'), label: 'Species Recovery Zone' },
             { shape: shapes.circle('rgb(255, 200, 50)'), label: 'Renewable Installation' },
-            { shape: shapes.circle('rgb(160, 100, 255)'), label: t('components.deckgl.legend.aircraft') },
+            // { shape: shapes.circle('rgb(160, 100, 255)'), label: t('components.deckgl.legend.aircraft') },
           ]
           : [
             { shape: shapes.circle('rgb(255, 68, 68)'), label: t('components.deckgl.legend.highAlert') },
@@ -3960,7 +3960,7 @@ export class DeckGLMap {
             { shape: shapes.triangle('rgb(68, 136, 255)'), label: t('components.deckgl.legend.base') },
             { shape: shapes.hexagon(isLight ? 'rgb(180, 120, 0)' : 'rgb(255, 220, 0)'), label: t('components.deckgl.legend.nuclear') },
             { shape: shapes.square('rgb(136, 68, 255)'), label: t('components.deckgl.legend.datacenter') },
-            { shape: shapes.circle('rgb(160, 100, 255)'), label: t('components.deckgl.legend.aircraft') },
+            // { shape: shapes.circle('rgb(160, 100, 255)'), label: t('components.deckgl.legend.aircraft') },
           ];
 
     legend.innerHTML = `

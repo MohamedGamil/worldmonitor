@@ -759,6 +759,7 @@ export class PanelLayoutManager implements AppModule {
       const serviceStatusPanel = new ServiceStatusPanel();
       this.ctx.panels['service-status'] = serviceStatusPanel;
 
+      // Disabled until ready
       // this.lazyPanel('tech-readiness', () =>
       //   import('@/components/TechReadinessPanel').then(m => new m.TechReadinessPanel()),
       // );
