@@ -1,24 +1,21 @@
 #!/usr/bin/env node
 
-import { loadEnvFile, CHROME_UA, runSeed, sleep } from './_seed-utils.mjs';
+import { loadEnvFile, loadSharedConfig, CHROME_UA, runSeed, sleep } from './_seed-utils.mjs';
+
+const cryptoConfig = loadSharedConfig('crypto.json');
 
 loadEnvFile(import.meta.url);
 
 const CANONICAL_KEY = 'market:crypto:v1';
 const CACHE_TTL = 3600; // 1 hour
 
-const CRYPTO_IDS = ['bitcoin', 'ethereum', 'solana', 'ripple'];
-const CRYPTO_META = {
-  bitcoin: { name: 'Bitcoin', symbol: 'BTC' },
-  ethereum: { name: 'Ethereum', symbol: 'ETH' },
-  solana: { name: 'Solana', symbol: 'SOL' },
-  ripple: { name: 'XRP', symbol: 'XRP' },
-};
+const CRYPTO_IDS = cryptoConfig.ids;
+const CRYPTO_META = cryptoConfig.meta;
 
-async function fetchWithRateLimitRetry(url, maxAttempts = 5) {
+async function fetchWithRateLimitRetry(url, maxAttempts = 5, headers = { Accept: 'application/json', 'User-Agent': CHROME_UA }) {
   for (let i = 0; i < maxAttempts; i++) {
     const resp = await fetch(url, {
-      headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+      headers,
       signal: AbortSignal.timeout(15_000),
     });
     if (resp.status === 429) {
@@ -33,14 +30,55 @@ async function fetchWithRateLimitRetry(url, maxAttempts = 5) {
   throw new Error('CoinGecko rate limit exceeded after retries');
 }
 
-async function fetchCryptoQuotes() {
-  const ids = CRYPTO_IDS.join(',');
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
-  const resp = await fetchWithRateLimitRetry(url);
+const COINPAPRIKA_ID_MAP = cryptoConfig.coinpaprika;
 
+async function fetchFromCoinGecko() {
+  const ids = CRYPTO_IDS.join(',');
+  const apiKey = process.env.COINGECKO_API_KEY;
+  const baseUrl = apiKey
+    ? 'https://pro-api.coingecko.com/api/v3'
+    : 'https://api.coingecko.com/api/v3';
+  const url = `${baseUrl}/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
+  const headers = { Accept: 'application/json', 'User-Agent': CHROME_UA };
+  if (apiKey) headers['x-cg-pro-api-key'] = apiKey;
+
+  const resp = await fetchWithRateLimitRetry(url, 5, headers);
   const data = await resp.json();
   if (!Array.isArray(data) || data.length === 0) {
     throw new Error('CoinGecko returned no data');
+  }
+  return data;
+}
+
+async function fetchFromCoinPaprika() {
+  console.log('  [CoinPaprika] Falling back to CoinPaprika...');
+  const resp = await fetch('https://api.coinpaprika.com/v1/tickers?quotes=USD', {
+    headers: { Accept: 'application/json', 'User-Agent': CHROME_UA },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!resp.ok) throw new Error(`CoinPaprika HTTP ${resp.status}`);
+  const allTickers = await resp.json();
+  const paprikaIds = new Set(CRYPTO_IDS.map((id) => COINPAPRIKA_ID_MAP[id]).filter(Boolean));
+  const reverseMap = new Map(Object.entries(COINPAPRIKA_ID_MAP).map(([g, p]) => [p, g]));
+  return allTickers
+    .filter((t) => paprikaIds.has(t.id))
+    .map((t) => ({
+      id: reverseMap.get(t.id) || t.id,
+      current_price: t.quotes.USD.price,
+      price_change_percentage_24h: t.quotes.USD.percent_change_24h,
+      sparkline_in_7d: undefined,
+      symbol: t.symbol.toLowerCase(),
+      name: t.name,
+    }));
+}
+
+async function fetchCryptoQuotes() {
+  let data;
+  try {
+    data = await fetchFromCoinGecko();
+  } catch (err) {
+    console.warn(`  [CoinGecko] Failed: ${err.message}`);
+    data = await fetchFromCoinPaprika();
   }
 
   const byId = new Map(data.map((c) => [c.id, c]));
@@ -63,7 +101,7 @@ async function fetchCryptoQuotes() {
   }
 
   if (quotes.every((q) => q.price === 0)) {
-    throw new Error('CoinGecko returned all-zero prices');
+    throw new Error('All sources returned all-zero prices');
   }
 
   return { quotes };

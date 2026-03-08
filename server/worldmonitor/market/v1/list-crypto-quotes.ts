@@ -9,7 +9,7 @@ import type {
   ListCryptoQuotesResponse,
   CryptoQuote,
 } from '../../../../src/generated/server/worldmonitor/market/v1/service_server';
-import { CRYPTO_META, fetchCoinGeckoMarkets, parseStringArray } from './_shared';
+import { CRYPTO_META, fetchCryptoMarkets, parseStringArray } from './_shared';
 import { cachedFetchJson, getCachedJson } from '../../../_shared/redis';
 
 const REDIS_CACHE_KEY = 'market:crypto:v1';
@@ -60,8 +60,8 @@ export async function listCryptoQuotes(
   const cacheKey = `${REDIS_CACHE_KEY}:${[...ids].sort().join(',')}`;
 
   try {
-    const result = await cachedFetchJson<ListCryptoQuotesResponse>(cacheKey, REDIS_CACHE_TTL, async () => {
-      const items = await fetchCoinGeckoMarkets(ids);
+  const result = await cachedFetchJson<ListCryptoQuotesResponse>(cacheKey, REDIS_CACHE_TTL, async () => {
+    const items = await fetchCryptoMarkets(ids);
 
       if (items.length === 0) {
         throw new Error('CoinGecko returned no data');

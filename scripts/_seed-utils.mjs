@@ -7,7 +7,17 @@ import { fileURLToPath } from 'node:url';
 const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const MAX_PAYLOAD_BYTES = 5 * 1024 * 1024; // 5MB per key
 
+const __seed_dirname = dirname(fileURLToPath(import.meta.url));
+
 export { CHROME_UA };
+
+export function loadSharedConfig(filename) {
+  for (const base of [join(__seed_dirname, '..', 'shared'), join(__seed_dirname, 'shared')]) {
+    const p = join(base, filename);
+    if (existsSync(p)) return JSON.parse(readFileSync(p, 'utf8'));
+  }
+  throw new Error(`Cannot find shared/${filename} — checked ../shared/ and ./shared/`);
+}
 
 export function loadEnvFile(metaUrl) {
   const __dirname = metaUrl ? dirname(fileURLToPath(metaUrl)) : process.cwd();
@@ -119,7 +129,9 @@ export async function atomicPublish(canonicalKey, data, validateFn, ttlSeconds) 
 
   if (validateFn) {
     const valid = validateFn(data);
-    if (!valid) throw new Error('Validation failed for seed data');
+    if (!valid) {
+      return { payloadBytes: 0, skipped: true };
+    }
   }
 
   // Write to staging key
@@ -233,11 +245,20 @@ export async function runSeed(domain, resource, canonicalKey, fetchFn, opts = {}
 
   try {
     const data = await withRetry(fetchFn);
-    const { payloadBytes } = await atomicPublish(canonicalKey, data, validateFn, ttlSeconds);
+    const publishResult = await atomicPublish(canonicalKey, data, validateFn, ttlSeconds);
+    if (publishResult.skipped) {
+      const durationMs = Date.now() - startMs;
+      console.log(`  SKIPPED: validation failed (empty data) — preserving existing cache`);
+      console.log(`\n=== Done (${Math.round(durationMs)}ms, no write) ===`);
+      await releaseLock(`${domain}:${resource}`, runId);
+      process.exit(0);
+    }
+    const { payloadBytes } = publishResult;
     const recordCount = Array.isArray(data) ? data.length
       : (data?.events?.length ?? data?.earthquakes?.length ?? data?.outages?.length
         ?? data?.fireDetections?.length ?? data?.anomalies?.length ?? data?.threats?.length
-        ?? data?.quotes?.length ?? data?.stablecoins?.length ?? 0);
+        ?? data?.quotes?.length ?? data?.stablecoins?.length
+        ?? data?.cables?.length ?? 0);
 
     // Write extra keys (e.g., bootstrap hydration keys)
     if (extraKeys) {

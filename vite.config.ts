@@ -575,6 +575,31 @@ function youtubeLivePlugin(): Plugin {
   };
 }
 
+function gpsjamDevPlugin(): Plugin {
+  return {
+    name: 'gpsjam-dev',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        if (req.url !== '/api/gpsjam' && !req.url?.startsWith('/api/gpsjam?')) {
+          return next();
+        }
+
+        try {
+          const data = await readFile(resolve(__dirname, 'scripts/data/gpsjam-latest.json'), 'utf8');
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(data);
+        } catch {
+          res.statusCode = 503;
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.end(JSON.stringify({ error: 'No GPS jam data. Run: node scripts/fetch-gpsjam.mjs' }));
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
@@ -584,6 +609,7 @@ export default defineConfig({
     polymarketPlugin(),
     rssProxyPlugin(),
     youtubeLivePlugin(),
+    gpsjamDevPlugin(),
     sebufApiPlugin(),
     brotliPrecompressPlugin(),
     VitePWA({
@@ -648,20 +674,23 @@ export default defineConfig({
             method: 'GET',
           },
           {
-            urlPattern: /^https:\/\/api\.maptiler\.com\//,
-            handler: 'CacheFirst',
+            urlPattern: ({ url }: { url: URL }) =>
+              url.pathname.endsWith('.pmtiles') ||
+              url.hostname.endsWith('.r2.dev') ||
+              url.hostname === 'build.protomaps.com',
+            handler: 'NetworkFirst',
             options: {
-              cacheName: 'map-tiles',
+              cacheName: 'pmtiles-ranges',
               expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            urlPattern: /^https:\/\/[abc]\.basemaps\.cartocdn\.com\//,
+            urlPattern: /^https:\/\/protomaps\.github\.io\//,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'carto-tiles',
-              expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
+              cacheName: 'protomaps-assets',
+              expiration: { maxEntries: 100, maxAgeSeconds: 365 * 24 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
@@ -750,7 +779,7 @@ export default defineConfig({
             if (id.includes('/onnxruntime-web/')) {
               return 'onnxruntime';
             }
-            if (id.includes('/maplibre-gl/')) {
+            if (id.includes('/maplibre-gl/') || id.includes('/pmtiles/') || id.includes('/@protomaps/basemaps/')) {
               return 'maplibre';
             }
             if (
