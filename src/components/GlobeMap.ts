@@ -912,7 +912,7 @@ export class GlobeMap {
       const hsKey = `geo.hotspots.${d.id}`;
       el.title = t(hsKey) !== hsKey ? t(hsKey) : d.name;
     } else if (d._kind === 'flight') {
-      const heading = d.heading ?? 0;
+      const heading = (d.heading ?? 0) - 90; // SVG points right, so subtract 90 to align with north-up heading
       const typeColors: Record<string, string> = {
         fighter:        '#ff4444',
         bomber:         '#ff8800',

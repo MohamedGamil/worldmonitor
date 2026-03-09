@@ -1805,7 +1805,7 @@ export class DeckGLMap {
         }
         return [160, 100, 255, 230] as [number, number, number, number]; // Purple = real OpenSky
       },
-      getAngle: (d) => -d.trackDeg,
+      getAngle: (d) => -d.trackDeg -90, // Rotate plane icon to match heading (subtract 90 to align with icon orientation)
       sizeMinPixels: 8,
       sizeMaxPixels: 28,
       sizeScale: 1,
