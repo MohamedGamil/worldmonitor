@@ -714,7 +714,7 @@ fn build_app_menu(handle: &AppHandle) -> tauri::Result<Menu<tauri::Wry>> {
     let about_metadata = AboutMetadata {
         name: Some("Marsd".into()),
         version: Some(env!("CARGO_PKG_VERSION").into()),
-        copyright: Some("\u{00a9} 2025 Elie Habib".into()),
+        copyright: Some("\u{00a9} 2026 Mohamed Gamil".into()),
         website: Some("https://marsd.app".into()),
         website_label: Some("marsd.app".into()),
         ..Default::default()

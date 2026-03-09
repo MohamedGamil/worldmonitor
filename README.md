@@ -2103,7 +2103,7 @@ GNU Affero General Public License v3.0 (AGPL-3.0) — see [LICENSE](LICENSE) for
 
 ## Author
 
-**Elie Habib** — [GitHub](https://github.com/MohamedGamil)
+**Mohamed Gamil** — [GitHub](https://github.com/MohamedGamil)
 
 ---
 

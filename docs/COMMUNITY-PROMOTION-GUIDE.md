@@ -171,7 +171,7 @@ Run AI summarization entirely on your own hardware — no API keys, no cloud, no
 - **Name**: "Marsd" (two words, capitalized)
 - **Tagline**: "Real-time global intelligence dashboard"
 - **License**: AGPL-3.0 (free and open source)
-- **Creator**: Credit "Marsd by Elie Habib" or link to the GitHub repo
+- **Creator**: Credit "Marsd by Mohamed Gamil" or link to the GitHub repo, based on "World Monitor by Elie Habib"
 - **Variants**: You can mention all three (World/Tech/Finance) or focus on the main one
 - **No login required**: Anyone can use the web app immediately — no signup, no paywall
 
