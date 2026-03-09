@@ -157,6 +157,15 @@ export class CircuitBreaker<T> {
     return this.cache?.data ?? defaultValue;
   }
 
+  /**
+   * Returns the in-flight SWR background refresh promise, or null if none is
+   * active. Callers that need guaranteed fresh data can await this before
+   * reading the cache (e.g. to avoid serving a stale wrong-locale response).
+   */
+  getBackgroundRefresh(): Promise<void> | null {
+    return this.backgroundRefreshPromise;
+  }
+
   recordSuccess(data: T): void {
     this.state = { failures: 0, cooldownUntil: 0 };
     this.cache = { data, timestamp: Date.now() };

@@ -413,9 +413,11 @@ export async function fetchIranEvents(): Promise<IranEvent[]> {
   // Skip hydrated SSR data when a non-English locale is active — the server-side
   // data is always English and would show untranslated titles to the user.
   const hydrated = getHydratedData('iranEvents') as ListIranEventsResponse | undefined;
+
   if (hydrated?.events?.length && (!lang || lang === 'en')) return hydrated.events;
 
-  const resp = await getIranBreaker(lang).execute(async () => {
+  const breaker = getIranBreaker(lang);
+  const resp = await breaker.execute(async () => {
     const cacheBust = Math.floor(Date.now() / 120_000);
     // Always send lang so the backend can serve translated content for any locale,
     // including English (backend uses it as a no-op and returns untranslated data).
@@ -424,5 +426,18 @@ export async function fetchIranEvents(): Promise<IranEvent[]> {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json() as Promise<ListIranEventsResponse>;
   }, emptyIranFallback);
+
+  // If the circuit breaker served stale persistent-cache data (SWR) and a
+  // background refresh is in flight, await it and return the fresh result.
+  // Without this, the map shows stale English titles when the locale is Arabic
+  // (or any other non-English language) because loadIranEvents() is only called
+  // once at startup — the background-refresh result would otherwise be saved to
+  // cache/IndexedDB but never pushed to the map.
+  const bgRefresh = breaker.getBackgroundRefresh();
+  if (bgRefresh) {
+    await bgRefresh;
+    return breaker.getCachedOrDefault(emptyIranFallback).events;
+  }
+
   return resp.events;
 }
