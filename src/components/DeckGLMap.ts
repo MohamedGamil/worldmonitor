@@ -2247,7 +2247,7 @@ export class DeckGLMap {
       iconMapping: AIRCRAFT_ICON_MAPPING,
       getSize: (d) => d.onGround ? 14 : 20,
       getColor: (d) => d.isInteresting ? INTERESTING_COLOR : (TYPE_COLORS[d.aircraftType] ?? COLORS.flightMilitary),
-      getAngle: (d) => -(d.heading ?? 0),
+      getAngle: (d) => -(d.heading ?? 0) +90, // Rotate to match heading
       sizeMinPixels: 6,
       sizeMaxPixels: 24,
       billboard: false,
