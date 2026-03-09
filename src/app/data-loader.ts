@@ -924,6 +924,24 @@ export class DataLoaderManager implements AppModule {
   }
 
   async loadMarkets(): Promise<void> {
+    // Crypto loading is independent of Yahoo/Finnhub data — start it immediately
+    // so it doesn't wait for the market pipeline (which can retry for up to ~40s).
+    const cryptoTrack = (async () => {
+      try {
+        let crypto = await fetchCrypto();
+        if (crypto.length === 0) {
+          (this.ctx.panels['crypto'] as CryptoPanel).showRetrying();
+          await new Promise(r => setTimeout(r, 20_000));
+          crypto = await fetchCrypto();
+        }
+        (this.ctx.panels['crypto'] as CryptoPanel).renderCrypto(crypto);
+        this.ctx.statusPanel?.updateApi('CoinGecko', { status: crypto.length > 0 ? 'ok' : 'error' });
+      } catch {
+        this.ctx.statusPanel?.updateApi('CoinGecko', { status: 'error' });
+        (this.ctx.panels['crypto'] as CryptoPanel)?.renderCrypto([]);
+      }
+    })();
+
     try {
       const customEntries = getMarketWatchlistEntries();
       const effectiveSymbols = (() => {
@@ -1052,18 +1070,7 @@ export class DataLoaderManager implements AppModule {
       this.ctx.statusPanel?.updateApi('Finnhub', { status: 'error' });
     }
 
-    try {
-      let crypto = await fetchCrypto();
-      if (crypto.length === 0) {
-        (this.ctx.panels['crypto'] as CryptoPanel).showRetrying();
-        await new Promise(r => setTimeout(r, 20_000));
-        crypto = await fetchCrypto();
-      }
-      (this.ctx.panels['crypto'] as CryptoPanel).renderCrypto(crypto);
-      this.ctx.statusPanel?.updateApi('CoinGecko', { status: crypto.length > 0 ? 'ok' : 'error' });
-    } catch {
-      this.ctx.statusPanel?.updateApi('CoinGecko', { status: 'error' });
-    }
+    await cryptoTrack;
   }
 
   async loadPredictions(): Promise<void> {

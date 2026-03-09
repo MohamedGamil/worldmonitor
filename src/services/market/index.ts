@@ -21,7 +21,7 @@ import { getHydratedData } from '@/services/bootstrap';
 const client = new MarketServiceClient('', { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args) });
 const stockBreaker = createCircuitBreaker<ListMarketQuotesResponse>({ name: 'Market Quotes', cacheTtlMs: 0 });
 const commodityBreaker = createCircuitBreaker<ListMarketQuotesResponse>({ name: 'Commodity Quotes', cacheTtlMs: 0 });
-const cryptoBreaker = createCircuitBreaker<ListCryptoQuotesResponse>({ name: 'Crypto Quotes' });
+const cryptoBreaker = createCircuitBreaker<ListCryptoQuotesResponse>({ name: 'Crypto Quotes', persistCache: true });
 
 const emptyStockFallback: ListMarketQuotesResponse = { quotes: [], finnhubSkipped: false, skipReason: '', rateLimited: false };
 const emptyCryptoFallback: ListCryptoQuotesResponse = { quotes: [] };

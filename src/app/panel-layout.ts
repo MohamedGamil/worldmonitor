@@ -663,8 +663,9 @@ export class PanelLayoutManager implements AppModule {
       const cascadePanel = new CascadePanel();
       this.ctx.panels['cascade'] = cascadePanel;
 
-      const satelliteFiresPanel = new SatelliteFiresPanel();
-      this.ctx.panels['satellite-fires'] = satelliteFiresPanel;
+      // Disabled until ready
+      // const satelliteFiresPanel = new SatelliteFiresPanel();
+      // this.ctx.panels['satellite-fires'] = satelliteFiresPanel;
 
       const strategicRiskPanel = new StrategicRiskPanel();
       strategicRiskPanel.setLocationClickHandler((lat, lon) => {

@@ -236,8 +236,18 @@ export async function fetchCoinGeckoMarkets(
   ids: string[],
 ): Promise<CoinGeckoMarketItem[]> {
   const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.join(',')}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  };
+  const cgKey = process.env.COINGECKO_API_KEY;
+  if (cgKey) {
+    // Free/demo keys use x-cg-demo-api-key; Pro keys use x-cg-pro-api-key.
+    // The demo header is accepted by both tiers, so use it unconditionally.
+    headers['x-cg-demo-api-key'] = cgKey;
+  }
   const resp = await fetch(url, {
-    headers: { Accept: 'application/json', 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
+    headers,
     signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
   });
   if (!resp.ok) {
