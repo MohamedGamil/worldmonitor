@@ -486,10 +486,11 @@ export class PanelLayoutManager implements AppModule {
     this.ctx.newsPanels['gov'] = govPanel;
     this.ctx.panels['gov'] = govPanel;
 
-    const intelPanel = new NewsPanel('intel', t('panels.intel'));
-    this.attachRelatedAssetHandlers(intelPanel);
-    this.ctx.newsPanels['intel'] = intelPanel;
-    this.ctx.panels['intel'] = intelPanel;
+    // Disabled until fixed
+    // const intelPanel = new NewsPanel('intel', t('panels.intel'));
+    // this.attachRelatedAssetHandlers(intelPanel);
+    // this.ctx.newsPanels['intel'] = intelPanel;
+    // this.ctx.panels['intel'] = intelPanel;
 
     const cryptoPanel = new CryptoPanel();
     this.ctx.panels['crypto'] = cryptoPanel;

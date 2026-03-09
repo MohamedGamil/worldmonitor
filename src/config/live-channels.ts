@@ -19,10 +19,10 @@ export const FULL_LIVE_CHANNELS_GLOBAL: LiveChannel[] = [
  * Full MENA variant: Middle East & North Africa news channels (24/7 live streams)
  */
 export const FULL_LIVE_CHANNELS_MENA: LiveChannel[] = [
-  { id: 'france24_ar', name: 'France24 Arabic', handle: '@France24_ar', fallbackVideoId: '3ursYA8HMeo', useFallbackOnly: true },
-  { id: 'sky-news-arabia', name: 'Sky News Arabia', handle: '@skynewsarabia', fallbackVideoId: 'U--OjmpjF5o' },
-  { id: 'aljazeeramubasher', name: 'AlJazeera Mubasher', handle: '@aljazeeramubasher', fallbackVideoId: '8D5QY5gw_Xk', useFallbackOnly: true },
   { id: 'aljazeera-arabic', name: 'AlJazeera Arabic', handle: '@aljazeera', fallbackVideoId: 'bNyUyrR0PHo', useFallbackOnly: true },
+  { id: 'aljazeeramubasher', name: 'AlJazeera Mubasher', handle: '@aljazeeramubasher', fallbackVideoId: '8D5QY5gw_Xk', useFallbackOnly: true },
+  { id: 'sky-news-arabia', name: 'Sky News Arabia', handle: '@skynewsarabia', fallbackVideoId: 'U--OjmpjF5o' },
+  { id: 'france24_ar', name: 'France24 Arabic', handle: '@France24_ar', fallbackVideoId: '3ursYA8HMeo', useFallbackOnly: true },
   { id: 'alarabiya', name: 'AlArabiya', handle: '@AlArabiya', fallbackVideoId: 'n7eQejkXbnM', useFallbackOnly: true },
   { id: 'alaraby', name: 'Alaraby', handle: '@AlarabyTv_News', fallbackVideoId: 'e2RgSa1Wt5o', useFallbackOnly: true },
   { id: 'al-hadath', name: 'Al Hadath', handle: '@AlHadath', fallbackVideoId: 'xWXpl7azI8k', useFallbackOnly: true },
