@@ -5,7 +5,7 @@ import {
   type GdeltArticle as ProtoGdeltArticle,
   type SearchGdeltDocumentsResponse,
 } from '@/generated/client/marsd/intelligence/v1/service_client';
-import { createCircuitBreaker } from '@/utils';
+import { CircuitBreaker } from '@/utils';
 
 export interface GdeltArticle {
   title: string;
@@ -125,8 +125,26 @@ export function getIntelTopics(): IntelTopic[] {
 // ---- Sebuf client ----
 
 const client = new IntelligenceServiceClient('', { fetch: (...args) => globalThis.fetch(...args) });
-const gdeltBreaker = createCircuitBreaker<SearchGdeltDocumentsResponse>({ name: 'GDELT Intelligence', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
-const positiveGdeltBreaker = createCircuitBreaker<SearchGdeltDocumentsResponse>({ name: 'GDELT Positive', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
+
+// Per-query circuit breakers — cacheTtlMs:0 disables the breaker's own response
+// cache so that articleCache (below) remains the sole per-query data store.
+// Without this, a single shared breaker would return Topic A's cached articles
+// for Topic B's query whenever the cache is still fresh.
+const _gdeltBreakerMap = new Map<string, CircuitBreaker<SearchGdeltDocumentsResponse>>();
+const _positiveBreakerMap = new Map<string, CircuitBreaker<SearchGdeltDocumentsResponse>>();
+
+function _getBreaker(
+  map: Map<string, CircuitBreaker<SearchGdeltDocumentsResponse>>,
+  key: string,
+  prefix: string,
+): CircuitBreaker<SearchGdeltDocumentsResponse> {
+  let b = map.get(key);
+  if (!b) {
+    b = new CircuitBreaker({ name: `${prefix}:${key.slice(0, 40)}`, cacheTtlMs: 0 });
+    map.set(key, b);
+  }
+  return b;
+}
 
 const emptyGdeltFallback: SearchGdeltDocumentsResponse = { articles: [], query: '', error: '' };
 
@@ -158,7 +176,7 @@ export async function fetchGdeltArticles(
     return cached.articles;
   }
 
-  const resp = await gdeltBreaker.execute(async () => {
+  const resp = await _getBreaker(_gdeltBreakerMap, cacheKey, 'GDELT').execute(async () => {
     return client.searchGdeltDocuments({
       query,
       maxRecords: maxrecords,
@@ -251,7 +269,7 @@ export async function fetchPositiveGdeltArticles(
     return cached.articles;
   }
 
-  const resp = await positiveGdeltBreaker.execute(async () => {
+  const resp = await _getBreaker(_positiveBreakerMap, cacheKey, 'GDELT+').execute(async () => {
     return client.searchGdeltDocuments({
       query,
       maxRecords: maxrecords,

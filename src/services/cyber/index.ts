@@ -102,5 +102,14 @@ export async function fetchCyberThreats(options: { limit?: number; days?: number
     });
   }, emptyFallback);
 
+  // Don't persist an empty response — if the backend had no seeded data at the
+  // time of the request, the breaker would cache the empty list in IndexedDB
+  // and serve it on every subsequent load (SWR background-refreshes don't
+  // re-render already-painted panels). Clearing here forces a fresh fetch on
+  // the next call once real data is available.
+  if (!resp.threats?.length) {
+    breaker.clearCache();
+  }
+
   return resp.threats.map(toCyberThreat);
 }

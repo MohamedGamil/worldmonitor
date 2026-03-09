@@ -65,18 +65,24 @@ export class GdeltIntelPanel extends Panel {
   }
 
   private async loadActiveTopic(): Promise<void> {
+    // Capture the topic at the start of the load so that if the user switches
+    // tabs while this fetch is in-flight, we discard the stale result instead
+    // of overwriting the newly-selected topic's content.
+    const topic = this.activeTopic;
     this.showLoading();
 
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const data = await fetchTopicIntelligence(this.activeTopic);
+        const data = await fetchTopicIntelligence(topic);
         if (!this.element?.isConnected) return;
-        this.topicData.set(this.activeTopic.id, data);
+        if (this.activeTopic.id !== topic.id) return; // tab switched mid-flight
+        this.topicData.set(topic.id, data);
 
         if (data.articles.length === 0 && attempt < 2) {
           this.showRetrying();
           await new Promise(r => setTimeout(r, 15_000));
           if (!this.element?.isConnected) return;
+          if (this.activeTopic.id !== topic.id) return;
           continue;
         }
 
@@ -86,11 +92,13 @@ export class GdeltIntelPanel extends Panel {
       } catch (error) {
         if (this.isAbortError(error)) return;
         if (!this.element?.isConnected) return;
+        if (this.activeTopic.id !== topic.id) return;
         console.error(`[GdeltIntelPanel] Load error (attempt ${attempt + 1}):`, error);
         if (attempt < 2) {
           this.showRetrying();
           await new Promise(r => setTimeout(r, 15_000));
           if (!this.element?.isConnected) return;
+          if (this.activeTopic.id !== topic.id) return;
           continue;
         }
         this.showError(t('common.failedIntelFeed'));
