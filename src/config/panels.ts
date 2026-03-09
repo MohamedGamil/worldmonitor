@@ -25,12 +25,15 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   us: { name: 'United States', enabled: true, priority: 1 },
   europe: { name: 'Europe', enabled: true, priority: 1 },
   middleeast: { name: 'Middle East', enabled: true, priority: 1 },
-  africa: { name: 'Africa', enabled: true, priority: 1 },
-  latam: { name: 'Latin America', enabled: true, priority: 1 },
-  asia: { name: 'Asia-Pacific', enabled: true, priority: 1 },
-  energy: { name: 'Energy & Resources', enabled: true, priority: 1 },
-  gov: { name: 'Government', enabled: true, priority: 1 },
-  thinktanks: { name: 'Think Tanks', enabled: true, priority: 1 },
+
+  // Disabled panels (not fully ready or data issues)
+  africa: { name: 'Africa', enabled: false, priority: 1 },
+  latam: { name: 'Latin America', enabled: false, priority: 1 },
+  asia: { name: 'Asia-Pacific', enabled: false, priority: 1 },
+  energy: { name: 'Energy & Resources', enabled: false, priority: 1 },
+  gov: { name: 'Government', enabled: false, priority: 1 },
+  thinktanks: { name: 'Think Tanks', enabled: false, priority: 1 },
+
   polymarket: { name: 'Predictions', enabled: true, priority: 1 },
   commodities: { name: 'Commodities', enabled: true, priority: 1 },
   markets: { name: 'Markets', enabled: true, priority: 1 },

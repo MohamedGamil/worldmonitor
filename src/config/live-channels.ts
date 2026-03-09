@@ -19,15 +19,15 @@ export const FULL_LIVE_CHANNELS_GLOBAL: LiveChannel[] = [
  * Full MENA variant: Middle East & North Africa news channels (24/7 live streams)
  */
 export const FULL_LIVE_CHANNELS_MENA: LiveChannel[] = [
-  { id: 'aljazeeramubasher', name: 'AlJazeera Mubasher', handle: '@aljazeeramubasher', fallbackVideoId: '8D5QY5gw_Xk', useFallbackOnly: true },
-  { id: 'al-hadath', name: 'Al Hadath', handle: '@AlHadath', fallbackVideoId: 'xWXpl7azI8k', useFallbackOnly: true },
   { id: 'france24_ar', name: 'France24 Arabic', handle: '@France24_ar', fallbackVideoId: '3ursYA8HMeo', useFallbackOnly: true },
-  { id: 'alarabiya', name: 'AlArabiya', handle: '@AlArabiya', fallbackVideoId: 'n7eQejkXbnM', useFallbackOnly: true },
-  { id: 'aljazeera-arabic', name: 'AlJazeera Arabic', handle: '@aljazeera', fallbackVideoId: 'bNyUyrR0PHo', useFallbackOnly: true },
   { id: 'sky-news-arabia', name: 'Sky News Arabia', handle: '@skynewsarabia', fallbackVideoId: 'U--OjmpjF5o' },
-  { id: 'dw-arabia', name: 'DW Arabia', handle: '@dwarabic', fallbackVideoId: 'AGkp2AL8e7o', useFallbackOnly: true },
-  { id: 'asharq-news', name: 'Asharq News', handle: '@asharqnews', fallbackVideoId: 'f6VpkfV7m4Y', useFallbackOnly: true },
+  { id: 'aljazeeramubasher', name: 'AlJazeera Mubasher', handle: '@aljazeeramubasher', fallbackVideoId: '8D5QY5gw_Xk', useFallbackOnly: true },
+  { id: 'aljazeera-arabic', name: 'AlJazeera Arabic', handle: '@aljazeera', fallbackVideoId: 'bNyUyrR0PHo', useFallbackOnly: true },
+  { id: 'alarabiya', name: 'AlArabiya', handle: '@AlArabiya', fallbackVideoId: 'n7eQejkXbnM', useFallbackOnly: true },
   { id: 'alaraby', name: 'Alaraby', handle: '@AlarabyTv_News', fallbackVideoId: 'e2RgSa1Wt5o', useFallbackOnly: true },
+  { id: 'al-hadath', name: 'Al Hadath', handle: '@AlHadath', fallbackVideoId: 'xWXpl7azI8k', useFallbackOnly: true },
+  { id: 'asharq-news', name: 'Asharq News', handle: '@asharqnews', fallbackVideoId: 'f6VpkfV7m4Y', useFallbackOnly: true },
+  { id: 'dw-arabia', name: 'DW Arabia', handle: '@dwarabic', fallbackVideoId: 'AGkp2AL8e7o', useFallbackOnly: true },
 ];
 
 /**
@@ -102,7 +102,7 @@ export const LIVE_CHANNELS_LIST: LiveChannel[] = [
   { id: 'aljazeera-arabic', name: 'AlJazeera Arabic', handle: '@aljazeera', fallbackVideoId: 'bNyUyrR0PHo', useFallbackOnly: true },
   { id: 'aljazeera', name: 'AlJazeera English', handle: '@AlJazeeraEnglish', fallbackVideoId: 'gCNeDWCI0vo', useFallbackOnly: true },
   { id: 'sky-news-arabia', name: 'Sky News Arabia', handle: '@skynewsarabia', fallbackVideoId: 'U--OjmpjF5o' },
-  { id: 'dw-arabia', name: 'TRT World', handle: '@TRTWorld', fallbackVideoId: 'ABfFhWzWs0s' },
+  { id: 'trt-world', name: 'TRT World', handle: '@TRTWorld', fallbackVideoId: 'ABfFhWzWs0s' },
   { id: 'cgtn-arabic', name: 'CGTN Arabic', handle: '@CGTNArabic' },
   { id: 'kan-11', name: 'Kan 11', handle: '@KAN11NEWS', fallbackVideoId: 'TCnaIE_SAtM' },
   { id: 'asharq-news', name: 'Asharq News', handle: '@asharqnews', fallbackVideoId: 'f6VpkfV7m4Y', useFallbackOnly: true },
