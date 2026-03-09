@@ -85,6 +85,7 @@ export interface HumanitarianCountrySummary {
 }
 
 export interface ListIranEventsRequest {
+  lang?: string;
 }
 
 export interface ListIranEventsResponse {
@@ -317,7 +318,11 @@ export function createConflictServiceRoutes(
       handler: async (req: Request): Promise<Response> => {
         try {
           const pathParams: Record<string, string> = {};
-          const body = {} as ListIranEventsRequest;
+          const url = new URL(req.url, "http://localhost");
+          const params = url.searchParams;
+          const body: ListIranEventsRequest = {
+            lang: params.get("lang") ?? undefined,
+          };
 
           const ctx: ServerContext = {
             request: req,

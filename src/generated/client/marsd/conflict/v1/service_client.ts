@@ -85,6 +85,7 @@ export interface HumanitarianCountrySummary {
 }
 
 export interface ListIranEventsRequest {
+  lang?: string;
 }
 
 export interface ListIranEventsResponse {
@@ -239,7 +240,9 @@ export class ConflictServiceClient {
 
   async listIranEvents(req: ListIranEventsRequest, options?: ConflictServiceCallOptions): Promise<ListIranEventsResponse> {
     let path = "/api/conflict/v1/list-iran-events";
-    const url = this.baseURL + path;
+    const params = new URLSearchParams();
+    if (req.lang != null && req.lang !== "" && req.lang !== "en") params.set("lang", String(req.lang));
+    const url = this.baseURL + path + (params.toString() ? "?" + params.toString() : "");
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",

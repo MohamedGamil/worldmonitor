@@ -12,6 +12,7 @@ import {
 import type { UcdpGeoEvent, UcdpEventType } from '@/types';
 import { createCircuitBreaker } from '@/utils';
 import { getHydratedData } from '@/services/bootstrap';
+import { getCurrentLanguage } from '@/services/i18n';
 
 // ---- Client + Circuit Breakers (per-RPC; HAPI uses per-country map) ----
 
@@ -396,9 +397,11 @@ export async function fetchIranEvents(): Promise<IranEvent[]> {
   const hydrated = getHydratedData('iranEvents') as ListIranEventsResponse | undefined;
   if (hydrated?.events?.length) return hydrated.events;
 
+  const lang = getCurrentLanguage();
   const resp = await iranBreaker.execute(async () => {
     const cacheBust = Math.floor(Date.now() / 120_000);
-    const r = await globalThis.fetch(`/api/conflict/v1/list-iran-events?_v=${cacheBust}`);
+    const langParam = lang && lang !== 'en' ? `&lang=${encodeURIComponent(lang)}` : '';
+    const r = await globalThis.fetch(`/api/conflict/v1/list-iran-events?_v=${cacheBust}${langParam}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json() as Promise<ListIranEventsResponse>;
   }, emptyIranFallback);

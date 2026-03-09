@@ -2897,7 +2897,7 @@ export class MapPopup {
           </div>
           ${event.locationName ? `<div class="popup-stat">
             <span class="stat-label">${t('popups.location')}</span>
-            <span class="stat-value">${escapeHtml(event.locationName)}</span>
+            <span class="stat-value">${escapeHtml(getLocalizedGeoName(event.locationName) || event.locationName)}</span>
           </div>` : ''}
           ${timeAgo ? `<div class="popup-stat">
             <span class="stat-label">${t('popups.time')}</span>
