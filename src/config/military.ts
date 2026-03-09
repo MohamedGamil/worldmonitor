@@ -73,6 +73,9 @@ export const US_MILITARY_CALLSIGNS: CallsignPattern[] = [
 // NATO/Allied callsign patterns
 export const NATO_ALLIED_CALLSIGNS: CallsignPattern[] = [
   // Royal Air Force (UK)
+  // RFR is the ICAO 3-letter operator designator for the Royal Air Force.
+  // Must be listed before the Russian ^RF pattern to avoid misclassification.
+  { pattern: '^RFR', operator: 'raf', description: 'RAF aircraft (ICAO designator)' },
   { pattern: '^RRR', operator: 'raf', description: 'RAF aircraft' },
   { pattern: '^ASCOT', operator: 'raf', aircraftType: 'transport', description: 'RAF transport' },
   { pattern: '^RAFAIR', operator: 'raf', aircraftType: 'transport', description: 'RAF transport' },
@@ -150,7 +153,9 @@ export const NATO_ALLIED_CALLSIGNS: CallsignPattern[] = [
 // Russian/Chinese callsign patterns (less common due to transponder usage)
 export const ADVERSARY_CALLSIGNS: CallsignPattern[] = [
   // Russian Aerospace Forces
-  { pattern: '^RF', operator: 'vks', description: 'Russian Federation aircraft' },
+  // Russian military registrations follow the RF-NNNNN format (RF + digits).
+  // ^RF[0-9] avoids false matches against ICAO operator prefixes like RFR (Royal Air Force).
+  { pattern: '^RF[0-9]', operator: 'vks', description: 'Russian Federation aircraft (RF-NNNNN registration)' },
   { pattern: '^RFF', operator: 'vks', description: 'Russian AF' },
   { pattern: '^RUSSIAN', operator: 'vks', description: 'Russian military' },
 
