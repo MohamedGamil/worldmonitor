@@ -40,6 +40,7 @@ import type { SpeciesRecovery } from '@/services/conservation-data';
 import type { RenewableInstallation } from '@/services/renewable-installations';
 import type { GpsJamHex } from '@/services/gps-interference';
 import type { IranEvent } from '@/services/conflict';
+import { getCurrentLanguage } from '@/services/i18n';
 
 export type TimeRange = '1h' | '6h' | '24h' | '48h' | '7d' | 'all';
 export type MapView = 'global' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
@@ -120,6 +121,7 @@ export class MapContainer {
   private cachedGpsJamming: GpsJamHex[] | null = null;
   private cachedCyberThreats: CyberThreat[] | null = null;
   private cachedIranEvents: IranEvent[] | null = null;
+  private cachedIranEventsLang: string = '';
   private cachedNewsLocations: NewsLocationMarker[] | null = null;
   private cachedPositiveEvents: PositiveGeoEvent[] | null = null;
   private cachedKindnessData: KindnessPoint[] | null = null;
@@ -306,7 +308,15 @@ export class MapContainer {
     if (this.cachedClimateAnomalies) this.setClimateAnomalies(this.cachedClimateAnomalies);
     if (this.cachedGpsJamming) this.setGpsJamming(this.cachedGpsJamming);
     if (this.cachedCyberThreats) this.setCyberThreats(this.cachedCyberThreats);
-    if (this.cachedIranEvents) this.setIranEvents(this.cachedIranEvents);
+    // Only replay Iran events if they were fetched for the current locale;
+    // a stale translated cache from a different language must not overwrite
+    // the new renderer's initial state — the data-loader will push fresh data.
+    if (this.cachedIranEvents && this.cachedIranEventsLang === getCurrentLanguage()) {
+      this.setIranEvents(this.cachedIranEvents);
+    } else {
+      this.cachedIranEvents = null;
+      this.cachedIranEventsLang = '';
+    }
     if (this.cachedNewsLocations) this.setNewsLocations(this.cachedNewsLocations);
     if (this.cachedPositiveEvents) this.setPositiveEvents(this.cachedPositiveEvents);
     if (this.cachedKindnessData) this.setKindnessData(this.cachedKindnessData);
@@ -574,6 +584,7 @@ export class MapContainer {
 
   public setIranEvents(events: IranEvent[]): void {
     this.cachedIranEvents = events;
+    this.cachedIranEventsLang = getCurrentLanguage();
     if (this.useGlobe) { this.globeMap?.setIranEvents(events); return; }
     if (this.useDeckGL) {
       this.deckGLMap?.setIranEvents(events);

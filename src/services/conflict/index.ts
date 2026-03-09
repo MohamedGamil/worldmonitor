@@ -30,7 +30,21 @@ function getHapiBreaker(iso2: string) {
   }
   return hapiBreakers.get(iso2)!;
 }
-const iranBreaker = createCircuitBreaker<ListIranEventsResponse>({ name: 'Iran Events', cacheTtlMs: 10 * 60 * 1000, persistCache: true });
+// Per-language breakers so that each locale's translated data is cached
+// independently. A single shared breaker would serve English cached events
+// to Arabic (or vice-versa) while the persistent IndexedDB entry is still fresh.
+const iranBreakers = new Map<string, ReturnType<typeof createCircuitBreaker<ListIranEventsResponse>>>();
+function getIranBreaker(lang: string) {
+  const key = lang && lang !== 'en' ? lang : 'en';
+  if (!iranBreakers.has(key)) {
+    iranBreakers.set(key, createCircuitBreaker<ListIranEventsResponse>({
+      name: `Iran Events:${key}`,
+      cacheTtlMs: 10 * 60 * 1000,
+      persistCache: true,
+    }));
+  }
+  return iranBreakers.get(key)!;
+}
 
 const emptyIranFallback: ListIranEventsResponse = { events: [], scrapedAt: '0' };
 
@@ -394,13 +408,18 @@ export function groupByType(events: UcdpGeoEvent[]): Record<string, UcdpGeoEvent
 }
 
 export async function fetchIranEvents(): Promise<IranEvent[]> {
-  const hydrated = getHydratedData('iranEvents') as ListIranEventsResponse | undefined;
-  if (hydrated?.events?.length) return hydrated.events;
-
   const lang = getCurrentLanguage();
-  const resp = await iranBreaker.execute(async () => {
+
+  // Skip hydrated SSR data when a non-English locale is active — the server-side
+  // data is always English and would show untranslated titles to the user.
+  const hydrated = getHydratedData('iranEvents') as ListIranEventsResponse | undefined;
+  if (hydrated?.events?.length && (!lang || lang === 'en')) return hydrated.events;
+
+  const resp = await getIranBreaker(lang).execute(async () => {
     const cacheBust = Math.floor(Date.now() / 120_000);
-    const langParam = lang && lang !== 'en' ? `&lang=${encodeURIComponent(lang)}` : '';
+    // Always send lang so the backend can serve translated content for any locale,
+    // including English (backend uses it as a no-op and returns untranslated data).
+    const langParam = lang ? `&lang=${encodeURIComponent(lang)}` : '';
     const r = await globalThis.fetch(`/api/conflict/v1/list-iran-events?_v=${cacheBust}${langParam}`);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json() as Promise<ListIranEventsResponse>;
