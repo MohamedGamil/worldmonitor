@@ -50,16 +50,18 @@
 
 ---
 
-## Live Demos
+## Live Demo
 
-| Variant             | URL                                                          | Focus                                            |
+Visit **Marsd** website: [marsd.app](https://marsd.app).
+
+<!-- | Variant             | URL                                                          | Focus                                            |
 | ------------------- | ------------------------------------------------------------ | ------------------------------------------------ |
 | **Marsd**   | [marsd.app](https://marsd.app)                 | Geopolitics, military, conflicts, infrastructure |
 | **Tech Monitor**    | [tech.marsd.app](https://tech.marsd.app)       | Startups, AI/ML, cloud, cybersecurity            |
 | **Finance Monitor** | [finance.marsd.app](https://finance.marsd.app) | Global markets, trading, central banks, Gulf FDI |
 | **Happy Monitor**   | [happy.marsd.app](https://happy.marsd.app)     | Good news, positive trends, uplifting stories    |
 
-All four variants run from a single codebase — switch between them with one click via the header bar.
+All four variants run from a single codebase — switch between them with one click via the header bar. -->
 
 ---
 
