@@ -4,6 +4,17 @@
     "description": "Global Situation with AI Insights"
   },
   "countryBrief": {
+    "overview": "Country Intelligence",
+    "close": "Close",
+    "updated": "Updated",
+    "story": "Story",
+    "export": "Export",
+    "loadingNews": "Loading country headlines…",
+    "loadingMilitary": "Loading flights, vessels, and nearby bases…",
+    "loadingInfrastructure": "Computing nearby critical infrastructure…",
+    "loadingEconomic": "Loading available indicators…",
+    "shareLink": "Share link",
+    "exportData":"Export Data",
     "identifying": "Identifying country...",
     "locating": "Locating region...",
     "limitedCoverage": "Limited coverage",
@@ -119,6 +130,10 @@
       "stockIndex": "Stock index: {{value}}",
       "recentHeadlines": "**Recent headlines:**",
       "activeStrikes": "{{count}} active strikes detected"
+    },
+    "indicators": {
+      "instabilityregime": "Regime Instability",
+      "displacementoutflow": "Displacement Outflow"
     }
   },
   "header": {
@@ -1547,7 +1562,13 @@
     },
     "countryTimeline": {
       "now": "now",
-      "noEventsIn7Days": "No events in 7 days"
+      "noEventsIn7Days": "No events in 7 days",
+      "lanes": {
+        "protest": "Protest",
+        "conflict": "Conflict",
+        "natural": "Natural",
+        "military": "Military"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>GDELT Intelligence</strong> Real-time global news monitoring:<ul><li>Curated topic categories (conflicts, cyber, etc.)</li><li>Articles from 100+ languages translated</li><li>Updates every 15 minutes</li></ul>Source: GDELT Project (gdeltproject.org)"

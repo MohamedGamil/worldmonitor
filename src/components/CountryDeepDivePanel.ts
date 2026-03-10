@@ -414,7 +414,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     }
     if (top) {
       const updatedEl = top.querySelector('.cdp-updated');
-      if (updatedEl) updatedEl.textContent = `Updated ${this.shortDate(score?.lastUpdated ?? new Date())}`;
+      if (updatedEl) updatedEl.textContent = `${t('countryBrief.updated')} ${this.shortDate(score?.lastUpdated ?? new Date())}`;
     }
     if (score) {
       const band = this.ciiBand(score.score);
@@ -511,9 +511,9 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     const text = this.el('p', 'cdp-assessment-text', summary);
 
     const metaTokens: string[] = [];
-    if (data.cached) metaTokens.push('Cached');
-    if (data.fallback) metaTokens.push('Fallback');
-    if (data.generatedAt) metaTokens.push(`Updated ${new Date(data.generatedAt).toLocaleTimeString()}`);
+    if (data.cached) metaTokens.push(t('countryBrief.cached'));
+    if (data.fallback) metaTokens.push(t('countryBrief.fallback'));
+    if (data.generatedAt) metaTokens.push(`${t('countryBrief.updated')} ${new Date(data.generatedAt).toLocaleTimeString()}`);
     const meta = this.el('div', 'cdp-assessment-meta', metaTokens.join(' • '));
     this.briefBody.append(text, meta);
 
@@ -545,7 +545,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     const flag = this.el('span', 'cdp-flag', CountryDeepDivePanel.toFlagEmoji(code));
     const titleWrap = this.el('div', 'cdp-title-wrap');
     const name = this.el('h2', 'cdp-country-name', country);
-    const subtitle = this.el('div', 'cdp-country-subtitle', `${code.toUpperCase()} • Country Intelligence`);
+    const subtitle = this.el('div', 'cdp-country-subtitle', `${code.toUpperCase()} • ${t('countryBrief.overview')}`);
     titleWrap.append(name, subtitle);
     left.append(flag, titleWrap);
 
@@ -562,7 +562,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
     const shareBtn = this.el('button', 'cdp-action-btn cdp-share-btn') as HTMLButtonElement;
     shareBtn.setAttribute('type', 'button');
-    shareBtn.setAttribute('aria-label', t('components.countryBrief.shareLink'));
+    shareBtn.setAttribute('aria-label', t('countryBrief.shareLink'));
     shareBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
     shareBtn.addEventListener('click', () => {
       if (!this.currentCode || !this.currentName) return;
@@ -574,7 +574,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       }).catch(() => { });
     });
 
-    const storyButton = this.el('button', 'cdp-action-btn', 'Story') as HTMLButtonElement;
+    const storyButton = this.el('button', 'cdp-action-btn', t('countryBrief.story')) as HTMLButtonElement;
     storyButton.setAttribute('type', 'button');
     storyButton.addEventListener('click', () => {
       if (this.onShareStory && this.currentCode && this.currentName) {
@@ -582,7 +582,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       }
     });
 
-    const exportButton = this.el('button', 'cdp-action-btn', 'Export') as HTMLButtonElement;
+    const exportButton = this.el('button', 'cdp-action-btn', t('countryBrief.export')) as HTMLButtonElement;
     exportButton.setAttribute('type', 'button');
     exportButton.addEventListener('click', () => {
       if (this.onExportImage && this.currentCode && this.currentName) {
@@ -596,7 +596,7 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     this.scoreCard = scoreCard;
     const top = this.el('div', 'cdp-score-top');
     const label = this.el('span', 'cdp-score-label', t('countryBrief.instabilityIndex'));
-    const updated = this.el('span', 'cdp-updated', `Updated ${this.shortDate(score?.lastUpdated ?? new Date())}`);
+    const updated = this.el('span', 'cdp-updated', `${t('countryBrief.updated')} ${this.shortDate(score?.lastUpdated ?? new Date())}`);
     top.append(label, updated);
     scoreCard.append(top);
 
@@ -633,10 +633,10 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     this.briefBody = briefBody;
 
     this.renderInitialSignals(signals);
-    newsBody.append(this.makeLoading('Loading country headlines…'));
-    militaryBody.append(this.makeLoading('Loading flights, vessels, and nearby bases…'));
-    infraBody.append(this.makeLoading('Computing nearby critical infrastructure…'));
-    economicBody.append(this.makeLoading('Loading available indicators…'));
+    newsBody.append(this.makeLoading(t('countryBrief.loadingNews')));
+    militaryBody.append(this.makeLoading(t('countryBrief.loadingMilitary')));
+    infraBody.append(this.makeLoading(t('countryBrief.loadingInfrastructure')));
+    economicBody.append(this.makeLoading(t('countryBrief.loadingEconomic')));
     marketsBody.append(this.makeLoading(t('countryBrief.loadingMarkets')));
     briefBody.append(this.makeLoading(t('countryBrief.generatingBrief')));
 
@@ -783,8 +783,12 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       const top = this.el('div', 'cdp-economic-top');
       const isMarketRow = indicator.label === 'Stock Index' || indicator.label === 'Weekly Momentum';
       const trendClass = isMarketRow ? `trend-market-${indicator.trend}` : `trend-${indicator.trend}`;
+      const i18nLabelKey = `countryBrief.indicators.${indicator.label.replace(/\s+/g, '').toLowerCase()}`;
+      const i18nLabelValue = t(i18nLabelKey);
+      const i18nLabel = i18nLabelValue !== i18nLabelKey ? i18nLabelValue : indicator.label;
+
       top.append(
-        this.el('span', 'cdp-economic-label', indicator.label),
+        this.el('span', 'cdp-economic-label', i18nLabel),
         this.el('span', `cdp-trend-token ${trendClass}`, this.trendArrowFromDirection(indicator.trend)),
       );
       const value = this.el('div', 'cdp-economic-value', indicator.value);
@@ -833,13 +837,13 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
     const panel = this.el('aside', 'country-deep-dive');
     panel.id = 'country-deep-dive-panel';
-    panel.setAttribute('aria-label', 'Country Intelligence');
+    panel.setAttribute('aria-label', t('countryBrief.overview'));
     panel.setAttribute('aria-hidden', 'true');
 
     const shell = this.el('div', 'country-deep-dive-shell');
     const close = this.el('button', 'panel-close', '×') as HTMLButtonElement;
     close.id = 'deep-dive-close';
-    close.setAttribute('aria-label', 'Close');
+    close.setAttribute('aria-label', t('countryBrief.close'));
 
     const content = this.el('div', 'panel-content');
     content.id = 'deep-dive-content';

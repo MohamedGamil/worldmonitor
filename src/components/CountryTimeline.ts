@@ -172,6 +172,12 @@ export class CountryTimeline {
       military: 'Military',
     };
 
+    for (let idx of Object.keys(laneLabels)) {
+      const key = `components.countryTimeline.lanes.${idx}`;
+      const i18nLabel = t(key);
+      laneLabels[idx] = String(i18nLabel !== key ? i18nLabel : laneLabels[idx]);
+    }
+
     g.selectAll('.lane-label')
       .data(LANES)
       .join('text')

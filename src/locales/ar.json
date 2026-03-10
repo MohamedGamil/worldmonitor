@@ -4,6 +4,17 @@
     "description": "الوضع العالمي مع رؤى الذكاء الاصطناعي"
   },
   "countryBrief": {
+    "overview": "معلومات الدولة",
+    "close": "إغلاق",
+    "updated": "تم التحديث",
+    "story": "الاخبار",
+    "export": "تصدير",
+    "loadingNews": "جارٍ تحميل عناوين الأخبار الخاصة بالدولة…",
+    "loadingMilitary": "جارٍ تحميل الرحلات الجوية، السفن، والقواعد القريبة…",
+    "loadingInfrastructure": "جارٍ حساب البنية التحتية الحرجة القريبة…",
+    "loadingEconomic": "جارٍ تحميل المؤشرات المتاحة…",
+    "shareLink": "مشاركة الرابط",
+    "exportData":"تصدير البيانات",
     "identifying": "جارٍ تحديد الدولة...",
     "locating": "جارٍ تحديد المنطقة...",
     "limitedCoverage": "تغطية محدودة",
@@ -128,6 +139,10 @@
       "sirens24h": "صفارات / 24 ساعة",
       "aviationDisruptions": "اضطرابات الملاحة الجوية",
       "gpsJammingZones": "مناطق تشويش GPS"
+    },
+    "indicators": {
+      "instabilityregime": "عدم استقرار النظام",
+      "displacementoutflow": "تدفق النزوح"
     }
   },
   "header": {
@@ -1472,7 +1487,13 @@
     },
     "countryTimeline": {
       "now": "الآن",
-      "noEventsIn7Days": "لا توجد أحداث خلال 7 أيام"
+      "noEventsIn7Days": "لا توجد أحداث خلال 7 أيام",
+      "lanes": {
+        "protest": "احتجاج",
+        "conflict": "نزاع",
+        "natural": "طبيعي",
+        "military": "عسكري"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>استخبارات GDELT</strong> مراقبة أخبار عالمية فورية:<ul><li>فئات مواضيع منتقاة (نزاعات، سيبرانية، إلخ.)</li><li>مقالات من 100+ لغة مترجمة</li><li>تُحدّث كل 15 دقيقة</li></ul>المصدر: مشروع GDELT (gdeltproject.org)"
