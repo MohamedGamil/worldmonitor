@@ -1,6 +1,6 @@
 # Marsd
 
-**Marsd** is an AI-powered advanced situational awareness dashboard for real-time global intelligence, news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface, based on the Marsd core.
+**Marsd** is an AI-powered real-time global intelligence dashboard integrating live news, markets, military tracking, infrastructure monitoring, and geopolitical data — OSINT in one view.
 
 [![GitHub stars](https://img.shields.io/github/stars/MohamedGamil/marsd?style=social)](https://github.com/MohamedGamil/marsd/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/MohamedGamil/marsd?style=social)](https://github.com/MohamedGamil/marsd/network/members)
@@ -42,7 +42,7 @@
 | Expensive OSINT tools ($$$)        | **100% free & open source**                                                                                |
 | Static news feeds                  | **Real-time updates** with live video streams and AI-powered deductions                                    |
 | Cloud-dependent AI tools           | **Run AI locally** with Ollama/LM Studio — no API keys, no data leaves your machine. Opt-in **Headline Memory** builds a local semantic index of every headline for RAG-powered queries |
-| Web-only dashboards                | **Native desktop app** (Tauri) for macOS, Windows, and Linux + installable PWA with offline map support    |
+| Web-only dashboards                | **Native desktop app** (Tauri) for macOS, Windows, and Linux + installable PWA with offline map support (coming soon)    |
 | Flat 2D maps                       | **Dual map engine** — photorealistic 3D globe (globe.gl + Three.js) and WebGL flat map (deck.gl) with 45 toggleable data layers, runtime-switchable |
 | English-only OSINT tools           | **21 languages** with native-language RSS feeds, AI-translated summaries, and RTL support for Arabic       |
 | Siloed financial data              | **Finance variant** with 92 stock exchanges, 19 financial centers, 13 central banks, BIS data, WTO trade policy, and Gulf FDI tracking |
@@ -188,7 +188,7 @@ Two rendering engines are available, switchable at runtime via Settings or the `
 - **BIS & WTO** — central bank rates, trade policy intelligence. [Details →](./docs/FINANCE_DATA.md)
 
 ### Desktop & Mobile
-- **Native desktop app** (Tauri) — macOS, Windows, Linux with OS keychain, local sidecar, and cloud fallback. [Details →](./docs/DESKTOP_APP.md)
+- **Native desktop app (*coming soon*)** (Tauri) — macOS, Windows, Linux with OS keychain, local sidecar, and cloud fallback. [Details →](./docs/DESKTOP_APP.md)
 - **Progressive Web App** — installable with offline map support (CacheFirst tiles, 500-tile cap)
 - **Mobile-optimized map** — touch pan with inertia, pinch-to-zoom, bottom-sheet popups, GPS centering
 - **Responsive layout** — ultra-wide L-shaped layout on 2000px+, collapsible panels, mobile search sheet
@@ -201,7 +201,7 @@ Two rendering engines are available, switchable at runtime via Settings or the `
 - **Canvas-based image generation** — stories render as PNG images for visual sharing, with QR codes linking back to the live dashboard
 - **Dynamic Open Graph images** — the `/api/og-story` endpoint generates 1200×630px SVG cards on-the-fly for each country story. Cards display the country name, CII score gauge arc with threat-level coloring, a 0–100 score bar, and signal indicator chips (threats, military, markets, convergence). Social crawlers (Twitter, Facebook, LinkedIn, Telegram, Discord, Reddit, WhatsApp) receive these cards via `og:image` meta tags, while regular browsers get a 302 redirect to the SPA. Bot detection uses a user-agent regex for 10+ known social crawler signatures
 
-### Desktop Application (Tauri)
+### Desktop Application (Tauri) - *coming soon*
 
 - **Native desktop app** for macOS, Windows, and Linux — packages the full dashboard with a local Node.js sidecar that runs all 60+ API handlers locally
 - **OS keychain integration** — API keys stored in the system credential manager (macOS Keychain, Windows Credential Manager), never in plaintext files
