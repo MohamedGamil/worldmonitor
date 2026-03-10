@@ -123,6 +123,8 @@ export { GULF_INVESTMENTS } from './gulf-fdi';
 
 // UI configuration
 export {
+  APP_NAME,
+  APP_NAME_ARABIC,
   DOWNLOAD_BUTTON_ENABLED,
   VARIANT_SWITCH_ENABLED,
   GITHUB_LINK_ENABLED,

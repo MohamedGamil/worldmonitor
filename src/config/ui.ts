@@ -6,6 +6,7 @@
  * App Name
  */
 export const APP_NAME = 'Marsd';
+export const APP_NAME_ARABIC = 'مرصد';
 
 /**
  * Enable / Disable variant switcher
