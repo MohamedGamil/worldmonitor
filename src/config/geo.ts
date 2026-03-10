@@ -528,7 +528,7 @@ export const CONFLICT_ZONES: ConflictZone[] = [
     displaced: 'Millions fleeing major cities',
     keywords: ['iran', 'tehran', 'khamenei', 'epic fury', 'roaring lion', 'irgc', 'centcom', 'isfahan', 'bushehr'],
     startDate: 'Feb 28, 2026',
-    location: 'Iran (nationwide)',
+    location: 'Iran',
     description: 'Joint US-Israeli military operation (US: Operation Epic Fury / Israel: Operation Roaring Lion). 1000+ targets struck including military, nuclear, and leadership sites. Supreme Leader Khamenei killed in Tehran strikes. Iran retaliating with missiles and drones across the region.',
     keyDevelopments: ['Khamenei killed in Tehran strikes', '1000+ Iranian targets struck', '3 US service members KIA', 'Iranian missile/drone retaliation on Gulf states'],
   },
