@@ -27,7 +27,7 @@ export const FULL_LIVE_CHANNELS_MENA: LiveChannel[] = [
   { id: 'alaraby', name: 'Alaraby', handle: '@AlarabyTv_News', fallbackVideoId: 'e2RgSa1Wt5o', useFallbackOnly: true },
   { id: 'al-hadath', name: 'Al Hadath', handle: '@AlHadath', fallbackVideoId: 'xWXpl7azI8k', useFallbackOnly: true },
   { id: 'asharq-news', name: 'Asharq News', handle: '@asharqnews', fallbackVideoId: 'f6VpkfV7m4Y', useFallbackOnly: true },
-  { id: 'dw-arabia', name: 'DW Arabia', handle: '@dwarabic', fallbackVideoId: 'AGkp2AL8e7o', useFallbackOnly: true },
+  // { id: 'dw-arabia', name: 'DW Arabia', handle: '@dwarabic', fallbackVideoId: 'AGkp2AL8e7o', useFallbackOnly: true },
 ];
 
 /**
