@@ -13,13 +13,13 @@ export interface VariantMeta {
 
 export const VARIANT_META: { full: VariantMeta;[k: string]: VariantMeta } = {
   full: {
-    title: 'Marsd - Real-Time Global Intelligence Dashboard',
-    description: 'Real-time global intelligence dashboard with live news, markets, military tracking, infrastructure monitoring, and geopolitical data. OSINT in one view.',
-    keywords: 'global intelligence, geopolitical dashboard, world news, market data, military bases, nuclear facilities, undersea cables, conflict zones, real-time monitoring, situation awareness, OSINT, flight tracking, AIS ships, earthquake monitor, protest tracker, power outages, oil prices, government spending, polymarket predictions',
+    title: 'Marsd - AI-Driven Global Monitoring & Insights | مرصد - منصة مراقبة وتحليل عالمي مدعومة بالذكاء الاصطناعي',
+    description: 'AI-powered real-time global intelligence dashboard integrating live news, markets, military tracking, infrastructure monitoring, and geopolitical data — OSINT in one view.',
+    keywords: 'AI intelligence, AI-powered dashboard, global intelligence, geopolitical dashboard, world news, market data, military bases, nuclear facilities, undersea cables, conflict zones, real-time monitoring, situation awareness, OSINT, flight tracking, AIS ships, earthquake monitor, protest tracker, power outages, oil prices, government spending, polymarket predictions',
     url: 'https://marsd.app/',
     siteName: 'Marsd',
     shortName: 'Marsd',
-    subject: 'Real-Time Global Intelligence and Situation Awareness',
+    subject: 'AI-Driven Global Monitoring & Insights | مرصد - منصة مراقبة وتحليل عالمي مدعومة بالذكاء الاصطناعي',
     classification: 'Intelligence Dashboard, OSINT Tool, News Aggregator',
     categories: ['news', 'productivity'],
     features: [
