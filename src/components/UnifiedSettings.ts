@@ -360,17 +360,18 @@ export class UnifiedSettings {
       html += `<div class="ai-flow-section-label">${t('components.insights.sectionAi')}</div>`;
       html += this.toggleRowHtml('us-cloud', t('components.insights.aiFlowCloudLabel'), t('components.insights.aiFlowCloudDesc'), settings.cloudLlm);
 
-      html += this.toggleRowHtml('us-browser', t('components.insights.aiFlowBrowserLabel'), t('components.insights.aiFlowBrowserDesc'), settings.browserModel);
-      html += `<div class="ai-flow-toggle-warn" style="display:${settings.browserModel ? 'block' : 'none'}">${t('components.insights.aiFlowBrowserWarn')}</div>`;
+      // Disabled until issues resolved
+      // html += this.toggleRowHtml('us-browser', t('components.insights.aiFlowBrowserLabel'), t('components.insights.aiFlowBrowserDesc'), settings.browserModel);
+      // html += `<div class="ai-flow-toggle-warn" style="display:${settings.browserModel ? 'block' : 'none'}">${t('components.insights.aiFlowBrowserWarn')}</div>`;
 
-      // Ollama CTA
-      html += `
-        <div class="ai-flow-cta">
-          <div class="ai-flow-cta-title">${t('components.insights.aiFlowOllamaCta')}</div>
-          <div class="ai-flow-cta-desc">${t('components.insights.aiFlowOllamaCtaDesc')}</div>
-          <a href="${DESKTOP_RELEASES_URL}" target="_blank" rel="noopener noreferrer" class="ai-flow-cta-link">${t('components.insights.aiFlowDownloadDesktop')}</a>
-        </div>
-      `;
+      // Ollama CTA - Disabled until ready
+      // html += `
+      //   <div class="ai-flow-cta">
+      //     <div class="ai-flow-cta-title">${t('components.insights.aiFlowOllamaCta')}</div>
+      //     <div class="ai-flow-cta-desc">${t('components.insights.aiFlowOllamaCtaDesc')}</div>
+      //     <a href="${DESKTOP_RELEASES_URL}" target="_blank" rel="noopener noreferrer" class="ai-flow-cta-link">${t('components.insights.aiFlowDownloadDesktop')}</a>
+      //   </div>
+      // `;
     }
 
     // Intelligence section

@@ -1211,7 +1211,7 @@
       "mapFlashLabel": "نبض الأحداث المباشرة",
       "mapFlashDesc": "وميض المواقع على الخريطة عند وصول الأخبار العاجلة",
       "aiFlowTitle": "الإعدادات",
-      "aiFlowCloudLabel": "الذكاء الاصطناعي السحابي (Groq و OpenRouter)",
+      "aiFlowCloudLabel": "الذكاء الاصطناعي السحابي",
       "aiFlowCloudDesc": "إرسال العناوين إلى السحابة لتلخيص الذكاء الاصطناعي (موصى به)",
       "aiFlowBrowserLabel": "نموذج محلي في المتصفح",
       "aiFlowBrowserDesc": "تشغيل الذكاء الاصطناعي محلياً في متصفحك",
