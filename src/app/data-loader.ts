@@ -182,7 +182,7 @@ export class DataLoaderManager implements AppModule {
   private boundMarketWatchlistHandler: (() => void) | null = null;
 
   private digestBreaker = { state: 'closed' as 'closed' | 'open' | 'half-open', failures: 0, cooldownUntil: 0 };
-  private readonly digestRequestTimeoutMs = 8000;
+  private readonly digestRequestTimeoutMs = 25_000; // digest aggregates many feeds; 8s caused frequent cold-start timeouts
   private readonly digestBreakerCooldownMs = 5 * 60 * 1000;
   private readonly persistedDigestMaxAgeMs = 6 * 60 * 60 * 1000;
   private readonly perFeedFallbackCategoryFeedLimit = 3;
