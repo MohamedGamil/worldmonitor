@@ -3,10 +3,11 @@
  */
 
 /**
- * App Name
+ * App Names & Logos
  */
 export const APP_NAME = 'Marsd';
 export const APP_NAME_ARABIC = 'مرصد';
+export const APP_LOGO_URL = '/marsd-logo.png';
 
 /**
  * Enable / Disable variant switcher

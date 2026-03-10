@@ -6,6 +6,23 @@ button {
     border-radius: var(--button-corner-radius);
 }
 
+.no-select {
+    user-select: none;
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon,
+.logo-icon img {
+    display: block;
+    width: 32px;
+    height: 32px;
+}
+
 .map-author-badge {
     color: var(--text-secondary);
     font-family: 'Courier New', Courier, monospace !important;

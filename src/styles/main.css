@@ -17407,8 +17407,6 @@ body.has-breaking-alert .panels-grid {
 .globe-loading-text {
   color: rgba(0, 212, 255, 0.65);
   font-size: 12px;
-  font-family: system-ui, ui-sans-serif, sans-serif;
-  letter-spacing: 0.1em;
   text-transform: uppercase;
   user-select: none;
 }
