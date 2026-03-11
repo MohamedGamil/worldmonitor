@@ -34,7 +34,7 @@ import {
   AirlineIntelPanel,
   AviationCommandBar,
 } from '@/components';
-import { SatelliteFiresPanel } from '@/components/SatelliteFiresPanel';
+// import { SatelliteFiresPanel } from '@/components/SatelliteFiresPanel';
 import { focusInvestmentOnMap } from '@/services/investments-focus';
 import { debounce, saveToStorage, loadFromStorage } from '@/utils';
 import { escapeHtml } from '@/utils/sanitize';

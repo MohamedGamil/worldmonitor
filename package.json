@@ -12,7 +12,7 @@
     "dev:tech": "cross-env VITE_VARIANT=tech vite",
     "dev:finance": "cross-env VITE_VARIANT=finance vite",
     "dev:happy": "cross-env VITE_VARIANT=happy vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --env production",
     "build:sidecar-sebuf": "node scripts/build-sidecar-sebuf.mjs",
     "build:desktop": "node scripts/build-sidecar-sebuf.mjs && tsc && vite build",
     "build:full": "cross-env-shell VITE_VARIANT=full \"tsc && vite build\"",
