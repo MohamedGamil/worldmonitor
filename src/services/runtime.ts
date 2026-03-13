@@ -99,7 +99,10 @@ export function isDesktopRuntime(): boolean {
 
 export function getApiBaseUrl(): string {
   if (!isDesktopRuntime()) {
-    return '';
+    // VITE_BACKEND_URL is set at build time in CF Workers environment variables
+    // to https://api.marsd.app so all /api/* fetches go directly to the backend.
+    const webBase = import.meta.env.VITE_BACKEND_URL;
+    return webBase ? normalizeBaseUrl(webBase) : '';
   }
 
   const configuredBaseUrl = import.meta.env.VITE_TAURI_API_BASE_URL;
