@@ -1,0 +1,85 @@
+# Cloudflare Workers — Vite frontend (marsd)
+# Deploy: wrangler deploy --env production
+# CI:     CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID must be set in environment
+
+name = "marsd"
+compatibility_date = "2025-09-01"
+
+# nodejs_compat — required for the edge worker (Buffer, stream, etc.)
+compatibility_flags = ["nodejs_compat"]
+
+# Worker entry point: handles bot filtering, per-variant OG responses,
+# and /api/* reverse-proxy to api.marsd.app.
+# Adapt middleware.ts → functions/worker.ts using the Cloudflare Workers API.
+main = "functions/worker.ts"
+
+# Workers Assets: serve the Vite dist/ output as static files.
+# SPA fallback (/* → /index.html) is automatic when not_found_handling = "single-page-application".
+[assets]
+directory             = "./dist"
+not_found_handling    = "single-page-application"
+
+# ---------------------------------------------------------------------------
+# Local dev (wrangler dev)
+# ---------------------------------------------------------------------------
+[dev]
+ip             = "localhost"
+port           = 5173
+local_protocol = "http"
+
+# ---------------------------------------------------------------------------
+# Build — CI runs: npm ci → typecheck → npm run build:full → wrangler deploy
+# ---------------------------------------------------------------------------
+[build]
+command = "npm run build:full"
+
+# ---------------------------------------------------------------------------
+# Shared vars (non-secret, available to the edge worker at runtime)
+# Secrets: wrangler secret put SECRET_NAME --env production
+# ---------------------------------------------------------------------------
+[vars]
+BACKEND_URL = "https://api.marsd.app"
+
+# ---------------------------------------------------------------------------
+# Staging environment (branch deploys / smoke tests)
+# ---------------------------------------------------------------------------
+[env.staging]
+name                = "marsd-staging"
+compatibility_date  = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.staging.vars]
+BACKEND_URL = "https://api.marsd.app"
+
+# ---------------------------------------------------------------------------
+# Production environment
+# Custom domains → Cloudflare dashboard: Workers → Triggers → Custom Domains
+#   marsd.app, frontend2.marsd.app,
+#   tech.marsd.app, finance.marsd.app, happy.marsd.app
+# ---------------------------------------------------------------------------
+[env.production]
+name                = "marsd"
+compatibility_date  = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production.vars]
+BACKEND_URL = "https://api.marsd.app"
+
+# ---------------------------------------------------------------------------
+# Notes
+# ---------------------------------------------------------------------------
+# HTTP headers (CSP, HSTS, cache-control, permissions-policy, etc.)
+#   → Must be set in functions/worker.ts response headers.
+#     _headers / _redirects files are NOT processed by Workers Assets.
+#
+# /api/* reverse-proxy
+#   → functions/worker.ts proxies /api/* to https://api.marsd.app/api/*
+#     (mirrors vercel.json rewrite: /api/:path* → https://api.marsd.app/api/:path*)
+#
+# Brotli pre-compression
+#   → The Vite brotliPrecompressPlugin generates .br sidecar files in dist/.
+#     Cloudflare's edge CDN applies its own compression; .br files are uploaded
+#     but Workers Assets compression is handled transparently at the edge.
+#
+# Cloudflare cache invalidation
+#   → Run after deploy: wrangler pages deployment tail (or use CF API purge endpoint)
