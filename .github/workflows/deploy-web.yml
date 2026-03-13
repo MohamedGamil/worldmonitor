@@ -46,7 +46,7 @@ jobs:
       - name: Build (full variant)
         env:
           VITE_VARIANT: full
-        run: npm run build:full
+        run: npm run build:cf
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
