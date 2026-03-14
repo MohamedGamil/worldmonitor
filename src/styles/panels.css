@@ -80,10 +80,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
-  margin-bottom: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
   background: color-mix(in srgb, var(--threat-critical) 8%, transparent);
-  border-radius: 4px;
+  border-radius: var(--md-shape-small);
   border-left: 3px solid var(--threat-critical);
 }
 
@@ -228,8 +228,8 @@
 .climate-badge {
   font-size: 9px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: var(--md-shape-extra-small);
   letter-spacing: 0.5px;
 }
 
@@ -263,10 +263,10 @@
 }
 
 .disp-stat-box {
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 6px;
+  background: var(--md-color-surface-container-high);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-small);
+  padding: 10px 6px;
   text-align: center;
 }
 
@@ -311,24 +311,28 @@
 
 .disp-tab {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  color: var(--md-color-on-surface-variant);
   padding: 4px 14px;
   font-size: 11px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
+  border-radius: var(--md-shape-full);
+  transition:
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color           var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background      var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .disp-tab:hover {
-  border-color: var(--text-faint);
-  color: var(--text-secondary);
+  border-color: var(--md-color-outline);
+  color: var(--md-color-on-surface);
+  background: color-mix(in srgb, var(--md-color-on-surface) 8%, transparent);
 }
 
 .disp-tab-active {
-  background: color-mix(in srgb, var(--threat-critical) 10%, transparent);
-  border-color: var(--threat-critical);
-  color: var(--threat-critical);
+  background: var(--md-color-secondary-container);
+  border-color: transparent;
+  color: var(--md-color-on-secondary-container);
 }
 
 .disp-table {
@@ -375,8 +379,8 @@
 .disp-badge {
   font-size: 9px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: var(--md-shape-extra-small);
   letter-spacing: 0.5px;
 }
 
@@ -423,24 +427,28 @@
 
 .ucdp-tab {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  color: var(--md-color-on-surface-variant);
   padding: 4px 10px;
   font-size: 11px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
+  border-radius: var(--md-shape-full);
+  transition:
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color           var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background      var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .ucdp-tab:hover {
-  border-color: var(--text-faint);
-  color: var(--text-secondary);
+  border-color: var(--md-color-outline);
+  color: var(--md-color-on-surface);
+  background: color-mix(in srgb, var(--md-color-on-surface) 8%, transparent);
 }
 
 .ucdp-tab-active {
-  background: color-mix(in srgb, var(--threat-critical) 10%, transparent);
-  border-color: var(--threat-critical);
-  color: var(--threat-critical);
+  background: var(--md-color-secondary-container);
+  border-color: transparent;
+  color: var(--md-color-on-secondary-container);
 }
 
 .ucdp-tab-count {
@@ -545,14 +553,16 @@
   bottom: 0;
   right: 0;
   z-index: 900;
-  width: 230px;
-  background: var(--surface);
-  border-left: 3px solid var(--green);
-  border-top: 1px solid var(--border);
-  border-top-left-radius: 8px;
-  padding: 14px;
+  width: 240px;
+  background: var(--md-color-surface-container-high);
+  border: 1px solid var(--md-color-outline-variant);
+  border-bottom: none;
+  border-right: none;
+  border-top-left-radius: var(--md-shape-large);
+  box-shadow: var(--md-elevation-3-shadow);
+  padding: 16px;
   transform: translateX(110%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
   font-family: inherit;
 }
 
@@ -609,13 +619,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 10px;
+  padding: 8px 12px;
+  border-radius: var(--md-shape-small);
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .wm-dl-btn.mac {
@@ -678,10 +688,10 @@
 }
 
 .giving-stat-box {
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 6px;
+  background: var(--md-color-surface-container-high);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-small);
+  padding: 10px 6px;
   text-align: center;
 }
 
@@ -715,22 +725,26 @@
 
 .giving-tab {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  color: var(--md-color-on-surface-variant);
   padding: 4px 10px;
   font-size: 11px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
+  border-radius: var(--md-shape-full);
+  transition:
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color           var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background      var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .giving-tab:hover {
-  border-color: var(--text-faint);
-  color: var(--text-secondary);
+  border-color: var(--md-color-outline);
+  color: var(--md-color-on-surface);
+  background: color-mix(in srgb, var(--md-color-on-surface) 8%, transparent);
 }
 
 .giving-tab-active {
-  background: color-mix(in srgb, var(--semantic-positive, #44ff88) 10%, transparent);
+  background: color-mix(in srgb, var(--semantic-positive, #44ff88) 15%, var(--md-color-surface-container));
   border-color: var(--semantic-positive, #44ff88);
   color: var(--semantic-positive, #44ff88);
 }
@@ -783,8 +797,8 @@
 .giving-fresh-badge {
   font-size: 9px;
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: var(--md-shape-extra-small);
   letter-spacing: 0.5px;
 }
 
@@ -820,16 +834,16 @@
   display: inline-block;
   width: 60px;
   height: 6px;
-  background: var(--border);
-  border-radius: 3px;
+  background: var(--md-color-outline-variant);
+  border-radius: var(--md-shape-full);
   vertical-align: middle;
   margin-right: 6px;
 }
 
 .giving-share-fill {
   height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
+  border-radius: var(--md-shape-full);
+  background: var(--md-color-primary);
 }
 
 .giving-share-label {
@@ -909,10 +923,10 @@
 }
 
 .sa-summary-item {
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 6px;
+  background: var(--md-color-surface-container-high);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-small);
+  padding: 10px 6px;
   text-align: center;
 }
 
@@ -953,24 +967,28 @@
 
 .sa-filter {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  color: var(--md-color-on-surface-variant);
   padding: 3px 10px;
   font-size: 10px;
   cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.15s;
+  border-radius: var(--md-shape-full);
+  transition:
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color           var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background      var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .sa-filter:hover {
-  border-color: var(--text-faint);
-  color: var(--text-secondary);
+  border-color: var(--md-color-outline);
+  color: var(--md-color-on-surface);
+  background: color-mix(in srgb, var(--md-color-on-surface) 8%, transparent);
 }
 
 .sa-filter-active {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--md-color-secondary-container);
+  border-color: transparent;
+  color: var(--md-color-on-secondary-container);
 }
 
 .sa-list {
@@ -980,10 +998,15 @@
 }
 
 .sa-item {
-  padding: 8px;
-  border-radius: 4px;
-  border-left: 3px solid var(--border);
-  background: var(--overlay-subtle);
+  padding: 10px 12px;
+  border-radius: var(--md-shape-extra-small);
+  border-left: 3px solid var(--md-color-outline-variant);
+  background: var(--md-color-surface-container-high);
+  transition: background var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.sa-item:hover {
+  background: var(--md-color-surface-container-highest);
 }
 
 .sa-item.sa-level-dnt {
@@ -1016,8 +1039,8 @@
 .sa-badge {
   font-size: 8px;
   font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 3px;
+  padding: 2px 7px;
+  border-radius: var(--md-shape-extra-small);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -1088,17 +1111,20 @@
 
 .sa-refresh-btn {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  color: var(--md-color-on-surface-variant);
   padding: 3px 10px;
   font-size: 10px;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: var(--md-shape-full);
+  transition:
+    border-color var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color        var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .sa-refresh-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--md-color-primary);
+  color: var(--md-color-primary);
 }
 
 /* ----------------------------------------------------------
@@ -1112,8 +1138,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border-radius: var(--md-shape-small);
   margin-bottom: 8px;
   font-weight: 600;
 }
@@ -1162,10 +1188,15 @@
 }
 
 .oref-alert-row {
-  padding: 8px;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border-radius: var(--md-shape-extra-small);
   border-left: 3px solid var(--semantic-critical);
-  background: var(--overlay-subtle);
+  background: var(--md-color-surface-container-high);
+  transition: background var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.oref-alert-row:hover {
+  background: var(--md-color-surface-container-highest);
 }
 
 .oref-alert-header {
@@ -1214,10 +1245,15 @@
 }
 
 .oref-wave-row {
-  padding: 5px 8px;
-  border-radius: 4px;
-  border-left: 3px solid var(--border-subtle);
-  background: var(--overlay-subtle);
+  padding: 6px 10px;
+  border-radius: var(--md-shape-extra-small);
+  border-left: 3px solid var(--md-color-outline-variant);
+  background: var(--md-color-surface-container-high);
+  transition: background var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.oref-wave-row:hover {
+  background: var(--md-color-surface-container-highest);
 }
 
 .oref-wave-recent {
@@ -1247,8 +1283,8 @@
   font-weight: 700;
   color: var(--semantic-warning, #f59e0b);
   background: color-mix(in srgb, var(--semantic-warning, #f59e0b) 12%, transparent);
-  padding: 1px 4px;
-  border-radius: 3px;
+  padding: 1px 5px;
+  border-radius: var(--md-shape-extra-small);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1266,49 +1302,54 @@
 .fdi-search {
   flex: 1;
   min-width: 0;
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
+  background: var(--md-color-surface-container-highest);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-extra-small);
+  color: var(--md-color-on-surface);
   font-size: 11px;
-  padding: 6px 8px;
+  padding: 6px 10px;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .fdi-search::placeholder {
-  color: var(--text-faint);
+  color: var(--md-color-on-surface-variant);
 }
 
 .fdi-search:focus {
-  border-color: var(--accent);
+  border-color: var(--md-color-primary);
+  border-width: 2px;
+  padding: 5px 9px;
 }
 
 .fdi-filter-toggle {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-dim);
+  width: 30px;
+  height: 30px;
+  background: var(--md-color-surface-container-highest);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-extra-small);
+  color: var(--md-color-on-surface-variant);
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition:
+    border-color var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color        var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background   var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 .fdi-filter-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--md-color-primary);
+  color: var(--md-color-primary);
 }
 
 .fdi-filter-toggle.fdi-filters-active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: var(--md-color-primary);
+  color: var(--md-color-primary);
+  background: color-mix(in srgb, var(--md-color-primary) 10%, transparent);
 }
 
 .fdi-filters {
@@ -1323,19 +1364,19 @@
 }
 
 .fdi-filter {
-  background: var(--overlay-subtle);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  color: var(--text-secondary);
+  background: var(--md-color-surface-container-highest);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-extra-small);
+  color: var(--md-color-on-surface-variant);
   font-size: 10px;
-  padding: 3px 6px;
+  padding: 3px 7px;
   outline: none;
   cursor: pointer;
   max-width: 140px;
 }
 
 .fdi-filter:focus {
-  border-color: var(--accent);
+  border-color: var(--md-color-primary);
 }
 
 .fdi-sort-pills {
@@ -1348,25 +1389,29 @@
 
 .fdi-sort {
   background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 3px;
-  color: var(--text-dim);
+  border: 1px solid var(--md-color-outline-variant);
+  border-radius: var(--md-shape-full);
+  color: var(--md-color-on-surface-variant);
   font-size: 9px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition:
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color           var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background      var(--md-motion-duration-short2) var(--md-motion-easing-standard);
   white-space: nowrap;
 }
 
 .fdi-sort:hover {
-  border-color: var(--text-faint);
-  color: var(--text-secondary);
+  border-color: var(--md-color-outline);
+  color: var(--md-color-on-surface);
+  background: color-mix(in srgb, var(--md-color-on-surface) 8%, transparent);
 }
 
 .fdi-sort.fdi-sort-active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: transparent;
+  background: var(--md-color-secondary-container);
+  color: var(--md-color-on-secondary-container);
 }
 
 .fdi-list {
@@ -1378,15 +1423,15 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  padding: 7px 8px;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--md-color-outline-variant);
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--md-motion-duration-short2) var(--md-motion-easing-standard);
   gap: 0 6px;
 }
 
 .fdi-row:hover {
-  background: var(--surface-hover);
+  background: var(--md-color-surface-container-highest);
 }
 
 .fdi-row-line1 {
@@ -1445,11 +1490,11 @@
 .fdi-sector-badge {
   font-size: 9px;
   font-weight: 600;
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 1px 6px;
+  border-radius: var(--md-shape-extra-small);
   letter-spacing: 0.3px;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--md-color-primary) 12%, transparent);
+  color: var(--md-color-primary);
 }
 
 .fdi-status-dot {
@@ -1493,13 +1538,13 @@
   align-items: stretch;
   gap: 8px;
   padding: 12px;
-  background: color-mix(in srgb, var(--surface) 40%, var(--bg));
-  border-top: 1px solid var(--border);
+  background: var(--md-color-surface-container-low);
+  border-top: 1px solid var(--md-color-outline-variant);
   flex: 1;
   min-height: 120px;
   overflow-y: auto;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all var(--md-motion-duration-short4) var(--md-motion-easing-standard);
   position: relative;
   z-index: 5;
 }
@@ -1516,16 +1561,16 @@
   justify-content: center;
   height: 80%;
   width: 90%;
-  border: 2px dashed var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
+  border: 2px dashed var(--md-color-outline-variant);
+  border-radius: var(--md-shape-medium);
+  color: var(--md-color-on-surface-variant);
   font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
   opacity: 0.4;
   pointer-events: none;
-  transition: opacity 0.2s;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-easing-standard);
 }
 
 /* Hide placeholder if there are panels */
@@ -1535,8 +1580,8 @@
 
 /* Highlight zone during drag (handled by JS if possible, but let's add a hover state too) */
 .map-bottom-grid:hover {
-  background: color-mix(in srgb, var(--surface) 60%, var(--bg));
-  border-top-color: var(--accent);
+  background: var(--md-color-surface-container);
+  border-top-color: var(--md-color-outline);
 }
 
 /* Hide drop zone completely on smaller screens (overridden by media query in main.css) */
