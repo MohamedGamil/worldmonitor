@@ -152,17 +152,47 @@ export class PanelLayoutManager implements AppModule {
     `;
   }
 
-  renderLogo(): string {
-    const logoUrl = APP_LOGO_URL;
+  getDisplayedAppName(): string {
     const appName = this.ctx.appName || 'Marsd';
     const appNameAr = this.ctx.appNameArabic || 'مرصد';
     const displayedAppName = getCurrentLanguage() === 'ar' ? appNameAr : appName;
+
+    return displayedAppName;
+  }
+
+  getVariantsMobileMenuItems(): string {
+    // const local = this.ctx.isDesktopApp || location.hostname === 'localhost' || location.hostname === '
+    // Disabled for now
+    return '';
+
+    return `
+      ${(() => {
+        const variants = [
+          { key: 'full', icon: '🌍', label: t('header.world') },
+          { key: 'tech', icon: '💻', label: t('header.tech') },
+          { key: 'finance', icon: '📈', label: t('header.finance') },
+        ];
+        if (SITE_VARIANT === 'happy') variants.push({ key: 'happy', icon: '☀️', label: 'Good News' });
+        return variants.map(v =>
+          `<button class="mobile-menu-item mobile-menu-variant ${v.key === SITE_VARIANT ? 'active' : ''}" data-variant="${v.key}">
+            <span class="mobile-menu-item-icon">${v.icon}</span>
+            <span class="mobile-menu-item-label">${v.label}</span>
+            ${v.key === SITE_VARIANT ? '<span class="mobile-menu-check">✓</span>' : ''}
+          </button>`
+        ).join('');
+      })()}
+    `;
+  }
+
+  renderLogo(): string {
+    const logoUrl = APP_LOGO_URL;
+    const displayedAppName = this.getDisplayedAppName();
 
     return `
       <a href="/" class="logo-wrapper">
         <span class="logo-icon"><img src="${logoUrl}" alt="${displayedAppName} logo" /></span>
         <span class="logo">${displayedAppName}</span>
-        <span class="logo-mobile">${appName}</span>
+        <span class="logo-mobile">${displayedAppName}</span>
       </a>
       <span class="version">v${__APP_VERSION__}</span>
       ${BETA_MODE ? '<span class="beta-badge">BETA</span>' : ''}
@@ -172,6 +202,8 @@ export class PanelLayoutManager implements AppModule {
   renderLayout(): void {
     const variantSwitchEnabled = this.ctx.variantSwitchEnabled || false;
     const githubLinkEnabled = this.ctx.githubLinkEnabled || false;
+    const displayedAppName = this.getDisplayedAppName();
+
     this.ctx.container.innerHTML = `
       <div class="header no-select">
         <div class="header-left">
@@ -236,27 +268,13 @@ export class PanelLayoutManager implements AppModule {
       <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
       <nav class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
-          <span class="mobile-menu-title">WORLD MONITOR</span>
+          <span class="mobile-menu-title">${displayedAppName}</span>
           <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
         <div class="mobile-menu-divider"></div>
-        ${(() => {
-        const variants = [
-          { key: 'full', icon: '🌍', label: t('header.world') },
-          { key: 'tech', icon: '💻', label: t('header.tech') },
-          { key: 'finance', icon: '📈', label: t('header.finance') },
-        ];
-        if (SITE_VARIANT === 'happy') variants.push({ key: 'happy', icon: '☀️', label: 'Good News' });
-        return variants.map(v =>
-          `<button class="mobile-menu-item mobile-menu-variant ${v.key === SITE_VARIANT ? 'active' : ''}" data-variant="${v.key}">
-            <span class="mobile-menu-item-icon">${v.icon}</span>
-            <span class="mobile-menu-item-label">${v.label}</span>
-            ${v.key === SITE_VARIANT ? '<span class="mobile-menu-check">✓</span>' : ''}
-          </button>`
-        ).join('');
-      })()}
+        ${this.getVariantsMobileMenuItems()}
         <div class="mobile-menu-divider"></div>
         <button class="mobile-menu-item" id="mobileMenuRegion">
           <span class="mobile-menu-item-icon">🌐</span>
