@@ -3,31 +3,33 @@
 @import './panels.css';
 
 /* ============================================================
-   Theme Colors — overridden by [data-theme="light"] below
+   Theme Colors — bridged to M3 roles (md3-roles.css).
+   Legacy token names preserved for backward compatibility;
+   [data-theme="light"] overrides are now handled by md3-roles.css.
    ============================================================ */
 :root {
-  /* Backgrounds */
-  --bg: #0a0a0a;
-  --bg-secondary: #111;
-  --surface: #141414;
-  --surface-hover: #1e1e1e;
-  --surface-active: #1a1a2e;
+  /* Backgrounds — mapped to M3 surface containers */
+  --bg:             var(--md-color-surface-container-lowest);
+  --bg-secondary:   var(--md-color-surface-container-low);
+  --surface:        var(--md-color-surface-container);
+  --surface-hover:  var(--md-color-surface-container-high);
+  --surface-active: var(--md-color-surface-container-highest);
 
-  /* Borders */
-  --border: #2a2a2a;
-  --border-strong: #444;
-  --border-subtle: #1a1a1a;
+  /* Borders — mapped to M3 outline roles */
+  --border:        var(--md-color-outline-variant);
+  --border-strong: var(--md-color-outline);
+  --border-subtle: color-mix(in srgb, var(--md-color-outline-variant) 50%, transparent);
 
-  /* Text */
-  --text: #e8e8e8;
-  --text-inverted: #111;
-  --text-secondary: #ccc;
-  --text-dim: #888;
-  --text-muted: #666;
-  --text-faint: #555;
-  --text-ghost: #444;
-  --text-danger: #f43434;
-  --accent: #fff;
+  /* Text — mapped to M3 on-surface roles */
+  --text:           var(--md-color-on-surface);
+  --text-inverted:  var(--md-color-inverse-on-surface);
+  --text-secondary: var(--md-color-on-surface-variant);
+  --text-dim:       color-mix(in srgb, var(--md-color-on-surface-variant) 70%, transparent);
+  --text-muted:     color-mix(in srgb, var(--md-color-on-surface-variant) 50%, transparent);
+  --text-faint:     color-mix(in srgb, var(--md-color-on-surface-variant) 35%, transparent);
+  --text-ghost:     color-mix(in srgb, var(--md-color-on-surface-variant) 25%, transparent);
+  --text-danger:    var(--md-color-error);
+  --accent:         var(--md-color-primary);
 
   /* Overlays & shadows */
   --overlay-subtle: rgba(255, 255, 255, 0.03);
@@ -40,32 +42,32 @@
   --darken-heavy: rgba(0, 0, 0, 0.3);
 
   /* Scrollbar */
-  --scrollbar-thumb: #333;
-  --scrollbar-thumb-hover: #555;
+  --scrollbar-thumb: var(--md-color-outline-variant);
+  --scrollbar-thumb-hover: var(--md-color-outline);
 
   /* Input */
-  --input-bg: #1a1a1a;
+  --input-bg: var(--md-color-surface-container-highest);
 
   /* Panels */
-  --panel-bg: #141414;
-  --panel-border: #2a2a2a;
+  --panel-bg:     var(--md-color-surface-container);
+  --panel-border: var(--md-color-outline-variant);
 
-  /* Map */
+  /* Map — keep specific map palette colors untouched */
   --map-bg: #020a08;
   --map-grid: #0a2a20;
   --map-country: #0a2018;
   --map-stroke: #0f5040;
-  --popup-corner-radius: 6px;
-  --popup-border-color: #2a2a2a;
-  --popup-box-shadow: 0 4px 24px rgba(206, 206, 206, 0.24);
+  --popup-corner-radius: var(--md-shape-small);
+  --popup-border-color: var(--md-color-outline-variant);
+  --popup-box-shadow: var(--md-elevation-3-shadow);
 
   /* Font stack */
   --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Fira Code', 'DejaVu Sans Mono', 'Liberation Mono', monospace;
   --font-ar: 'Cairo', 'Tajawal', 'Geeza Pro', 'SF Arabic', 'Tahoma', system-ui, sans-serif;
   --font-body: var(--font-mono);
 
-  /* Styles */
-  --button-corner-radius: 4px;
+  /* Styles — shape aliases kept for backward compat; real values from md3-shape.css */
+  --button-corner-radius: var(--md-shape-extra-small);
 }
 
 [dir="rtl"] {
@@ -116,86 +118,47 @@
 }
 
 /* ============================================================
-   Light Theme — overrides theme colors AND semantic colors
-   Bright/neon dark-mode colors need darker variants for light backgrounds
+   Light Theme — overrides semantic/legacy colors for light bg.
+   Surface/border/text tokens are handled automatically through
+   the M3 role bridge above (md3-roles.css sets [data-theme="light"]).
+   Only semantic/threat/status colors that need lighter-friendly
+   variants are overridden here.
    ============================================================ */
 [data-theme="light"] {
   /* Semantic color overrides — darker variants for light backgrounds */
-  --semantic-high: #ea580c;
-  /* Tailwind orange-600 (was #ff8800, 2.27:1) */
-  --semantic-elevated: #d97706;
-  /* Tailwind amber-600 (was #ffaa00, 1.81:1) */
-  --semantic-normal: #15803d;
-  /* Tailwind green-700 (was #44aa44, 2.81:1) */
-  --semantic-positive: #16a34a;
-  /* Tailwind green-600 (was #44ff88, too bright for light bg) */
-  --threat-high: #c2410c;
-  /* Tailwind orange-700 (was #f97316, 2.66:1) */
-  --threat-medium: #ca8a04;
-  /* Tailwind yellow-600 (was #eab308, 1.82:1) */
-  --threat-low: #15803d;
-  /* Tailwind green-700 (was #22c55e, 2.16:1) */
-  --defcon-3: #d97706;
-  /* Tailwind amber-600 (was #ffaa00, 1.81:1) */
-  --defcon-4: #0284c7;
-  /* Tailwind sky-600 (was #00aaff, 2.43:1) */
-  --status-live: #16a34a;
-  /* Tailwind green-600 (was #44ff88, 1.25:1) */
-  --status-cached: #d97706;
-  /* Tailwind amber-600 (was #ffaa00, 1.81:1) */
-  --green: #16a34a;
-  /* Tailwind green-600 (was #44ff88) */
+  --semantic-high:     #ea580c; /* orange-600 (was neon #ff8800) */
+  --semantic-elevated: #d97706; /* amber-600  (was #ffaa00) */
+  --semantic-normal:   #15803d; /* green-700  (was #44aa44) */
+  --semantic-positive: #16a34a; /* green-600  (was #44ff88, too bright) */
+
+  --threat-high:   #c2410c; /* orange-700 (was #f97316) */
+  --threat-medium: #ca8a04; /* yellow-600 (was #eab308) */
+  --threat-low:    #15803d; /* green-700  (was #22c55e) */
+
+  --defcon-3: #d97706; /* amber-600 (was #ffaa00) */
+  --defcon-4: #0284c7; /* sky-600   (was #00aaff) */
+
+  --status-live:   #16a34a; /* green-600  (was #44ff88) */
+  --status-cached: #d97706; /* amber-600  (was #ffaa00) */
+
+  --green:  #16a34a;
   --yellow: #d97706;
-  /* Tailwind amber-600 (was #ffaa00) */
 
-  /* Backgrounds */
-  --bg: #f8f9fa;
-  --bg-secondary: #f0f1f3;
-  --surface: #ffffff;
-  --surface-hover: #f0f0f0;
-  --surface-active: #e8e8f0;
-
-  /* Borders */
-  --border: #d4d4d4;
-  --border-strong: #b0b0b0;
-  --border-subtle: #e8e8e8;
-
-  /* Text */
-  --text: #1a1a1a;
-  --text-secondary: #333;
-  --text-dim: #6b6b6b;
-  --text-muted: #767676;
-  /* WCAG AA: 4.54:1 vs #f8f9fa */
-  --text-faint: #aaa;
-  --text-ghost: #bbb;
-  --accent: #111111;
-
-  /* Overlays & shadows */
+  /* Overlays & shadows — light theme uses dark overlays at low opacity */
   --overlay-subtle: rgba(0, 0, 0, 0.02);
-  --overlay-light: rgba(0, 0, 0, 0.04);
+  --overlay-light:  rgba(0, 0, 0, 0.04);
   --overlay-medium: rgba(0, 0, 0, 0.08);
-  --overlay-heavy: rgba(0, 0, 0, 0.12);
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --darken-light: rgba(0, 0, 0, 0.1);
-  --darken-medium: rgba(0, 0, 0, 0.15);
-  --darken-heavy: rgba(0, 0, 0, 0.2);
+  --overlay-heavy:  rgba(0, 0, 0, 0.12);
+  --shadow-color:   rgba(0, 0, 0, 0.1);
+  --darken-light:   rgba(0, 0, 0, 0.1);
+  --darken-medium:  rgba(0, 0, 0, 0.15);
+  --darken-heavy:   rgba(0, 0, 0, 0.2);
 
-  /* Scrollbar */
-  --scrollbar-thumb: #c0c0c0;
-  --scrollbar-thumb-hover: #999;
-
-  /* Input */
-  --input-bg: #f0f0f0;
-
-  /* Panels */
-  --panel-bg: #ffffff;
-  --panel-border: #d4d4d4;
-
-  /* Map */
-  --map-bg: #e8f0f8;
-  --map-grid: #b0c8d8;
+  /* Map — lighter palette for light theme */
+  --map-bg:      #e8f0f8;
+  --map-grid:    #b0c8d8;
   --map-country: #f0e8d8;
-  --map-stroke: #c8b8a8;
+  --map-stroke:  #c8b8a8;
 }
 
 * {

@@ -1,0 +1,86 @@
+/* ============================================================
+   Material Design 3 — Surface Elevation
+   Dark scheme: tonal primary overlay lightens surfaces at
+   higher elevations. color-mix() blends the primary color
+   into the base surface at each level's specified opacity.
+   Spec: specs/10-material-design-v3.md §2
+   ============================================================ */
+
+:root {
+  /* ── Overlay percentages ── */
+  --md-elevation-0-overlay: 0%;
+  --md-elevation-1-overlay: 5%;
+  --md-elevation-2-overlay: 8%;
+  --md-elevation-3-overlay: 11%;
+  --md-elevation-4-overlay: 12%;
+  --md-elevation-5-overlay: 14%;
+
+  /* ── Shadow tokens ── */
+  --md-elevation-0-shadow: none;
+  --md-elevation-1-shadow: 0 1px 2px rgba(0,0,0,0.3),  0 1px 3px 1px rgba(0,0,0,0.15);
+  --md-elevation-2-shadow: 0 1px 2px rgba(0,0,0,0.3),  0 2px 6px 2px rgba(0,0,0,0.15);
+  --md-elevation-3-shadow: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+  --md-elevation-4-shadow: 0 6px 10px 4px rgba(0,0,0,0.15), 0 2px 3px rgba(0,0,0,0.3);
+  --md-elevation-5-shadow: 0 8px 12px 6px rgba(0,0,0,0.15), 0 4px 4px rgba(0,0,0,0.3);
+}
+
+/* ── Elevation utility classes ── */
+
+.md-elevation-0 {
+  background-color: var(--md-color-surface);
+  box-shadow: var(--md-elevation-0-shadow);
+}
+
+.md-elevation-1 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-1-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-1-shadow);
+}
+
+.md-elevation-2 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-2-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-2-shadow);
+}
+
+.md-elevation-3 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-3-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-3-shadow);
+}
+
+.md-elevation-4 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-4-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-4-shadow);
+}
+
+.md-elevation-5 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-5-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-5-shadow);
+}
+
+/* Light theme — tonal overlay still applies but the mix is lighter by nature */
+[data-theme="light"] .md-elevation-1 {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-1-overlay),
+    var(--md-color-surface)
+  );
+}

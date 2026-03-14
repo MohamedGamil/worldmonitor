@@ -1,0 +1,610 @@
+/* ============================================================
+   Material Design 3 — Component Patterns
+   Buttons, Cards, Chips, Dialog, Navigation Rail/Bar.
+   All components compose the md-state-layer + md-ripple pattern
+   and reference only --md-color-* / --md-shape-* / --md-typescale-* vars.
+   Spec: specs/10-material-design-v3.md §7
+   ============================================================ */
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+/* Shared button base */
+.md-button-filled,
+.md-button-tonal,
+.md-button-outlined,
+.md-button-elevated,
+.md-button-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--md-shape-button);
+  font-family: var(--font-body);
+  font-size: var(--md-typescale-label-large-size);
+  font-weight: var(--md-typescale-label-large-weight);
+  letter-spacing: var(--md-typescale-label-large-tracking);
+  line-height: var(--md-typescale-label-large-line-height);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  /* State layer setup */
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    box-shadow      var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background-color var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    border-color    var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+/* Filled — highest emphasis */
+.md-button-filled {
+  border: none;
+  background-color: var(--md-color-primary);
+  color: var(--md-color-on-primary);
+  --md-state-layer-color: var(--md-color-on-primary);
+}
+
+.md-button-filled:hover {
+  box-shadow: var(--md-elevation-1-shadow);
+}
+
+/* Tonal — medium-high emphasis using secondary container */
+.md-button-tonal {
+  border: none;
+  background-color: var(--md-color-secondary-container);
+  color: var(--md-color-on-secondary-container);
+  --md-state-layer-color: var(--md-color-on-secondary-container);
+}
+
+.md-button-tonal:hover {
+  box-shadow: var(--md-elevation-1-shadow);
+}
+
+/* Elevated — medium emphasis with shadow */
+.md-button-elevated {
+  border: none;
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-1-overlay),
+    var(--md-color-surface)
+  );
+  color: var(--md-color-primary);
+  box-shadow: var(--md-elevation-1-shadow);
+  --md-state-layer-color: var(--md-color-primary);
+}
+
+.md-button-elevated:hover {
+  box-shadow: var(--md-elevation-2-shadow);
+}
+
+/* Outlined — medium emphasis with border */
+.md-button-outlined {
+  border: 1px solid var(--md-color-outline);
+  background: transparent;
+  color: var(--md-color-primary);
+  --md-state-layer-color: var(--md-color-primary);
+}
+
+.md-button-outlined:hover {
+  border-color: var(--md-color-primary);
+}
+
+/* Text — low emphasis */
+.md-button-text {
+  border: none;
+  background: transparent;
+  color: var(--md-color-primary);
+  padding: 0 12px;
+  --md-state-layer-color: var(--md-color-primary);
+}
+
+/* Icon-only button size adjustment */
+.md-button-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--md-shape-full);
+  border: none;
+  background: transparent;
+  color: var(--md-color-on-surface-variant);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --md-state-layer-color: var(--md-color-on-surface-variant);
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+/* Shared card base */
+.md-card-elevated,
+.md-card-filled,
+.md-card-outlined {
+  border-radius: var(--md-shape-card);
+  padding: 16px;
+  transition:
+    box-shadow       var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    background-color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+/* Elevated card — tonal overlay + shadow */
+.md-card-elevated {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-1-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-1-shadow);
+  border: none;
+}
+
+.md-card-elevated:hover {
+  background-color: color-mix(
+    in oklch,
+    var(--md-color-primary) var(--md-elevation-2-overlay),
+    var(--md-color-surface)
+  );
+  box-shadow: var(--md-elevation-2-shadow);
+}
+
+/* Filled card — highest-container surface, no shadow */
+.md-card-filled {
+  background-color: var(--md-color-surface-container-highest);
+  box-shadow: none;
+  border: none;
+}
+
+/* Outlined card — base surface + outline border */
+.md-card-outlined {
+  background-color: var(--md-color-surface);
+  border: 1px solid var(--md-color-outline-variant);
+  box-shadow: none;
+}
+
+.md-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.md-card__title {
+  font-size: var(--md-typescale-title-medium-size);
+  font-weight: var(--md-typescale-title-medium-weight);
+  letter-spacing: var(--md-typescale-title-medium-tracking);
+  color: var(--md-color-on-surface);
+}
+
+.md-card__subtitle {
+  font-size: var(--md-typescale-body-medium-size);
+  font-weight: var(--md-typescale-body-medium-weight);
+  color: var(--md-color-on-surface-variant);
+}
+
+.md-card__body {
+  font-size: var(--md-typescale-body-medium-size);
+  line-height: var(--md-typescale-body-medium-line-height);
+  color: var(--md-color-on-surface-variant);
+}
+
+.md-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ============================================================
+   CHIPS
+   ============================================================ */
+
+/* Base chip */
+.md-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--md-shape-chip);
+  border: 1px solid var(--md-color-outline);
+  background: transparent;
+  color: var(--md-color-on-surface-variant);
+  font-family: var(--font-body);
+  font-size: var(--md-typescale-label-large-size);
+  font-weight: var(--md-typescale-label-large-weight);
+  letter-spacing: var(--md-typescale-label-large-tracking);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --md-state-layer-color: var(--md-color-on-surface-variant);
+  transition:
+    background-color var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    border-color     var(--md-motion-duration-short2) var(--md-motion-easing-standard),
+    color            var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+/* Filter chip selected state */
+.md-chip[aria-selected="true"],
+.md-chip.is-selected {
+  background-color: var(--md-color-secondary-container);
+  color: var(--md-color-on-secondary-container);
+  border-color: transparent;
+  --md-state-layer-color: var(--md-color-on-secondary-container);
+}
+
+/* Input chip (dismissible) */
+.md-chip--input {
+  padding-right: 8px;
+}
+
+.md-chip__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-color-on-surface-variant);
+  color: var(--md-color-surface-container-highest);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   DIALOG
+   ============================================================ */
+
+.md-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--md-color-scrim) 32%, transparent);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: md-backdrop-in var(--md-motion-duration-short3) var(--md-motion-easing-standard-decelerate) both;
+}
+
+@keyframes md-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.md-dialog {
+  border-radius: var(--md-shape-dialog);
+  background-color: var(--md-color-surface-container-high);
+  box-shadow: var(--md-elevation-3-shadow);
+  padding: 24px;
+  min-width: 280px;
+  max-width: 560px;
+  width: calc(100% - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: md-dialog-in var(--md-motion-duration-medium3) var(--md-motion-easing-emphasized-decelerate) both;
+}
+
+@keyframes md-dialog-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.md-dialog__icon {
+  align-self: center;
+  margin-bottom: 12px;
+  color: var(--md-color-secondary);
+}
+
+.md-dialog__headline {
+  font-size: var(--md-typescale-headline-small-size);
+  line-height: var(--md-typescale-headline-small-line-height);
+  font-weight: var(--md-typescale-headline-small-weight);
+  color: var(--md-color-on-surface);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Left-aligned headings when no icon is present */
+.md-dialog:not(:has(.md-dialog__icon)) .md-dialog__headline {
+  text-align: left;
+}
+
+.md-dialog__body {
+  font-size: var(--md-typescale-body-medium-size);
+  line-height: var(--md-typescale-body-medium-line-height);
+  letter-spacing: var(--md-typescale-body-medium-tracking);
+  color: var(--md-color-on-surface-variant);
+  flex: 1;
+}
+
+.md-dialog__divider {
+  height: 1px;
+  background-color: var(--md-color-outline-variant);
+  margin: 16px -24px;
+}
+
+.md-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 24px;
+}
+
+/* ============================================================
+   TEXT FIELD
+   ============================================================ */
+
+.md-text-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-text-field__label {
+  font-size: var(--md-typescale-body-small-size);
+  font-weight: var(--md-typescale-label-medium-weight);
+  letter-spacing: var(--md-typescale-label-medium-tracking);
+  color: var(--md-color-on-surface-variant);
+  transition: color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.md-text-field__input {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--md-shape-text-field);
+  border: 1px solid var(--md-color-outline);
+  background-color: var(--md-color-surface-container-highest);
+  color: var(--md-color-on-surface);
+  font-family: var(--font-body);
+  font-size: var(--md-typescale-body-large-size);
+  line-height: var(--md-typescale-body-large-line-height);
+  outline: none;
+  transition:
+    border-color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.md-text-field__input::placeholder {
+  color: var(--md-color-on-surface-variant);
+}
+
+.md-text-field__input:hover {
+  border-color: var(--md-color-on-surface);
+}
+
+.md-text-field__input:focus {
+  border-color: var(--md-color-primary);
+  border-width: 2px;
+  padding: 0 15px; /* compensate for extra border width */
+}
+
+.md-text-field:focus-within .md-text-field__label {
+  color: var(--md-color-primary);
+}
+
+.md-text-field__supporting {
+  font-size: var(--md-typescale-body-small-size);
+  color: var(--md-color-on-surface-variant);
+  padding: 0 16px;
+}
+
+.md-text-field--error .md-text-field__input {
+  border-color: var(--md-color-error);
+}
+
+.md-text-field--error .md-text-field__label,
+.md-text-field--error .md-text-field__supporting {
+  color: var(--md-color-error);
+}
+
+/* ============================================================
+   NAVIGATION RAIL (desktop vertical sidebar)
+   ============================================================ */
+
+.md-nav-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  padding: 12px 0;
+  gap: 4px;
+  background-color: var(--md-color-surface-container);
+}
+
+.md-nav-rail__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 56px;
+  min-height: 56px;
+  padding: 4px 0;
+  border-radius: var(--md-shape-full);
+  border: none;
+  background: transparent;
+  color: var(--md-color-on-surface-variant);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --md-state-layer-color: var(--md-color-on-surface-variant);
+  font-family: var(--font-body);
+  font-size: var(--md-typescale-label-small-size);
+  font-weight: var(--md-typescale-label-small-weight);
+  letter-spacing: var(--md-typescale-label-small-tracking);
+  text-align: center;
+  line-height: var(--md-typescale-label-small-line-height);
+  transition: color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+/* Active indicator pill */
+.md-nav-rail__indicator {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 32px;
+  border-radius: var(--md-shape-full);
+  background-color: transparent;
+  transition:
+    background-color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+  pointer-events: none;
+}
+
+.md-nav-rail__item[aria-current="page"] .md-nav-rail__indicator,
+.md-nav-rail__item.is-active .md-nav-rail__indicator {
+  background-color: var(--md-color-secondary-container);
+}
+
+.md-nav-rail__item[aria-current="page"],
+.md-nav-rail__item.is-active {
+  color: var(--md-color-on-secondary-container);
+  --md-state-layer-color: var(--md-color-on-secondary-container);
+}
+
+/* ============================================================
+   NAVIGATION BAR (mobile horizontal bottom bar)
+   ============================================================ */
+
+.md-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 80px;
+  padding: 12px 0 16px;
+  background-color: var(--md-color-surface-container);
+}
+
+.md-nav-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--md-color-on-surface-variant);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--md-typescale-label-medium-size);
+  font-weight: var(--md-typescale-label-medium-weight);
+  letter-spacing: var(--md-typescale-label-medium-tracking);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --md-state-layer-color: var(--md-color-on-surface-variant);
+}
+
+.md-nav-bar__indicator {
+  width: 64px;
+  height: 32px;
+  border-radius: var(--md-shape-full);
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+}
+
+.md-nav-bar__item[aria-current="page"] .md-nav-bar__indicator,
+.md-nav-bar__item.is-active .md-nav-bar__indicator {
+  background-color: var(--md-color-secondary-container);
+}
+
+.md-nav-bar__item[aria-current="page"],
+.md-nav-bar__item.is-active {
+  color: var(--md-color-on-secondary-container);
+}
+
+/* ============================================================
+   BADGE
+   ============================================================ */
+
+.md-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--md-shape-badge);
+  background-color: var(--md-color-error);
+  color: var(--md-color-on-error);
+  font-size: var(--md-typescale-label-small-size);
+  font-weight: var(--md-typescale-label-small-weight);
+  letter-spacing: var(--md-typescale-label-small-tracking);
+  line-height: 1;
+}
+
+/* Small dot-only badge */
+.md-badge--dot {
+  min-width: 6px;
+  height: 6px;
+  padding: 0;
+}
+
+/* ============================================================
+   DIVIDER
+   ============================================================ */
+
+.md-divider {
+  height: 1px;
+  background-color: var(--md-color-outline-variant);
+  border: none;
+  margin: 0;
+}
+
+.md-divider--inset {
+  margin-left: 72px;
+}
+
+/* ============================================================
+   SNACKBAR
+   ============================================================ */
+
+.md-snackbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 288px;
+  max-width: 568px;
+  padding: 14px 16px;
+  border-radius: var(--md-shape-snackbar);
+  background-color: var(--md-color-inverse-surface);
+  color: var(--md-color-inverse-on-surface);
+  box-shadow: var(--md-elevation-3-shadow);
+  font-size: var(--md-typescale-body-medium-size);
+  line-height: var(--md-typescale-body-medium-line-height);
+}
+
+.md-snackbar__action {
+  margin-left: auto;
+  font-size: var(--md-typescale-label-large-size);
+  font-weight: var(--md-typescale-label-large-weight);
+  color: var(--md-color-inverse-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+  flex-shrink: 0;
+}

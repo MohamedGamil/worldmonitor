@@ -1,0 +1,90 @@
+/* ============================================================
+   Material Design 3 — Color Roles
+   Maps tonal palette stops → semantic role names.
+   Dark scheme is default; [data-theme="light"] overrides below.
+   Never reference --md-*-N palette tokens in component CSS —
+   always go through these role vars.
+   Spec: specs/10-material-design-v3.md §1
+   ============================================================ */
+
+/* ── Dark scheme (default) ── */
+:root {
+  /* Primary */
+  --md-color-primary:              var(--md-primary-80);
+  --md-color-on-primary:           var(--md-primary-20);
+  --md-color-primary-container:    var(--md-primary-30);
+  --md-color-on-primary-container: var(--md-primary-90);
+
+  /* Secondary */
+  --md-color-secondary:              var(--md-secondary-80);
+  --md-color-on-secondary:           var(--md-secondary-20);
+  --md-color-secondary-container:    var(--md-secondary-30);
+  --md-color-on-secondary-container: var(--md-secondary-90);
+
+  /* Surface */
+  --md-color-surface:                      var(--md-neutral-6);
+  --md-color-surface-dim:                  var(--md-neutral-6);
+  --md-color-surface-bright:               var(--md-neutral-24);
+  --md-color-surface-container-lowest:     var(--md-neutral-4);
+  --md-color-surface-container-low:        var(--md-neutral-10);
+  --md-color-surface-container:            var(--md-neutral-12);
+  --md-color-surface-container-high:       var(--md-neutral-17);
+  --md-color-surface-container-highest:    var(--md-neutral-22);
+  --md-color-on-surface:                   var(--md-neutral-90);
+  --md-color-on-surface-variant:           var(--md-neutral-variant-80);
+  --md-color-outline:                      var(--md-neutral-variant-60);
+  --md-color-outline-variant:              var(--md-neutral-variant-30);
+
+  /* Error */
+  --md-color-error:              var(--md-error-80);
+  --md-color-on-error:           var(--md-error-20);
+  --md-color-error-container:    var(--md-error-30);
+  --md-color-on-error-container: var(--md-error-90);
+
+  /* Scrim / inverse */
+  --md-color-scrim:              #000000;
+  --md-color-inverse-surface:    var(--md-neutral-90);
+  --md-color-inverse-on-surface: var(--md-neutral-20);
+  --md-color-inverse-primary:    var(--md-primary-40);
+}
+
+/* ── Light scheme override ── */
+[data-theme="light"] {
+  /* Primary */
+  --md-color-primary:              var(--md-primary-40);
+  --md-color-on-primary:           var(--md-primary-100);
+  --md-color-primary-container:    var(--md-primary-90);
+  --md-color-on-primary-container: var(--md-primary-10);
+
+  /* Secondary */
+  --md-color-secondary:              var(--md-secondary-40);
+  --md-color-on-secondary:           var(--md-secondary-100);
+  --md-color-secondary-container:    var(--md-secondary-90);
+  --md-color-on-secondary-container: var(--md-secondary-10);
+
+  /* Surface */
+  --md-color-surface:                      var(--md-neutral-98);
+  --md-color-surface-dim:                  var(--md-neutral-87);
+  --md-color-surface-bright:               var(--md-neutral-98);
+  --md-color-surface-container-lowest:     var(--md-neutral-100);
+  --md-color-surface-container-low:        var(--md-neutral-96);
+  --md-color-surface-container:            var(--md-neutral-94);
+  --md-color-surface-container-high:       var(--md-neutral-92);
+  --md-color-surface-container-highest:    var(--md-neutral-90);
+  --md-color-on-surface:                   var(--md-neutral-10);
+  --md-color-on-surface-variant:           var(--md-neutral-variant-30);
+  --md-color-outline:                      var(--md-neutral-variant-50);
+  --md-color-outline-variant:              var(--md-neutral-variant-80);
+
+  /* Error */
+  --md-color-error:              var(--md-error-40);
+  --md-color-on-error:           var(--md-neutral-100);
+  --md-color-error-container:    var(--md-error-90);
+  --md-color-on-error-container: var(--md-error-10);
+
+  /* Scrim / inverse */
+  --md-color-scrim:              #000000;
+  --md-color-inverse-surface:    var(--md-neutral-20);
+  --md-color-inverse-on-surface: var(--md-neutral-95);
+  --md-color-inverse-primary:    var(--md-primary-80);
+}

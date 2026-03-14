@@ -1,0 +1,40 @@
+/* ============================================================
+   Material Design 3 — Motion Tokens
+   Spec: specs/10-material-design-v3.md §6
+   ============================================================ */
+
+:root {
+  /* ── Durations ── */
+  --md-motion-duration-short1:  50ms;
+  --md-motion-duration-short2:  100ms;
+  --md-motion-duration-short3:  150ms;
+  --md-motion-duration-short4:  200ms;
+  --md-motion-duration-medium1: 250ms;
+  --md-motion-duration-medium2: 300ms;
+  --md-motion-duration-medium3: 350ms;
+  --md-motion-duration-medium4: 400ms;
+  --md-motion-duration-long1:   450ms;
+  --md-motion-duration-long2:   500ms;
+  --md-motion-duration-long3:   550ms;
+  --md-motion-duration-long4:   600ms;
+
+  /* ── Easing curves ── */
+  --md-motion-easing-emphasized:            cubic-bezier(0.2,  0,    0,    1);
+  --md-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7,  0.1,  1);
+  --md-motion-easing-emphasized-accelerate: cubic-bezier(0.3,  0,    0.8,  0.15);
+  --md-motion-easing-standard:              cubic-bezier(0.2,  0,    0,    1);
+  --md-motion-easing-standard-decelerate:   cubic-bezier(0,    0,    0,    1);
+  --md-motion-easing-standard-accelerate:   cubic-bezier(0.3,  0,    1,    1);
+  --md-motion-easing-linear:                linear;
+}
+
+/* ── Reduced motion — always respect user preference ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count: 1     !important;
+    transition-duration:      0.01ms !important;
+  }
+}

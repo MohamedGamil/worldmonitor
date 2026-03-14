@@ -3,7 +3,18 @@
  * Variant theme CSS (happy-theme.css etc.) stays unlayered and therefore
  * always wins the cascade, regardless of specificity or source order.
  *
+ * Import order matters: M3 token files load first so that main.css
+ * bridge aliases can reference --md-color-* vars directly.
+ *
  * See: https://developer.mozilla.org/en-US/docs/Web/CSS/@layer
  */
-@import url('./main.css') layer(base);
+@import url('./md3-palette.css')    layer(base);
+@import url('./md3-roles.css')      layer(base);
+@import url('./md3-typography.css') layer(base);
+@import url('./md3-shape.css')      layer(base);
+@import url('./md3-motion.css')     layer(base);
+@import url('./md3-elevation.css')  layer(base);
+@import url('./md3-state.css')      layer(base);
+@import url('./md3-components.css') layer(base);
+@import url('./main.css')           layer(base);
 @import url('./country-deep-dive.css') layer(base);

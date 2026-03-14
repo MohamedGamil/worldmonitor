@@ -1,0 +1,34 @@
+/* ============================================================
+   Material Design 3 — Shape Scale
+   Spec: specs/10-material-design-v3.md §4
+   ============================================================ */
+
+:root {
+  /* ── Shape scale ── */
+  --md-shape-none:        0px;
+  --md-shape-extra-small: 4px;
+  --md-shape-small:       8px;
+  --md-shape-medium:      12px;
+  --md-shape-large:       16px;
+  --md-shape-extra-large: 28px;
+  --md-shape-full:        9999px;
+
+  /* ── Component shape assignments ── */
+  --md-shape-button:     var(--md-shape-full);        /* Filled / tonal / outlined buttons */
+  --md-shape-fab:        var(--md-shape-large);       /* FAB + extended FAB */
+  --md-shape-card:       var(--md-shape-medium);      /* Elevated / filled / outlined cards */
+  --md-shape-chip:       var(--md-shape-small);       /* Assist / filter / input / suggestion chips */
+  --md-shape-dialog:     var(--md-shape-extra-large);
+  --md-shape-menu:       var(--md-shape-extra-small);
+  --md-shape-tooltip:    var(--md-shape-extra-small);
+  --md-shape-badge:      var(--md-shape-full);
+  --md-shape-text-field: var(--md-shape-extra-small);
+  --md-shape-snackbar:   var(--md-shape-extra-small);
+  --md-shape-nav-bar:    var(--md-shape-none);
+  --md-shape-nav-rail:   var(--md-shape-none);
+  --md-shape-nav-drawer: var(--md-shape-large);       /* Right edge only */
+
+  /* ── Legacy aliases — preserve existing component references ── */
+  --button-corner-radius: var(--md-shape-extra-small); /* compact for data-dense UI */
+  --popup-corner-radius:  var(--md-shape-small);
+}

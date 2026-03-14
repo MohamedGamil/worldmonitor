@@ -1,0 +1,115 @@
+/* ============================================================
+   Material Design 3 — State Layers & Ripple
+   State layers use ::before pseudo-element with opacity
+   transitions. Ripple uses ::after with @keyframes.
+   Spec: specs/10-material-design-v3.md §5
+   ============================================================ */
+
+/* ── State opacity tokens ── */
+:root {
+  --md-state-hover-opacity:   0.08;
+  --md-state-focus-opacity:   0.10;
+  --md-state-pressed-opacity: 0.12;
+  --md-state-dragged-opacity: 0.16;
+}
+
+/* ── Base state layer ──
+   Add .md-state-layer to any interactive element.
+   Override --md-state-layer-color to match the element's role. */
+.md-state-layer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.md-state-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-state-layer-color, var(--md-color-on-surface));
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-easing-standard);
+  z-index: 0;
+}
+
+/* Ensure children sit above the state layer overlay */
+.md-state-layer > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover */
+.md-state-layer:hover::before {
+  opacity: var(--md-state-hover-opacity);
+}
+
+/* Keyboard focus — more prominent than hover */
+.md-state-layer:focus-visible::before {
+  opacity: var(--md-state-focus-opacity);
+}
+
+/* Press */
+.md-state-layer:active::before {
+  opacity: var(--md-state-pressed-opacity);
+}
+
+/* ── Per-role colour helpers ── */
+.md-state-primary       { --md-state-layer-color: var(--md-color-primary); }
+.md-state-on-surface    { --md-state-layer-color: var(--md-color-on-surface); }
+.md-state-secondary     { --md-state-layer-color: var(--md-color-secondary); }
+.md-state-error         { --md-state-layer-color: var(--md-color-error); }
+
+/* ── Disabled pattern ──
+   Apply [disabled] or [aria-disabled="true"] via HTML/JS. */
+[disabled],
+[aria-disabled="true"] {
+  opacity: 0.38;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ── Ripple (bounded press wave) ──
+   Add .md-ripple alongside .md-state-layer to get a wave on press.
+   Uses ::after so it doesn't conflict with the state ::before layer. */
+.md-ripple::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: var(--md-state-layer-color, var(--md-color-on-surface));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.md-ripple:active::after {
+  animation: md-ripple-expand var(--md-motion-duration-medium2) var(--md-motion-easing-standard) forwards;
+}
+
+@keyframes md-ripple-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.24;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100% {
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* ── Focus-visible ring ──
+   Drawn outside the element border so it doesn't shift layout. */
+.md-state-layer:focus-visible {
+  outline: 3px solid var(--md-color-primary);
+  outline-offset: 2px;
+}
