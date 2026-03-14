@@ -68,10 +68,14 @@ const breaker = createCircuitBreaker<PredictionMarket[]>({ name: 'Polymarket', c
 const client = new PredictionServiceClient('', { fetch: (...args) => globalThis.fetch(...args) });
 
 // Track whether direct browser->Polymarket fetch works
-// Cloudflare blocks server-side TLS but browsers pass JA3 fingerprint checks
+// Cloudflare blocks server-side TLS but browsers pass JA3 fingerprint checks.
+// Skipped entirely on localhost — gamma-api.polymarket.com does not allow
+// localhost origins, so the probe always fails with a CORS error.
 let directFetchWorks: boolean | null = null;
 let directFetchProbe: Promise<boolean> | null = null;
 async function probeDirectFetchCapability(): Promise<boolean> {
+  // Never attempt direct fetch from localhost — CORS will always block it.
+  if (isLocalhostRuntime) return false;
   if (directFetchWorks !== null) return directFetchWorks;
   if (!directFetchProbe) {
     directFetchProbe = fetch(`${GAMMA_API}/events?closed=false&active=true&archived=false&order=volume&ascending=false&limit=1`, {
