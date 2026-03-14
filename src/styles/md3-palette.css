@@ -4,35 +4,35 @@
    ============================================================ */
 
 :root {
-  /* ── Primary palette (Teal-Green, Hue ≈ 165°) ── */
-  --md-primary-0:   oklch(0%    0     165);
-  --md-primary-5:   oklch(9%    0.03  165);
-  --md-primary-10:  oklch(16%   0.05  165);
-  --md-primary-20:  oklch(27%   0.08  165);
-  --md-primary-30:  oklch(37%   0.11  165);
-  --md-primary-40:  oklch(46%   0.14  165);
-  --md-primary-50:  oklch(55%   0.16  165);
-  --md-primary-60:  oklch(64%   0.15  165);
-  --md-primary-70:  oklch(73%   0.14  165);
-  --md-primary-80:  oklch(82%   0.12  165);
-  --md-primary-90:  oklch(90%   0.08  165);
-  --md-primary-95:  oklch(95%   0.04  165);
-  --md-primary-99:  oklch(99%   0.01  165);
-  --md-primary-100: oklch(100%  0     165);
+  /* ── Primary palette (Blue-Indigo, Hue ≈ 265°) ── */
+  --md-primary-0:   oklch(0%    0     265);
+  --md-primary-5:   oklch(9%    0.04  265);
+  --md-primary-10:  oklch(16%   0.08  265);
+  --md-primary-20:  oklch(27%   0.14  265);
+  --md-primary-30:  oklch(37%   0.19  265);
+  --md-primary-40:  oklch(46%   0.23  265);
+  --md-primary-50:  oklch(55%   0.25  265);
+  --md-primary-60:  oklch(64%   0.23  265);
+  --md-primary-70:  oklch(73%   0.19  265);
+  --md-primary-80:  oklch(82%   0.14  265);
+  --md-primary-90:  oklch(90%   0.08  265);
+  --md-primary-95:  oklch(95%   0.04  265);
+  --md-primary-99:  oklch(99%   0.01  265);
+  --md-primary-100: oklch(100%  0     265);
 
-  /* ── Secondary palette (same hue, low chroma — teal-grey) ── */
-  --md-secondary-0:   oklch(0%    0     165);
-  --md-secondary-10:  oklch(16%   0.02  165);
-  --md-secondary-20:  oklch(27%   0.03  165);
-  --md-secondary-30:  oklch(37%   0.04  165);
-  --md-secondary-40:  oklch(46%   0.05  165);
-  --md-secondary-50:  oklch(55%   0.06  165);
-  --md-secondary-60:  oklch(64%   0.05  165);
-  --md-secondary-70:  oklch(73%   0.05  165);
-  --md-secondary-80:  oklch(82%   0.04  165);
-  --md-secondary-90:  oklch(90%   0.03  165);
-  --md-secondary-95:  oklch(95%   0.02  165);
-  --md-secondary-100: oklch(100%  0     165);
+  /* ── Secondary palette (same hue, low chroma — blue-grey) ── */
+  --md-secondary-0:   oklch(0%    0     265);
+  --md-secondary-10:  oklch(16%   0.03  265);
+  --md-secondary-20:  oklch(27%   0.04  265);
+  --md-secondary-30:  oklch(37%   0.06  265);
+  --md-secondary-40:  oklch(46%   0.07  265);
+  --md-secondary-50:  oklch(55%   0.07  265);
+  --md-secondary-60:  oklch(64%   0.06  265);
+  --md-secondary-70:  oklch(73%   0.05  265);
+  --md-secondary-80:  oklch(82%   0.04  265);
+  --md-secondary-90:  oklch(90%   0.03  265);
+  --md-secondary-95:  oklch(95%   0.02  265);
+  --md-secondary-100: oklch(100%  0     265);
 
   /* ── Neutral palette (near-zero chroma) ── */
   --md-neutral-0:   #000000;
@@ -54,12 +54,12 @@
   --md-neutral-99:  #fcfcfc;
   --md-neutral-100: #ffffff;
 
-  /* ── Neutral-variant palette (very low chroma, teal tint) ── */
-  --md-neutral-variant-30: oklch(37%  0.02  165);
-  --md-neutral-variant-50: oklch(55%  0.02  165);
-  --md-neutral-variant-60: oklch(64%  0.02  165);
-  --md-neutral-variant-80: oklch(82%  0.02  165);
-  --md-neutral-variant-90: oklch(90%  0.01  165);
+  /* ── Neutral-variant palette (very low chroma, indigo tint) ── */
+  --md-neutral-variant-30: oklch(37%  0.03  265);
+  --md-neutral-variant-50: oklch(55%  0.03  265);
+  --md-neutral-variant-60: oklch(64%  0.03  265);
+  --md-neutral-variant-80: oklch(82%  0.02  265);
+  --md-neutral-variant-90: oklch(90%  0.02  265);
 
   /* ── Error palette ── */
   --md-error-10:  #410002;
@@ -71,22 +71,22 @@
 
   /* Fallback hex values for browsers without oklch support */
   @supports not (color: oklch(0% 0 0)) {
-    --md-primary-10:  #0d2e28;
-    --md-primary-20:  #1a4f46;
-    --md-primary-30:  #256257;
-    --md-primary-40:  #2d7a6c;
-    --md-primary-80:  #80cbc4;
-    --md-primary-90:  #b2dfdb;
-    --md-primary-95:  #e0f2f1;
+    --md-primary-10:  #1a1649;
+    --md-primary-20:  #2d2878;
+    --md-primary-30:  #3e38a0;
+    --md-primary-40:  #5147c8;
+    --md-primary-80:  #b5b0f0;
+    --md-primary-90:  #d8d6fb;
+    --md-primary-95:  #eeedfd;
     --md-primary-100: #ffffff;
-    --md-secondary-20: #1f3633;
-    --md-secondary-30: #2d4c48;
-    --md-secondary-80: #a8c5c2;
-    --md-secondary-90: #cce0de;
-    --md-neutral-variant-30: #3a3f3e;
-    --md-neutral-variant-50: #636968;
-    --md-neutral-variant-60: #7f8584;
-    --md-neutral-variant-80: #bec9c8;
-    --md-neutral-variant-90: #dae5e4;
+    --md-secondary-20: #1e1c3d;
+    --md-secondary-30: #2e2c5c;
+    --md-secondary-80: #b8b5d8;
+    --md-secondary-90: #d4d2ea;
+    --md-neutral-variant-30: #3a384a;
+    --md-neutral-variant-50: #625f73;
+    --md-neutral-variant-60: #7d7a8e;
+    --md-neutral-variant-80: #c4c2d1;
+    --md-neutral-variant-90: #e1e0e9;
   }
 }
