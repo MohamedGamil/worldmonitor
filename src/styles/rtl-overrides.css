@@ -207,3 +207,7 @@ body.dir-rtl {
 [dir="rtl"] .logo-mobile {
   letter-spacing: 0;
 }
+
+[dir="rtl"] .map-bottom-grid::after {
+  content: 'اسحب اللوحات هنا لتثبيتها أسفل الخريطة ';
+}
