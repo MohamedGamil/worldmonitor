@@ -12,7 +12,7 @@ Sentry.init({
   dsn: sentryDsn || undefined,
   release: `marsd@${__APP_VERSION__}`,
   environment: location.hostname === 'marsd.app' ? 'production'
-    : location.hostname.includes('vercel.app') ? 'preview'
+    : location.hostname.includes('marsd.dev') ? 'preview'
       : 'development',
   enabled: Boolean(sentryDsn) && !location.hostname.startsWith('localhost') && !('__TAURI_INTERNALS__' in window),
   sendDefaultPii: true,
