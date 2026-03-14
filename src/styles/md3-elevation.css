@@ -9,7 +9,7 @@
 :root {
   /* ── Overlay percentages ── */
   --md-elevation-0-overlay: 0%;
-  --md-elevation-1-overlay: 5%;
+  --md-elevation-1-overlay: 2.5%;
   --md-elevation-2-overlay: 8%;
   --md-elevation-3-overlay: 11%;
   --md-elevation-4-overlay: 12%;

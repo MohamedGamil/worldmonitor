@@ -51,6 +51,10 @@ body.dir-rtl {
   margin-left: 8px;
 }
 
+[dir="rtl"] .mobile-menu-title {
+  letter-spacing: 0;
+}
+
 /* Border-left accent bars → border-right */
 [dir="rtl"] .panel-summary {
   border-left: none;
