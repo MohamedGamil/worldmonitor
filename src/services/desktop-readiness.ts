@@ -7,7 +7,6 @@ export interface DesktopParityFeature {
   panel: string;
   serviceFiles: string[];
   apiRoutes: string[];
-  apiHandlers: string[];
   locality: LocalityClass;
   fallback: string;
   priority: 1 | 2 | 3;
@@ -42,7 +41,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'LiveNewsPanel',
     serviceFiles: ['src/services/live-news.ts'],
     apiRoutes: ['/api/youtube/live'],
-    apiHandlers: ['api/youtube/live.js'],
     locality: 'fully-local',
     fallback: 'Channel fallback video IDs are used when live detection fails.',
     priority: 1,
@@ -52,7 +50,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'MonitorPanel',
     serviceFiles: [],
     apiRoutes: [],
-    apiHandlers: [],
     locality: 'fully-local',
     fallback: 'Keyword monitoring runs fully client-side on loaded news corpus.',
     priority: 1,
@@ -62,7 +59,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'StrategicRiskPanel',
     serviceFiles: ['src/services/cached-risk-scores.ts'],
     apiRoutes: ['/api/risk-scores'],
-    apiHandlers: ['api/risk-scores.js'],
     locality: 'api-key',
     fallback: 'Panel stays available with local aggregate scoring when cached backend scores are unavailable.',
     priority: 1,
@@ -72,7 +68,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'Map layers (conflicts/outages/cyber/ais/flights)',
     serviceFiles: ['src/services/conflict/index.ts', 'src/services/infrastructure/index.ts', 'src/services/cyber/index.ts', 'src/services/maritime/index.ts', 'src/services/military-flights.ts'],
     apiRoutes: ['/api/conflict/v1/list-acled-events', '/api/infrastructure/v1/list-internet-outages', '/api/cyber/v1/list-cyber-threats', '/api/maritime/v1/get-vessel-snapshot', '/api/military/v1/list-military-flights'],
-    apiHandlers: ['server/marsd/conflict/v1/handler.ts', 'server/marsd/infrastructure/v1/handler.ts', 'server/marsd/cyber/v1/handler.ts', 'server/marsd/maritime/v1/handler.ts', 'server/marsd/military/v1/handler.ts'],
     locality: 'api-key',
     fallback: 'Unavailable feeds are disabled while map rendering remains active for local/static layers.',
     priority: 1,
@@ -82,7 +77,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'Summaries',
     serviceFiles: ['src/services/summarization.ts'],
     apiRoutes: ['/api/news/v1/summarize-article'],
-    apiHandlers: ['server/marsd/news/v1/handler.ts'],
     locality: 'api-key',
     fallback: 'Browser summarizer executes when hosted LLM providers are unavailable.',
     priority: 2,
@@ -92,7 +86,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'MarketPanel',
     serviceFiles: ['src/services/market/index.ts', 'src/services/prediction/index.ts'],
     apiRoutes: ['/api/market/v1/list-crypto-quotes', '/api/market/v1/list-stablecoin-markets', '/api/market/v1/list-etf-flows'],
-    apiHandlers: ['server/marsd/market/v1/handler.ts'],
     locality: 'fully-local',
     fallback: 'Multi-source market fetchers degrade to remaining providers and cached values.',
     priority: 2,
@@ -102,7 +95,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'Map layers (flight enrichment)',
     serviceFiles: ['src/services/wingbits.ts'],
     apiRoutes: ['/api/military/v1/get-aircraft-details', '/api/military/v1/get-aircraft-details-batch', '/api/military/v1/get-wingbits-status'],
-    apiHandlers: ['server/marsd/military/v1/handler.ts'],
     locality: 'api-key',
     fallback: 'Flight tracks continue with heuristic classification when Wingbits credentials are unavailable.',
     priority: 3,
@@ -112,7 +104,6 @@ export const DESKTOP_PARITY_FEATURES: DesktopParityFeature[] = [
     panel: 'Map layers (military flights relay)',
     serviceFiles: ['src/services/military-flights.ts'],
     apiRoutes: ['/api/military/v1/list-military-flights'],
-    apiHandlers: ['server/marsd/military/v1/handler.ts'],
     locality: 'cloud-fallback',
     fallback: 'If relay is unreachable, service falls back to Vercel proxy path and then no-data mode.',
     priority: 3,

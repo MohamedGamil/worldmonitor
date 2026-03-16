@@ -1277,72 +1277,23 @@ async function dispatch(requestUrl, req, routes, context) {
     }
   }
 
-  if (context.cloudFallback && cloudPreferred.has(routeUrl.pathname)) {
-    const cloudResponse = await tryCloudFallback(routeUrl, req, context);
+  // All explicit sidecar-local routes are handled above. After Phase 3+4, product
+  // /api/* calls go directly to the backend from the desktop client and should not
+  // reach the sidecar. If cloudFallback is on (dev/relay mode), forward unknown
+  // paths to the configured remote base as a safety net.
+  if (context.cloudFallback) {
+    const cloudResponse = await tryCloudFallback(routeUrl, req, context, 'not a sidecar endpoint');
     if (cloudResponse) return cloudResponse;
   }
-
-  const modulePath = pickModule(routeUrl.pathname, routes);
-  if (!modulePath || !existsSync(modulePath)) {
-    if (context.cloudFallback) {
-      const cloudResponse = await tryCloudFallback(routeUrl, req, context, 'handler missing');
-      if (cloudResponse) return cloudResponse;
-    }
-    logOnce(context.logger, routeUrl.pathname, 'no local handler');
-    return json({ error: 'No local handler for this endpoint', endpoint: routeUrl.pathname }, 404);
-  }
-
-  try {
-    const mod = await importHandler(modulePath);
-    if (typeof mod.default !== 'function') {
-      logOnce(context.logger, routeUrl.pathname, 'invalid handler module');
-      if (context.cloudFallback) {
-        const cloudResponse = await tryCloudFallback(routeUrl, req, context, `invalid handler module`);
-        if (cloudResponse) return cloudResponse;
-      }
-      return json({ error: 'Invalid handler module', endpoint: routeUrl.pathname }, 500);
-    }
-
-    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : await readBody(req);
-    const hdrs = toHeaders(req.headers, { stripOrigin: true });
-    hdrs.set('Origin', `http://127.0.0.1:${context.port}`);
-    const request = new Request(routeUrl.toString(), {
-      method: req.method,
-      headers: hdrs,
-      body,
-    });
-
-    const response = await mod.default(request);
-    if (!(response instanceof Response)) {
-      logOnce(context.logger, routeUrl.pathname, 'handler returned non-Response');
-      if (context.cloudFallback) {
-        const cloudResponse = await tryCloudFallback(routeUrl, req, context, 'handler returned non-Response');
-        if (cloudResponse) return cloudResponse;
-      }
-      return json({ error: 'Handler returned invalid response', endpoint: routeUrl.pathname }, 500);
-    }
-
-    if (!response.ok && context.cloudFallback) {
-      const cloudResponse = await tryCloudFallback(routeUrl, req, context, `local status ${response.status}`);
-      if (cloudResponse) { cloudPreferred.add(routeUrl.pathname); return cloudResponse; }
-    }
-
-    return response;
-  } catch (error) {
-    const reason = error.code === 'ERR_MODULE_NOT_FOUND' ? 'missing dependency' : error.message;
-    context.logger.error(`[local-api] ${routeUrl.pathname} → ${reason}`);
-    if (context.cloudFallback) {
-      const cloudResponse = await tryCloudFallback(routeUrl, req, context, error);
-      if (cloudResponse) { cloudPreferred.add(routeUrl.pathname); return cloudResponse; }
-    }
-    return json({ error: 'Local handler error', reason, endpoint: routeUrl.pathname }, 502);
-  }
+  return json({ error: 'Not a sidecar endpoint', endpoint: routeUrl.pathname }, 404);
 }
 
 export async function createLocalApiServer(options = {}) {
   const context = resolveConfig(options);
   loadVerboseState(context.dataDir);
-  const routes = await buildRouteTable(context.apiDir);
+  // Phase 4: explicit local-only route table — no dynamic loading from frontend/api.
+  // Product /api/* calls now go directly to the backend from the desktop client.
+  const routes = [];
 
   const server = createServer(async (req, res) => {
     const requestUrl = new URL(req.url || '/', `http://127.0.0.1:${context.port}`);
@@ -1443,7 +1394,7 @@ export async function createLocalApiServer(options = {}) {
         try { writeFileSync(portFile, String(boundPort)); } catch { }
       }
 
-      context.logger.log(`[local-api] listening on http://127.0.0.1:${boundPort} (apiDir=${context.apiDir}, routes=${routes.length}, cloudFallback=${context.cloudFallback})`);
+      context.logger.log(`[local-api] listening on http://127.0.0.1:${boundPort} (mode=${context.mode}, cloudFallback=${context.cloudFallback})`);
       return { port: boundPort };
     },
     async close() {

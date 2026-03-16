@@ -475,10 +475,6 @@ function isInterceptedApiTarget(target: string): boolean {
   return target.startsWith('/api/') || target.startsWith(LOCAL_ONLY_API_PREFIX);
 }
 
-function isKeyFreeApiTarget(target: string): boolean {
-  return target.startsWith('/api/register-interest');
-}
-
 async function fetchLocalWithStartupRetry(
   nativeFetch: typeof window.fetch,
   localUrl: string,
@@ -577,88 +573,65 @@ export function installRuntimeFetchPatch(): void {
     }
     const localInit = { ...init, headers };
 
-    const localTarget = normalizeLocalOnlyApiPath(target);
-    const localUrl = `${getApiBaseUrl()}${localTarget}`;
-    if (debug) console.log(`[fetch] intercept → ${target}`);
-    let allowCloudFallback = !isLocalOnlyApiTarget(target);
-
-    if (allowCloudFallback && !isKeyFreeApiTarget(target)) {
+    if (isLocalOnlyApiTarget(target)) {
+      // ── Sidecar path: /local-api/* routes go to the local sidecar only ──────
+      // These endpoints handle host-local capabilities (env updates, debug
+      // toggles, HLS proxy, YouTube embed bridge). They must never fall back
+      // to the cloud.
+      const localUrl = `${getApiBaseUrl()}${normalizeLocalOnlyApiPath(target)}`;
+      if (debug) console.log(`[fetch] sidecar → ${localUrl}`);
       try {
-        const { getSecretState, secretsReady } = await import('@/services/runtime-config');
-        await Promise.race([secretsReady, new Promise<void>(r => setTimeout(r, 2000))]);
-        const wmKeyState = getSecretState('MARSD_API_KEY');
-        if (!wmKeyState.present || !wmKeyState.valid) {
-          allowCloudFallback = false;
-        }
-      } catch {
-        allowCloudFallback = false;
-      }
-    }
+        const t0 = performance.now();
+        let response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, localInit);
+        if (debug) console.log(`[fetch] ${target} → ${response.status} (${Math.round(performance.now() - t0)}ms)`);
 
-    const cloudFallback = async () => {
-      if (!allowCloudFallback) {
-        throw new Error(`Cloud fallback blocked for ${target}`);
-      }
-      const cloudUrl = `${getRemoteApiBaseUrl()}${target}`;
-      if (debug) console.log(`[fetch] cloud fallback → ${cloudUrl}`);
-      const cloudHeaders = new Headers(init?.headers);
-      if (KEYED_CLOUD_API_PATTERN.test(target)) {
-        const { getRuntimeConfigSnapshot } = await import('@/services/runtime-config');
-        const wmKeyValue = getRuntimeConfigSnapshot().secrets['MARSD_API_KEY']?.value;
-        if (wmKeyValue) {
-          cloudHeaders.set('X-Marsd-Key', wmKeyValue);
-        }
-      }
-      return nativeFetch(cloudUrl, { ...init, headers: cloudHeaders });
-    };
-
-    try {
-      const t0 = performance.now();
-      let response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, localInit);
-      if (debug) console.log(`[fetch] ${target} → ${response.status} (${Math.round(performance.now() - t0)}ms)`);
-
-      // Token may be stale after a sidecar restart — refresh and retry once.
-      // Skip retry if we recently failed (avoid doubling every request during auth outages).
-      if (response.status === 401 && localApiToken && Date.now() > authRetryCooldownUntil) {
-        if (debug) console.log(`[fetch] 401 from sidecar, refreshing token and retrying`);
-        try {
-          const { tryInvokeTauri } = await import('@/services/tauri-bridge');
-          localApiToken = await tryInvokeTauri<string>('get_local_api_token');
-          tokenFetchedAt = Date.now();
-        } catch {
-          localApiToken = null;
-          tokenFetchedAt = 0;
-        }
-        if (localApiToken) {
-          const retryHeaders = new Headers(init?.headers);
-          retryHeaders.set('Authorization', `Bearer ${localApiToken}`);
-          response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, { ...init, headers: retryHeaders });
-          if (debug) console.log(`[fetch] retry ${target} → ${response.status}`);
-          if (response.status === 401) {
-            authRetryCooldownUntil = Date.now() + 60_000;
-            if (debug) console.log(`[fetch] auth retry failed, suppressing retries for 60s`);
-          } else {
-            authRetryCooldownUntil = 0;
+        // Token may be stale after a sidecar restart — refresh and retry once.
+        // Skip retry if we recently failed (avoid doubling requests during auth outages).
+        if (response.status === 401 && localApiToken && Date.now() > authRetryCooldownUntil) {
+          if (debug) console.log(`[fetch] 401 from sidecar, refreshing token and retrying`);
+          try {
+            const { tryInvokeTauri } = await import('@/services/tauri-bridge');
+            localApiToken = await tryInvokeTauri<string>('get_local_api_token');
+            tokenFetchedAt = Date.now();
+          } catch {
+            localApiToken = null;
+            tokenFetchedAt = 0;
+          }
+          if (localApiToken) {
+            const retryHeaders = new Headers(init?.headers);
+            retryHeaders.set('Authorization', `Bearer ${localApiToken}`);
+            response = await fetchLocalWithStartupRetry(nativeFetch, localUrl, { ...init, headers: retryHeaders });
+            if (debug) console.log(`[fetch] retry ${target} → ${response.status}`);
+            if (response.status === 401) {
+              authRetryCooldownUntil = Date.now() + 60_000;
+              if (debug) console.log(`[fetch] auth retry failed, suppressing retries for 60s`);
+            } else {
+              authRetryCooldownUntil = 0;
+            }
           }
         }
-      }
 
-      if (!response.ok) {
-        if (!allowCloudFallback) {
-          if (debug) console.log(`[fetch] local-only endpoint ${target} returned ${response.status}; skipping cloud fallback`);
-          return response;
-        }
-        if (debug) console.log(`[fetch] local ${response.status}, falling back to cloud`);
-        return cloudFallback();
-      }
-      return response;
-    } catch (error) {
-      if (debug) console.warn(`[runtime] Local API unavailable for ${target}`, error);
-      if (!allowCloudFallback) {
+        return response;
+      } catch (error) {
+        if (debug) console.warn(`[runtime] Sidecar unavailable for ${target}`, error);
         throw error;
       }
-      return cloudFallback();
     }
+
+    // ── Backend path: /api/* product routes go directly to the backend ────────
+    // Desktop no longer routes product API calls through the sidecar.
+    // The sidecar is now limited to /local-api/* host-local utilities.
+    const backendUrl = `${getRemoteApiBaseUrl()}${target}`;
+    if (debug) console.log(`[fetch] backend → ${backendUrl}`);
+    const backendHeaders = new Headers(init?.headers);
+    if (KEYED_CLOUD_API_PATTERN.test(target)) {
+      try {
+        const { getRuntimeConfigSnapshot } = await import('@/services/runtime-config');
+        const wmKeyValue = getRuntimeConfigSnapshot().secrets['MARSD_API_KEY']?.value;
+        if (wmKeyValue) backendHeaders.set('X-Marsd-Key', wmKeyValue);
+      } catch { /* no key available */ }
+    }
+    return nativeFetch(backendUrl, { ...init, headers: backendHeaders });
   };
 
   (window as unknown as Record<string, unknown>).__wmFetchPatched = true;

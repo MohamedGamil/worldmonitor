@@ -334,7 +334,7 @@ test('returns 404 when local route does not exist and cloudFallback is off', asy
     const response = await fetch(`http://127.0.0.1:${port}/api/not-found`);
     assert.equal(response.status, 404);
     const body = await response.json();
-    assert.equal(body.error, 'No local handler for this endpoint');
+    assert.equal(body.error, 'Not a sidecar endpoint');
     assert.equal(remote.hits.length, 0);
   } finally {
     await app.close();
@@ -477,12 +477,12 @@ test('returns local handler error when fetch(Request) uses a consumed body', asy
   const { port } = await app.start();
 
   try {
+    // After Phase 4 the sidecar no longer loads dynamic handlers from frontend/api.
+    // Unrecognised /api/* paths return 404 (not a sidecar endpoint).
     const response = await fetch(`http://127.0.0.1:${port}/api/request-consumed`);
-    assert.equal(response.status, 502);
+    assert.equal(response.status, 404);
     const body = await response.json();
-    assert.equal(body.error, 'Local handler error');
-    assert.equal(typeof body.reason, 'string');
-    assert.equal(body.reason.length > 0, true);
+    assert.equal(body.error, 'Not a sidecar endpoint');
     assert.equal(upstreamHits, 0);
   } finally {
     delete process.env.WM_TEST_UPSTREAM;
@@ -615,8 +615,8 @@ test('resolves packaged tauri resource layout under _up_/api', async () => {
   const { port } = await app.start();
 
   try {
-    assert.equal(app.context.apiDir, localResource.apiDir);
-    assert.equal(app.routes.length, 1);
+    // After Phase 4, apiDir is no longer scanned; routes is always empty.
+    assert.equal(app.routes.length, 0);
 
     const response = await fetch(`http://127.0.0.1:${port}/api/live`);
     assert.equal(response.status, 200);
