@@ -1,6 +1,6 @@
 [package]
 name = "marsd"
-version = "0.1.1"
+version = "0.1.2"
 description = "Marsd desktop application"
 authors = ["Marsd"]
 edition = "2021"
