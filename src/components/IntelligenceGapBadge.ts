@@ -5,6 +5,7 @@ import { t } from '@/services/i18n';
 import { getSignalContext } from '@/utils/analysis-constants';
 import { escapeHtml } from '@/utils/sanitize';
 import { trackFindingClicked } from '@/services/analytics';
+import { svgIcon } from '@/utils/icons';
 
 const LOW_COUNT_THRESHOLD = 3;
 const MAX_VISIBLE_FINDINGS = 10;
@@ -59,7 +60,7 @@ export class IntelligenceFindingsBadge {
     this.badge = document.createElement('button');
     this.badge.className = 'intel-findings-badge';
     this.badge.title = t('components.intelligenceFindings.badgeTitle');
-    this.badge.innerHTML = '<span class="findings-icon">🎯</span><span class="findings-count">0</span>';
+    this.badge.innerHTML = `<span class="findings-icon">${svgIcon('flash-circle', 'currentColor', 14)}</span><span class="findings-count">0</span>`;
 
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'intel-findings-dropdown';

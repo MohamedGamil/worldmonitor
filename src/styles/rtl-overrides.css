@@ -48,10 +48,14 @@ body.dir-rtl {
 
 [dir="rtl"] .search-btn {
   margin-right: 0;
-  margin-left: 8px;
+  margin-left: 0;
 }
 
 [dir="rtl"] .mobile-menu-title {
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .pizzint-defcon-label {
   letter-spacing: 0;
 }
 

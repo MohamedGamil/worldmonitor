@@ -1,6 +1,7 @@
 import type { PizzIntStatus, GdeltTensionPair } from '@/types';
 import { t } from '@/services/i18n';
 import { h, replaceChildren } from '@/utils/dom-utils';
+import { svgIcon } from '@/utils/icons';
 
 const DEFCON_COLORS: Record<number, string> = {
   1: '#ff0040',
@@ -12,11 +13,16 @@ const DEFCON_COLORS: Record<number, string> = {
 
 export class PizzIntIndicator {
   private element: HTMLElement;
+  private sirenIcon!: HTMLElement;
   private isExpanded = false;
   private status: PizzIntStatus | null = null;
   private tensions: GdeltTensionPair[] = [];
 
   constructor() {
+    this.sirenIcon = document.createElement('span');
+    this.sirenIcon.className = 'pizzint-icon';
+    this.sirenIcon.innerHTML = svgIcon('siren', '#888888', 16);
+
     const panel = h('div', { className: 'pizzint-panel hidden' },
       h('div', { className: 'pizzint-header' },
         h('span', { className: 'pizzint-title' }, t('components.pizzint.title')),
@@ -48,7 +54,7 @@ export class PizzIntIndicator {
         title: t('components.pizzint.title'),
         onClick: () => { this.isExpanded = !this.isExpanded; panel.classList.toggle('hidden', !this.isExpanded); },
       },
-        h('span', { className: 'pizzint-icon' }, '🍕'),
+        this.sirenIcon,
         h('span', { className: 'pizzint-defcon' }, '--'),
         h('span', { className: 'pizzint-score' }, '--%'),
       ),
@@ -76,7 +82,8 @@ export class PizzIntIndicator {
     const locationsEl = this.element.querySelector('.pizzint-locations') as HTMLElement;
     const updatedEl = this.element.querySelector('.pizzint-updated') as HTMLElement;
 
-    const color = DEFCON_COLORS[this.status.defconLevel] || '#888';
+    const color = DEFCON_COLORS[this.status.defconLevel] || '#888888';
+    this.sirenIcon.innerHTML = svgIcon('siren', color, 16);
     defconEl.textContent = t('components.pizzint.defcon', { level: String(this.status.defconLevel) });
     defconEl.style.background = color;
     defconEl.style.color = this.status.defconLevel <= 3 ? '#000' : '#fff';

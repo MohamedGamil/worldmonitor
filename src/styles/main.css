@@ -782,7 +782,7 @@ canvas,
 }
 
 .search-btn {
-  padding: 4px 10px;
+  padding: 3px 16px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
@@ -792,7 +792,7 @@ canvas,
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-right: 8px;
+  margin-right: 0;
 }
 
 .search-btn:hover {
@@ -7889,6 +7889,25 @@ a.prediction-link:hover {
   padding: 8px;
   max-height: 300px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.economic-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.economic-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.economic-content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--md-shape-full);
+}
+
+.economic-content::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 .economic-empty {
@@ -9597,9 +9616,9 @@ a.prediction-link:hover {
   align-items: center;
   gap: 6px;
   background: transparent;
-  border: 1px solid var(--overlay-heavy);
+  border: 0 solid;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 2px 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -11511,6 +11530,25 @@ a.prediction-link:hover {
   gap: 4px;
   max-height: 150px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.strategic-risk-panel .risk-alerts::-webkit-scrollbar {
+  width: 4px;
+}
+
+.strategic-risk-panel .risk-alerts::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.strategic-risk-panel .risk-alerts::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--md-shape-full);
+}
+
+.strategic-risk-panel .risk-alerts::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 .risk-alert {
@@ -12203,11 +12241,11 @@ a.prediction-link:hover {
 .intel-findings-badge {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  gap: 2px;
+  padding: 4px 4px;
   background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  border: 0 solid transparent;
+  border-radius: 50%;
   color: var(--text);
   font-size: 11px;
   cursor: pointer;
@@ -12226,16 +12264,26 @@ a.prediction-link:hover {
 }
 
 .intel-findings-badge .findings-icon {
-  font-size: 12px;
+  display: none;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.intel-findings-badge .findings-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .intel-findings-badge .findings-count {
-  background: var(--border);
+  /* background: transparent !important; */
   padding: 1px 5px;
-  border-radius: 8px;
+  border-radius: 100%;
   font-size: 10px;
-  font-weight: 600;
-  min-width: 14px;
+  font-weight: 700;
+  min-width: 22px;
   text-align: center;
 }
 
@@ -12252,19 +12300,28 @@ a.prediction-link:hover {
   border-color: rgba(74, 158, 255, 0.4);
 }
 
+.intel-findings-badge.status-low .findings-icon {
+  color: var(--semantic-low);
+}
+
 .intel-findings-badge.status-low .findings-count {
   background: rgba(74, 158, 255, 0.3);
   color: var(--semantic-low);
 }
 
 .intel-findings-badge.status-high {
-  border-color: rgba(255, 149, 0, 0.5);
+  background: var(--overlay-medium);
+  border-color: rgba(243, 54, 51, 0.65);
   animation: findings-pulse 2s infinite;
 }
 
+.intel-findings-badge.status-high .findings-icon {
+  color: rgba(243, 54, 51, 0.65);
+}
+
 .intel-findings-badge.status-high .findings-count {
-  background: rgba(255, 149, 0, 0.3);
-  color: var(--semantic-elevated);
+  background: rgba(243, 54, 51, 0.65);
+  color: var(--text);
 }
 
 .intel-findings-badge.pulse {
@@ -12275,11 +12332,11 @@ a.prediction-link:hover {
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 149, 0, 0);
+    box-shadow: 0 0 0 0 rgba(243, 54, 51, 0);
   }
 
   50% {
-    box-shadow: 0 0 8px 2px rgba(255, 149, 0, 0.3);
+    box-shadow: 0 0 8px 2px rgba(243, 54, 51, 0.3);
   }
 }
 
@@ -12303,13 +12360,13 @@ a.prediction-link:hover {
   top: 100%;
   right: 0;
   width: 380px;
-  background: var(--border-subtle);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 12px;
   box-shadow: 0 8px 24px var(--shadow-color);
   z-index: 1000;
+  margin-top: 8px;
   display: none;
-  margin-top: 4px;
 }
 
 .intel-findings-dropdown.open {
@@ -12412,6 +12469,25 @@ a.prediction-link:hover {
   padding: 10px 12px;
   max-height: 400px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+.intel-findings-dropdown .findings-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.intel-findings-dropdown .findings-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.intel-findings-dropdown .findings-content::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--md-shape-full);
+}
+
+.intel-findings-dropdown .findings-content::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
 }
 
 .findings-empty {

@@ -24,6 +24,16 @@ button {
     height: 32px;
 }
 
+.pizzint-icon {
+    margin-top: 2px;
+}
+
+.escalation-score .score-value,
+.escalation-score .score-label,
+.pizzint-location-status {
+    color: var(--text) !important;
+}
+
 .map-author-badge {
     color: var(--text-secondary);
     font-family: 'Courier New', Courier, monospace !important;

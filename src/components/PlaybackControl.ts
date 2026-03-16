@@ -1,6 +1,8 @@
 import { getSnapshotTimestamps, getSnapshotAt, type DashboardSnapshot } from '@/services/storage';
 import { t } from '@/services/i18n';
 
+const IS_PLAYBACK_ENABLED = false;
+
 export class PlaybackControl {
   private element: HTMLElement;
   private isPlaybackMode = false;
@@ -9,6 +11,11 @@ export class PlaybackControl {
   private onSnapshotChange: ((snapshot: DashboardSnapshot | null) => void) | null = null;
 
   constructor() {
+    if (!IS_PLAYBACK_ENABLED) {
+      this.element = document.createElement('div');
+      return;
+    }
+
     this.element = document.createElement('div');
     this.element.className = 'playback-control';
     this.element.innerHTML = `

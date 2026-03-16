@@ -4,6 +4,8 @@ import { t } from '@/services/i18n';
 
 type ExportFormat = 'json' | 'csv';
 
+const IS_PANEL_ENABLED = false;
+
 interface ExportData {
   news?: NewsItem[] | ClusteredEvent[];
   markets?: MarketData[];
@@ -148,6 +150,12 @@ export class ExportPanel {
 
   constructor(getDataFn: () => ExportData) {
     this.getData = getDataFn;
+
+    if (!IS_PANEL_ENABLED) {
+      this.element = document.createElement('div');
+      return;
+    }
+
     this.element = document.createElement('div');
     this.element.className = 'export-panel-container';
     this.element.innerHTML = `
