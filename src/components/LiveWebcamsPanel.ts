@@ -246,7 +246,7 @@ export class LiveWebcamsPanel extends Panel {
       // The sidecar serves the embed from http://127.0.0.1:PORT which YouTube accepts.
       const params = new URLSearchParams({ videoId, autoplay: '1', mute: '1' });
       if (quality !== 'auto') params.set('vq', quality);
-      return `http://localhost:${getLocalApiPort()}/api/youtube-embed?${params.toString()}`;
+      return `http://localhost:${getLocalApiPort()}/local-api/youtube-embed?${params.toString()}`;
     }
     const vq = quality !== 'auto' ? `&vq=${quality}` : '';
     return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1&rel=0${vq}`;

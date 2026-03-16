@@ -1,4 +1,4 @@
-import { getApiBaseUrl, isDesktopRuntime } from './runtime';
+import { isDesktopRuntime, toLocalSidecarUrl } from './runtime';
 import { invokeTauri } from './tauri-bridge';
 
 export type RuntimeSecretKey =
@@ -71,13 +71,13 @@ export interface RuntimeConfig {
 
 const TOGGLES_STORAGE_KEY = 'marsd-runtime-feature-toggles';
 function getSidecarEnvUpdateUrl(): string {
-  return `${getApiBaseUrl()}/api/local-env-update`;
+  return toLocalSidecarUrl('/local-api/env-update');
 }
 function getSidecarEnvUpdateBatchUrl(): string {
-  return `${getApiBaseUrl()}/api/local-env-update-batch`;
+  return toLocalSidecarUrl('/local-api/env-update-batch');
 }
 function getSidecarSecretValidateUrl(): string {
-  return `${getApiBaseUrl()}/api/local-validate-secret`;
+  return toLocalSidecarUrl('/local-api/validate-secret');
 }
 
 const defaultToggles: Record<RuntimeFeatureId, boolean> = {

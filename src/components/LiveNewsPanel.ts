@@ -343,7 +343,7 @@ export class LiveNewsPanel extends Panel {
     if (!entry) return undefined;
     const failedAt = this.hlsFailureCooldown.get(channelId);
     if (failedAt && Date.now() - failedAt < this.HLS_COOLDOWN_MS) return undefined;
-    return `http://127.0.0.1:${getLocalApiPort()}/api/hls-proxy?url=${encodeURIComponent(entry.url)}`;
+    return `http://127.0.0.1:${getLocalApiPort()}/local-api/hls-proxy?url=${encodeURIComponent(entry.url)}`;
   }
 
   private get embedOrigin(): string {
@@ -987,7 +987,7 @@ export class LiveNewsPanel extends Panel {
       mute: this.isMuted ? '1' : '0',
     });
     if (quality !== 'auto') params.set('vq', quality);
-    const embedUrl = `http://localhost:${getLocalApiPort()}/api/youtube-embed?${params.toString()}`;
+    const embedUrl = `http://localhost:${getLocalApiPort()}/local-api/youtube-embed?${params.toString()}`;
 
     if (renderToken !== this.desktopEmbedRenderToken) {
       return;

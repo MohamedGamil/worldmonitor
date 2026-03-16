@@ -113,6 +113,35 @@ export function getApiBaseUrl(): string {
   return `http://127.0.0.1:${getLocalApiPort()}`;
 }
 
+const LOCAL_ONLY_API_PREFIX = '/local-api/';
+const LEGACY_LOCAL_ONLY_API_PREFIX = '/api/local-';
+const LOCAL_ONLY_API_ALIASES: Record<string, string> = {
+  '/api/hls-proxy': '/local-api/hls-proxy',
+  '/api/youtube-embed': '/local-api/youtube-embed',
+};
+
+export function normalizeLocalOnlyApiPath(path: string): string {
+  if (!path.startsWith('/')) {
+    return path;
+  }
+
+  if (path.startsWith(LOCAL_ONLY_API_PREFIX)) {
+    return path;
+  }
+
+  if (path.startsWith(LEGACY_LOCAL_ONLY_API_PREFIX)) {
+    return path.replace(LEGACY_LOCAL_ONLY_API_PREFIX, LOCAL_ONLY_API_PREFIX);
+  }
+
+  return LOCAL_ONLY_API_ALIASES[path] ?? path;
+}
+
+export function toLocalSidecarUrl(path: string): string {
+  const normalizedPath = normalizeLocalOnlyApiPath(path);
+  const baseUrl = getApiBaseUrl();
+  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+}
+
 export function getRemoteApiBaseUrl(): string {
   const configuredRemoteBase = import.meta.env.VITE_TAURI_REMOTE_API_BASE_URL;
   if (configuredRemoteBase) {
@@ -437,9 +466,13 @@ export async function waitForSidecarReady(timeoutMs = 3000): Promise<boolean> {
 }
 
 function isLocalOnlyApiTarget(target: string): boolean {
-  // Security boundary: endpoints that can carry local secrets must use the
-  // `/api/local-*` prefix so cloud fallback is automatically blocked.
-  return target.startsWith('/api/local-');
+  // Security boundary: endpoints that can carry local secrets or require
+  // host-local capabilities must never fall back to the cloud.
+  return normalizeLocalOnlyApiPath(target).startsWith(LOCAL_ONLY_API_PREFIX);
+}
+
+function isInterceptedApiTarget(target: string): boolean {
+  return target.startsWith('/api/') || target.startsWith(LOCAL_ONLY_API_PREFIX);
 }
 
 function isKeyFreeApiTarget(target: string): boolean {
@@ -513,7 +546,7 @@ export function installRuntimeFetchPatch(): void {
     const target = getApiTargetFromRequestInput(input);
     const debug = localStorage.getItem('wm-debug-log') === '1';
 
-    if (!target?.startsWith('/api/')) {
+    if (!target || !isInterceptedApiTarget(target)) {
       if (debug) {
         const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
         console.log(`[fetch] passthrough → ${raw.slice(0, 120)}`);
@@ -544,7 +577,8 @@ export function installRuntimeFetchPatch(): void {
     }
     const localInit = { ...init, headers };
 
-    const localUrl = `${getApiBaseUrl()}${target}`;
+    const localTarget = normalizeLocalOnlyApiPath(target);
+    const localUrl = `${getApiBaseUrl()}${localTarget}`;
     if (debug) console.log(`[fetch] intercept → ${target}`);
     let allowCloudFallback = !isLocalOnlyApiTarget(target);
 

@@ -632,7 +632,7 @@ test('resolves packaged tauri resource layout under _up_/api', async () => {
 
 // ── Ollama env key allowlist + validation tests ──
 
-test('accepts OLLAMA_API_URL via /api/local-env-update', async () => {
+test('accepts OLLAMA_API_URL via /local-api/env-update', async () => {
   const localApi = await setupApiDir({});
 
   const app = await createLocalApiServer({
@@ -643,7 +643,7 @@ test('accepts OLLAMA_API_URL via /api/local-env-update', async () => {
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-env-update`, {
+    const response = await fetch(`http://127.0.0.1:${port}/local-api/env-update`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'OLLAMA_API_URL', value: 'http://127.0.0.1:11434' }),
@@ -713,7 +713,7 @@ test('rejects unknown key via /api/local-env-update', async () => {
   }
 });
 
-test('validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoint)', async () => {
+test('validates OLLAMA_API_URL via /local-api/validate-secret (reachable endpoint)', async () => {
   // Stand up a mock Ollama server that responds to /v1/models
   const mockOllama = createServer((req, res) => {
     if (req.url === '/v1/models') {
@@ -735,7 +735,7 @@ test('validates OLLAMA_API_URL via /api/local-validate-secret (reachable endpoin
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-validate-secret`, {
+    const response = await fetch(`http://127.0.0.1:${port}/local-api/validate-secret`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'OLLAMA_API_URL', value: `http://127.0.0.1:${ollamaPort}` }),
@@ -1078,7 +1078,7 @@ test('uses gzip compression when Brotli is unavailable but gzip is accepted', as
 
 // ── Security hardening tests ────────────────────────────────────────────
 
-test('rejects unauthenticated requests to /api/local-status when token is set', async () => {
+test('rejects unauthenticated requests to /local-api/status when token is set', async () => {
   const localApi = await setupApiDir({});
   const originalToken = process.env.LOCAL_API_TOKEN;
   process.env.LOCAL_API_TOKEN = 'security-test-token';
@@ -1091,13 +1091,13 @@ test('rejects unauthenticated requests to /api/local-status when token is set', 
   const { port } = await app.start();
 
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/api/local-status`);
+    const response = await fetch(`http://127.0.0.1:${port}/local-api/status`);
     assert.equal(response.status, 401);
     const body = await response.json();
     assert.equal(body.error, 'Unauthorized');
 
     // With token should succeed
-    const authed = await fetch(`http://127.0.0.1:${port}/api/local-status`, {
+    const authed = await fetch(`http://127.0.0.1:${port}/local-api/status`, {
       headers: { 'Authorization': 'Bearer security-test-token' },
     });
     assert.equal(authed.status, 200);
