@@ -9,6 +9,67 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.2] - 2026-03-17
+
+### Added
+
+- **Backend TypeScript service** — all server-side API logic migrated from legacy `code/api` into a new isolated `backend/` service
+- **Full API separation** — ownership matrix produced for every `frontend/api` route (`backend-owned`, `desktop-local-only`, `frontend-render-only`); all product `/api/*` routes now owned exclusively by `backend`; desktop sidecar refactored to local control-plane utilities only; web dev and production routing behavior preserved unchanged
+- **Globe loading overlay** — animated spinner with localized text hides the blank globe until earth textures complete loading; fades out once the 3D mesh first renders; overlay text uses `t('components.globe.loadingGlobe')` with RTL support
+- **Aircraft & vessel photos in map popups** — military flight popups fetch tail-specific photos from Planespotters.net (priority 1), with Wikipedia REST API fallback for aircraft type and named naval vessels; photos render at a user-friendly aspect ratio alongside popup metadata; lookup results cached in memory for the page lifetime
+- **Material Design v3** — M3 visual system implemented in pure CSS and vanilla TypeScript with no external libraries: OKLCH tonal palette, tonal surface elevation overlays, M3 typography scale, corner-radius shape tokens, state layer feedback (hover/pressed/focused/dragged), and motion easing/duration tokens; split across 8 CSS modules (`md3-palette.css`, `md3-roles.css`, `md3-typography.css`, `md3-shape.css`, `md3-elevation.css`, `md3-state.css`, `md3-motion.css`, `md3-components.css`) loaded via `base-layer.css`
+- **Virtual scrolling for News panel** — `VirtualList` (DOM-recycling fixed-height) and `WindowedList<T>` (generic windowed generic list) classes; `WindowedList` activates in `NewsPanel` above a configurable item threshold, eliminating layout thrashing on large feeds
+- **Lato as default sans-serif font-family** — set as first entry in `--font-sans` stack for all non-Arabic UI text; Arabic retains its own stack
+- **Sentry error tracking** — `@sentry/browser` initialized early in the bundle with noise filters for map renderer frames, stale DOM reference errors, and anonymous-only stack traces; disabled on localhost and in Tauri desktop builds
+
+### Fixed
+
+- **Map fullscreen mode — popups and country brief panel hidden** — map popups and the country brief panel are now correctly rendered and positioned when the map enters fullscreen mode
+- **Maps resize bug** — map container correctly handles resize events; no layout artifacts or blank areas after panel resizing
+- **UCDP conflict events not appearing** — upstream data-fetching issue resolved; UCDP events now render on the conflict map layer
+- **Iran attacks map layer returning no data** — data flow through endpoint and cache fixed; Iran event markers now appear correctly
+- **GlobeMap intermittent white sphere** — texture loading race condition resolved; globe no longer renders as a blank white sphere after initial load
+- **Frontend errors and warnings** — most frontend runtime errors and warnings identified and resolved
+
+### Changed
+
+- **Frontend converted to pure client bundle** — `frontend/api` and `frontend/server` legacy server-side directories removed after parity verification; Tauri sidecar refactored to expose only local-machine utilities; no API contract or call-site changes required in frontend components
+- **Self-hosted Redis Support** — Redis client with graceful fallback; cached endpoint behavior is unchanged
+- **Discord and Desktop download popups removed** — transient onboarding modals removed from UI
+- **Mobile app menu revised** — navigation structure and layout updated for better usability on small screens
+
+### Internationalization
+
+- **Map localizations updated** — continent, country, and region names fully localized across all 21 locales
+- **Arabic revisions** — all missing localizable text covered: labels, button states, popup fields, fallback strings
+- **Globe loading text localized** — `components.globe.loadingGlobe` key added to all 21 locale files with RTL-aware styling
+- **Live News Channel display names localized** in Arabic
+- **Panel titles with country names localized** across all 21 locales
+- **Country brief component labels and computed values localized** — hardcoded English strings replaced with `t()` calls throughout country brief panels
+- **Map tooltip and popup dynamic data localized** — military aircraft types, naval vessel types, and fallback labels (e.g., "Unknown") now use `t()` with `getLocalizedGeoName()` fallback instead of hardcoded strings
+- **Conflict zone names localized** in map popups and tooltips
+- **AI insights localized** — strategic posture, deduction, and country brief AI outputs now respond in the currently selected UI language
+- **News localization fixed** — localized news feed digest was not being applied; now correctly reflects the active locale
+- **RTL fix** — special letter-spacing styles removed in RTL mode; Arabic text is now readable without excessive character spacing
+
+### Performance
+
+- **Widget re-render memoization** — panel state updates no longer trigger full DOM rebuilds; only changed data causes targeted re-renders
+- **Viewport-based lazy loading** — `IntersectionObserver` defers widget initialization until they scroll into view; panels off-screen consume no resources
+- **Expensive UI operations cached** — computationally intensive calculations (map projections, icon generation, score aggregations) are now memoized for the lifecycle of each component
+- **Timer API hygiene** — `setInterval` and `setTimeout` usage replaced with more reliable browser scheduler APIs throughout the frontend
+
+### UI / Branding
+
+- **App branding** — logo, name, and visual identity applied consistently across all pages and the desktop app
+- **Map layer toggle icons** — custom SVG icons replace emoji throughout the layer list; consistent sizing and styling
+- **Map marker icons** — SVG icons replace emoji across all map layers for visual consistency and crisp rendering at all DPR levels
+- **Material Design v3 form elements** — inputs and selects styled to M3 specs with small rounded corners; consistent across all panels and settings pages
+- **Map UI components styled to M3** — tooltips, popups, and control overlays follow M3 elevation and shape conventions
+- **Logo and map container styling** updated to match the new design system
+
+---
+
 ## [0.1.1] - 2026-03-09
 
 ### Added
