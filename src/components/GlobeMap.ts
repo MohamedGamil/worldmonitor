@@ -437,6 +437,8 @@ export class GlobeMap {
   private hoverTooltipEl: HTMLElement | null = null;
   private loadingOverlayEl: HTMLElement | null = null;
   private loadingOverlayFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+  private spinToggleBtnEl: HTMLButtonElement | null = null;
+  private autoSpinEnabled = false;
 
   // Callbacks
   private onLayerChangeCb: ((layer: keyof MapLayers, enabled: boolean, source: 'user' | 'programmatic') => void) | null = null;
@@ -550,7 +552,7 @@ export class GlobeMap {
     // Orbit controls — match Sentinel's settings
     const controls = globe.controls() as GlobeControlsLike;
     this.controls = controls;
-    controls.autoRotate = !desktop;
+    controls.autoRotate = false;
     controls.autoRotateSpeed = 0.3;
     controls.enablePan = false;
     controls.enableZoom = true;
@@ -755,9 +757,10 @@ export class GlobeMap {
     };
     const scheduleResumeAutoRotate = () => {
       if (this.renderPaused) return;
+      if (!this.autoSpinEnabled) return;
       if (this.autoRotateTimer) clearTimeout(this.autoRotateTimer);
       this.autoRotateTimer = setTimeout(() => {
-        if (!this.renderPaused) controls.autoRotate = !desktop;
+        if (!this.renderPaused) controls.autoRotate = this.autoSpinEnabled;
       }, 60_000);
     };
 
@@ -1412,14 +1415,40 @@ export class GlobeMap {
         <button class="map-btn zoom-in"    title="Zoom in">+</button>
         <button class="map-btn zoom-out"   title="Zoom out">-</button>
         <button class="map-btn zoom-reset" title="Reset view">&#8962;</button>
+        <button class="map-btn spin-toggle" title="Enable auto-spin" aria-label="Enable auto-spin" aria-pressed="false">${svgIcon('globe', '#8899aa', 13)}</button>
       </div>`;
     this.container.appendChild(el);
+    this.spinToggleBtnEl = el.querySelector('.spin-toggle') as HTMLButtonElement | null;
+    this.updateSpinToggleButton();
     el.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains('zoom-in')) this.zoomInGlobe();
       else if (target.classList.contains('zoom-out')) this.zoomOutGlobe();
       else if (target.classList.contains('zoom-reset')) this.setView(this.currentView);
+      else if (target.classList.contains('spin-toggle') || target.closest('.spin-toggle')) this.toggleAutoSpin();
     });
+  }
+
+  private updateSpinToggleButton(): void {
+    if (!this.spinToggleBtnEl) return;
+    const enabled = this.autoSpinEnabled;
+    this.spinToggleBtnEl.classList.toggle('active', enabled);
+    this.spinToggleBtnEl.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+    this.spinToggleBtnEl.title = enabled ? 'Disable auto-spin' : 'Enable auto-spin';
+    this.spinToggleBtnEl.setAttribute('aria-label', this.spinToggleBtnEl.title);
+    this.spinToggleBtnEl.innerHTML = svgIcon('globe', enabled ? '#44aaff' : '#8899aa', 13);
+  }
+
+  private toggleAutoSpin(): void {
+    this.autoSpinEnabled = !this.autoSpinEnabled;
+    if (this.autoRotateTimer) {
+      clearTimeout(this.autoRotateTimer);
+      this.autoRotateTimer = null;
+    }
+    if (this.controls) {
+      this.controls.autoRotate = this.autoSpinEnabled && !this.renderPaused;
+    }
+    this.updateSpinToggleButton();
   }
 
   private zoomInGlobe(): void {
@@ -1972,7 +2001,7 @@ export class GlobeMap {
         this.controls.enableDamping = false;
       } else {
         if (this.controlsAutoRotateBeforePause !== null) {
-          this.controls.autoRotate = this.controlsAutoRotateBeforePause;
+          this.controls.autoRotate = this.controlsAutoRotateBeforePause && this.autoSpinEnabled;
         }
         if (this.controlsDampingBeforePause !== null) {
           this.controls.enableDamping = this.controlsDampingBeforePause;
@@ -1991,6 +2020,7 @@ export class GlobeMap {
       this.startAdaptiveQualityMonitor();
       this.applyRenderQuality();
     }
+    this.updateSpinToggleButton();
   }
   public updateHotspotActivity(_news: any[]): void { }
   public updateMilitaryForEscalation(_f: any[], _v: any[]): void { }
@@ -2639,6 +2669,7 @@ export class GlobeMap {
     this.debugOverlayEl?.remove();
     this.debugOverlayEl = null;
     this.layerTogglesEl = null;
+    this.spinToggleBtnEl = null;
     if (this.globe) {
       try { this.globe._destructor(); } catch { /* ignore */ }
       this.globe = null;
