@@ -352,6 +352,13 @@ export class GlobeMap {
   private workerStaticReady = false;
   private controlsAutoRotateBeforePause: boolean | null = null;
   private controlsDampingBeforePause: boolean | null = null;
+  private adaptiveQualityIntervalId: ReturnType<typeof setTimeout> | null = null;
+  private lastAdaptiveQualityBucket: 'far' | 'mid' | 'near' | null = null;
+  private lastAppliedPixelRatio: number | null = null;
+  private lastAppliedRenderWidth = 0;
+  private lastAppliedRenderHeight = 0;
+  private debugOverlayEl: HTMLElement | null = null;
+  private debugOverlayIntervalId: ReturnType<typeof setTimeout> | null = null;
 
   private initialized = false;
   private destroyed = false;
@@ -391,7 +398,7 @@ export class GlobeMap {
   private mineralMarkers: MineralMarker[] = [];
   private flightDelayMarkers: FlightDelayMarker[] = [];
   private aircraftPositionMarkers: AircraftPositionMarker[] = [];
-  private aircraftFetchTimer: ReturnType<typeof setInterval> | null = null;
+  private aircraftFetchTimer: ReturnType<typeof setTimeout> | null = null;
   private aircraftFetchSeq = 0;
   private newsLocationMarkers: NewsLocationMarker[] = [];
   private flashMarkers: FlashMarker[] = [];
@@ -501,6 +508,8 @@ export class GlobeMap {
       this.applyRenderQuality(scale);
       this.applyPerformanceProfile(resolvePerformanceProfile(scale));
     });
+
+    this.startAdaptiveQualityMonitor();
 
     // Initial sizing: use container dimensions, fall back to window if not yet laid out
     const initW = this.container.clientWidth || window.innerWidth;
@@ -617,17 +626,19 @@ export class GlobeMap {
         scene.add(this.innerGlow);
 
         // --- Procedural starfield ---
-        const starCount = 2000;
+        // Keep stars on a much larger shell than the globe radius (100)
+        // so they read as deep background space.
+        const starCount = 3300;
         const starPositions = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
         for (let i = 0; i < starCount; i++) {
-          const r = 50 + Math.random() * 50;
+          const r = 320 + Math.random() * 520;
           const theta = Math.random() * Math.PI * 2;
           const phi = Math.acos(2 * Math.random() - 1);
           starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
           starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
           starPositions[i * 3 + 2] = r * Math.cos(phi);
-          const brightness = 0.5 + Math.random() * 0.5;
+          const brightness = 0.68 + Math.random() * 0.32;
           starColors[i * 3] = brightness;
           starColors[i * 3 + 1] = brightness;
           starColors[i * 3 + 2] = brightness;
@@ -635,8 +646,19 @@ export class GlobeMap {
         const starGeo = new THREE.BufferGeometry();
         starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
         starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-        const starMat = new THREE.PointsMaterial({ size: 0.1, vertexColors: true, transparent: true });
+        const starMat = new THREE.PointsMaterial({
+          size: 0.20,
+          sizeAttenuation: true,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false,
+          depthTest: true,
+        });
         this.starField = new THREE.Points(starGeo, starMat);
+        // Draw stars first as background so the globe always appears in front.
+        this.starField.renderOrder = -100;
+        this.starField.frustumCulled = false;
         scene.add(this.starField);
 
         // --- Orbiting satellite sprites ---
@@ -709,7 +731,11 @@ export class GlobeMap {
 
     // Subscribe to texture changes
     this.unsubscribeGlobeTexture = subscribeGlobeTextureChange((texture) => {
-      if (this.globe) this.globe.globeImageUrl(GLOBE_TEXTURE_URLS[texture]);
+      if (this.globe) {
+        this.globe.globeImageUrl(GLOBE_TEXTURE_URLS[texture]);
+        // Re-tune sampling after texture swaps to keep quality consistent.
+        this.applyAdaptiveTextureSampling();
+      }
     });
 
     // Pause auto-rotate on user interaction; resume after 60 s idle (like Sentinel)
@@ -844,6 +870,7 @@ export class GlobeMap {
     // Loading overlay must be appended AFTER all globe.gl and UI elements so it is
     // the last DOM child — guaranteeing it sits on top in paint order.
     this.createLoadingOverlay();
+    this.createDebugOverlay();
 
     // Load static datasets (hotspots + conflict zones loaded synchronously;
     // remaining static layers arrive asynchronously from globe-data.worker)
@@ -1811,6 +1838,7 @@ export class GlobeMap {
     if (!this.globe) return;
     const pov = GlobeMap.VIEW_POVS[view] ?? GlobeMap.VIEW_POVS.global;
     this.globe.pointOfView(pov, 1200);
+    this.applyRenderQuality();
   }
 
   public setCenter(lat: number, lon: number, zoom?: number): void {
@@ -1828,6 +1856,7 @@ export class GlobeMap {
       else altitude = 1.5;
     }
     this.globe.pointOfView({ lat, lng: lon, altitude }, 1200);
+    this.applyRenderQuality();
   }
 
   public getCenter(): { lat: number; lon: number } | null {
@@ -1897,6 +1926,10 @@ export class GlobeMap {
         clearTimeout(this.autoRotateTimer);
         this.autoRotateTimer = null;
       }
+      if (this.adaptiveQualityIntervalId) {
+        clearTimeout(this.adaptiveQualityIntervalId);
+        this.adaptiveQualityIntervalId = null;
+      }
     }
 
     if (this.controls) {
@@ -1920,6 +1953,11 @@ export class GlobeMap {
     if (!paused && this.pendingFlushWhilePaused) {
       this.pendingFlushWhilePaused = false;
       this.flushMarkers();
+    }
+
+    if (!paused) {
+      this.startAdaptiveQualityMonitor();
+      this.applyRenderQuality();
     }
   }
   public updateHotspotActivity(_news: any[]): void { }
@@ -2100,12 +2138,11 @@ export class GlobeMap {
   private manageAircraftTimer(enabled: boolean): void {
     if (enabled) {
       if (!this.aircraftFetchTimer) {
-        this.fetchViewportAircraft(); // immediate fetch on enable
-        this.aircraftFetchTimer = setInterval(() => this.fetchViewportAircraft(), 120_000);
+        this.scheduleAircraftFetch(0); // immediate fetch on enable
       }
     } else {
       if (this.aircraftFetchTimer) {
-        clearInterval(this.aircraftFetchTimer);
+        clearTimeout(this.aircraftFetchTimer);
         this.aircraftFetchTimer = null;
       }
       if (this.aircraftPositionMarkers.length > 0) {
@@ -2115,7 +2152,20 @@ export class GlobeMap {
     }
   }
 
-  private fetchViewportAircraft(): void {
+  private scheduleAircraftFetch(delayMs: number): void {
+    if (this.destroyed || !this.layers.flights) return;
+    if (this.aircraftFetchTimer) return;
+
+    this.aircraftFetchTimer = setTimeout(async () => {
+      this.aircraftFetchTimer = null;
+      if (this.destroyed || !this.layers.flights) return;
+
+      await this.fetchViewportAircraft();
+      this.scheduleAircraftFetch(120_000);
+    }, Math.max(0, delayMs));
+  }
+
+  private async fetchViewportAircraft(): Promise<void> {
     if (!this.globe || !this.layers.flights || this.destroyed) return;
     const pov = this.globe.pointOfView() as { lat: number; lng: number; altitude: number };
     const alt = pov?.altitude ?? 1.5;
@@ -2136,14 +2186,13 @@ export class GlobeMap {
     const swLon = Math.max(-180, lng - degSpan);
     const neLon = Math.min(180, lng + degSpan);
     const seq = ++this.aircraftFetchSeq;
-    fetchAircraftPositions({ swLat, swLon, neLat, neLon })
-      .then(positions => {
-        if (seq !== this.aircraftFetchSeq || this.destroyed) return;
-        this.setAircraftPositions(positions);
-      })
-      .catch(err => {
-        if (import.meta.env.DEV) console.warn('[GlobeMap] aircraft fetch error', err);
-      });
+    try {
+      const positions = await fetchAircraftPositions({ swLat, swLon, neLat, neLon });
+      if (seq !== this.aircraftFetchSeq || this.destroyed) return;
+      this.setAircraftPositions(positions);
+    } catch (err) {
+      if (import.meta.env.DEV) console.warn('[GlobeMap] aircraft fetch error', err);
+    }
   }
 
   public setNewsLocations(data: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }>): void {
@@ -2279,15 +2328,155 @@ export class GlobeMap {
     if (!this.globe) return;
     try {
       const desktop = isDesktopRuntime();
-      const pr = desktop
+      const basePr = desktop
         ? Math.min(resolveGlobePixelRatio(scale ?? getGlobeRenderScale()), 1.25)
         : resolveGlobePixelRatio(scale ?? getGlobeRenderScale());
+      const altitude = this.globe.pointOfView()?.altitude ?? 1.2;
+      const adaptivePr = this.getAdaptivePixelRatio(basePr, altitude, desktop);
       const renderer = this.globe.renderer();
-      renderer.setPixelRatio(pr);
-      const w = (width ?? this.container.clientWidth) || window.innerWidth;
-      const h = (height ?? this.container.clientHeight) || window.innerHeight;
-      if (w > 0 && h > 0) this.globe.width(w).height(h);
+      if (this.lastAppliedPixelRatio !== adaptivePr) {
+        renderer.setPixelRatio(adaptivePr);
+        this.lastAppliedPixelRatio = adaptivePr;
+      }
+      this.applyAdaptiveTextureSampling(altitude);
+
+      const shouldApplySize = width !== undefined || height !== undefined || this.lastAppliedRenderWidth === 0 || this.lastAppliedRenderHeight === 0;
+      if (shouldApplySize) {
+        const w = (width ?? this.container.clientWidth) || window.innerWidth;
+        const h = (height ?? this.container.clientHeight) || window.innerHeight;
+        if (w > 0 && h > 0 && (w !== this.lastAppliedRenderWidth || h !== this.lastAppliedRenderHeight)) {
+          this.globe.width(w).height(h);
+          this.lastAppliedRenderWidth = w;
+          this.lastAppliedRenderHeight = h;
+        }
+      }
+      this.updateDebugOverlay();
     } catch { /* best-effort */ }
+  }
+
+  private createDebugOverlay(): void {
+    if (!import.meta.env.DEV || this.debugOverlayEl || this.destroyed) return;
+
+    const el = document.createElement('div');
+    el.className = 'globe-debug-overlay';
+    el.style.cssText = [
+      'position:absolute',
+      'right:10px',
+      'bottom:10px',
+      'z-index:10030',
+      'pointer-events:none',
+      'font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace',
+      'color:#d9ecff',
+      'background:rgba(7,12,18,0.78)',
+      'border:1px solid rgba(90,145,205,0.45)',
+      'border-radius:6px',
+      'padding:8px 10px',
+      'white-space:pre',
+      'backdrop-filter:blur(2px)',
+    ].join(';');
+
+    this.container.appendChild(el);
+    this.debugOverlayEl = el;
+    this.updateDebugOverlay();
+
+    this.scheduleDebugOverlayUpdate();
+  }
+
+  private scheduleDebugOverlayUpdate(): void {
+    if (!import.meta.env.DEV || this.destroyed || !this.debugOverlayEl) return;
+    if (this.debugOverlayIntervalId) return;
+
+    this.debugOverlayIntervalId = setTimeout(() => {
+      this.debugOverlayIntervalId = null;
+      this.updateDebugOverlay();
+      this.scheduleDebugOverlayUpdate();
+    }, 500);
+  }
+
+  private updateDebugOverlay(): void {
+    if (!import.meta.env.DEV || !this.debugOverlayEl || !this.globe) return;
+
+    const pov = this.globe.pointOfView();
+    const altitude = pov?.altitude ?? 1.2;
+    const bucket = this.getAdaptiveQualityBucket(altitude);
+    const material = this.globe.globeMaterial() as { map?: { anisotropy?: number } } | null;
+    const anisotropy = material?.map?.anisotropy ?? 0;
+    const pixelRatio = this.lastAppliedPixelRatio ?? 0;
+    const texture = getGlobeTexture();
+
+    this.debugOverlayEl.textContent = [
+      'Globe DEV Quality',
+      `texture: ${texture}`,
+      `alt: ${altitude.toFixed(3)} (${bucket})`,
+      `pixelRatio: ${pixelRatio.toFixed(2)} (device ${window.devicePixelRatio.toFixed(2)})`,
+      `anisotropy: ${anisotropy}`,
+      `size: ${this.lastAppliedRenderWidth}x${this.lastAppliedRenderHeight}`,
+      `paused: ${this.renderPaused ? 'yes' : 'no'}`,
+    ].join('\n');
+  }
+
+  private getAdaptivePixelRatio(basePr: number, altitude: number, desktop: boolean): number {
+    const maxPr = desktop ? 1.25 : 1.5;
+    const minPr = desktop ? 1 : 1;
+    let multiplier = 1;
+
+    // Boost close-up rendering where texture detail matters most.
+    if (altitude <= 0.22) multiplier = 1.15;
+    else if (altitude <= 0.55) multiplier = 1.08;
+    else if (altitude >= 2.2) multiplier = 0.92;
+    else if (altitude >= 1.6) multiplier = 0.96;
+
+    const nextPr = basePr * multiplier;
+    return Math.max(minPr, Math.min(maxPr, nextPr));
+  }
+
+  private getAdaptiveQualityBucket(altitude: number): 'far' | 'mid' | 'near' {
+    if (altitude <= 0.55) return 'near';
+    if (altitude <= 1.4) return 'mid';
+    return 'far';
+  }
+
+  private applyAdaptiveTextureSampling(altitude?: number): void {
+    if (!this.globe) return;
+    try {
+      const material = this.globe.globeMaterial() as { map?: { anisotropy?: number; needsUpdate?: boolean; generateMipmaps?: boolean } } | null;
+      const map = material?.map;
+      if (!map) return;
+
+      const effectiveAltitude = altitude ?? (this.globe.pointOfView()?.altitude ?? 1.2);
+      const bucket = this.getAdaptiveQualityBucket(effectiveAltitude);
+      const maxAnisotropy = Math.max(1, this.globe.renderer().capabilities.getMaxAnisotropy());
+
+      let targetAnisotropy = 2;
+      if (bucket === 'near') targetAnisotropy = Math.min(maxAnisotropy, 8);
+      else if (bucket === 'mid') targetAnisotropy = Math.min(maxAnisotropy, 4);
+
+      if (map.generateMipmaps !== true) {
+        map.generateMipmaps = true;
+        map.needsUpdate = true;
+      }
+      if (map.anisotropy !== targetAnisotropy) {
+        map.anisotropy = targetAnisotropy;
+        map.needsUpdate = true;
+      }
+    } catch {
+      // Best effort only; texture internals vary across renderers.
+    }
+  }
+
+  private startAdaptiveQualityMonitor(): void {
+    if (this.adaptiveQualityIntervalId || this.destroyed) return;
+    this.adaptiveQualityIntervalId = setTimeout(() => {
+      this.adaptiveQualityIntervalId = null;
+      if (!this.globe || this.destroyed || this.renderPaused) return;
+      const altitude = this.globe.pointOfView()?.altitude ?? 1.2;
+      const bucket = this.getAdaptiveQualityBucket(altitude);
+      if (bucket !== this.lastAdaptiveQualityBucket) {
+        this.lastAdaptiveQualityBucket = bucket;
+        this.applyRenderQuality();
+      }
+      this.startAdaptiveQualityMonitor();
+    }, 300);
   }
 
   private applyPerformanceProfile(profile: GlobePerformanceProfile): void {
@@ -2355,7 +2544,9 @@ export class GlobeMap {
     this.satOrbits = [];
     if (this.flushTimer) { clearTimeout(this.flushTimer); this.flushTimer = null; }
     if (this.flushMaxTimer) { clearTimeout(this.flushMaxTimer); this.flushMaxTimer = null; }
-    if (this.aircraftFetchTimer) { clearInterval(this.aircraftFetchTimer); this.aircraftFetchTimer = null; }
+    if (this.aircraftFetchTimer) { clearTimeout(this.aircraftFetchTimer); this.aircraftFetchTimer = null; }
+    if (this.adaptiveQualityIntervalId) { clearTimeout(this.adaptiveQualityIntervalId); this.adaptiveQualityIntervalId = null; }
+    if (this.debugOverlayIntervalId) { clearTimeout(this.debugOverlayIntervalId); this.debugOverlayIntervalId = null; }
     if (this.autoRotateTimer) clearTimeout(this.autoRotateTimer);
     if (this.globeDataWorker) {
       this.globeDataWorker.terminate();
@@ -2375,6 +2566,12 @@ export class GlobeMap {
     this.controls = null;
     this.controlsAutoRotateBeforePause = null;
     this.controlsDampingBeforePause = null;
+    this.lastAdaptiveQualityBucket = null;
+    this.lastAppliedPixelRatio = null;
+    this.lastAppliedRenderWidth = 0;
+    this.lastAppliedRenderHeight = 0;
+    this.debugOverlayEl?.remove();
+    this.debugOverlayEl = null;
     this.layerTogglesEl = null;
     if (this.globe) {
       try { this.globe._destructor(); } catch { /* ignore */ }

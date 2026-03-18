@@ -1,5 +1,5 @@
 export type GlobeRenderScale = 'auto' | '1' | '1.5' | '2' | '3';
-export type GlobeTexture = 'topographic' | 'blue-marble';
+export type GlobeTexture = 'topographic' | 'blue-marble' | 'clear';
 
 const STORAGE_KEY = 'wm-globe-render-scale';
 const EVENT_NAME = 'wm-globe-render-scale-changed';
@@ -77,19 +77,23 @@ export function resolvePerformanceProfile(scale: GlobeRenderScale): GlobePerform
 export const GLOBE_TEXTURE_OPTIONS: { value: GlobeTexture; label: string }[] = [
   { value: 'topographic', label: 'Topographic' },
   { value: 'blue-marble', label: 'Blue Marble (NASA)' },
+  { value: 'clear', label: 'Clear' },
 ];
 
 export const GLOBE_TEXTURE_URLS: Record<GlobeTexture, string> = {
   'topographic': '/textures/earth-topo-bathy.jpg',
   'blue-marble': '/textures/earth-blue-marble.jpg',
+  'clear': '/textures/earth-texture-4k.webp',
 };
+
+export const GLOBE_DEFAULT_TEXTURE: GlobeTexture = 'clear';
 
 export function getGlobeTexture(): GlobeTexture {
   try {
     const raw = localStorage.getItem(TEXTURE_STORAGE_KEY);
-    if (raw === 'topographic' || raw === 'blue-marble') return raw;
+    if (raw === 'topographic' || raw === 'blue-marble' || raw === 'clear') return raw;
   } catch { /* ignore */ }
-  return 'topographic';
+  return GLOBE_DEFAULT_TEXTURE;
 }
 
 export function setGlobeTexture(texture: GlobeTexture): void {
