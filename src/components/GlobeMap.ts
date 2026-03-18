@@ -264,6 +264,7 @@ interface NewsLocationMarker extends BaseMarker {
   id: string;
   title: string;
   threatLevel: string;
+  timestamp?: Date;
 }
 interface FlashMarker extends BaseMarker {
   _kind: 'flash';
@@ -335,6 +336,9 @@ interface GlobeControlsLike {
 }
 
 export class GlobeMap {
+  private static readonly MAX_GLOBE_ZOOM_LEVEL = 4;
+  private static readonly MIN_ALTITUDE_FOR_MAX_ZOOM = 0.5;
+
   private container: HTMLElement;
   private globe: GlobeInstance | null = null;
   private unsubscribeGlobeQuality: (() => void) | null = null;
@@ -547,7 +551,8 @@ export class GlobeMap {
     controls.enablePan = false;
     controls.enableZoom = true;
     controls.zoomSpeed = 1.4;
-    controls.minDistance = 101;
+    // globe.gl radius is ~100 world units; distance 150 ~= altitude 0.5 (zoom level 4 cap)
+    controls.minDistance = 150;
     controls.maxDistance = 600;
     controls.enableDamping = !desktop;
 
@@ -1231,6 +1236,7 @@ export class GlobeMap {
       case 'repairShip':    this.popup.show({ type: 'repair-ship', data: d as any, x, y }); break;
       case 'aisDisruption': this.popup.show({ type: 'ais', data: d as any, x, y }); break;
       case 'gpsjam':        this.popup.show({ type: 'gpsJamming', data: { h3: d.id, lat: d._lat, lon: d._lng, level: d.level, pct: d.pct, good: 0, bad: 0, total: 0 } as any, x, y }); break;
+      case 'newsLocation':  this.popup.show({ type: 'newsLocation', data: { title: d.title, lat: d._lat, lon: d._lng, threatLevel: d.threatLevel, timestamp: d.timestamp }, x, y }); break;
       case 'tech':          this.popup.show({ type: 'techEvent', data: d as any, x, y }); break;
       case 'aircraftPos':   this.popup.show({ type: 'aircraft', data: d as any, x, y }); break;
       case 'ucdp': {
@@ -1329,7 +1335,7 @@ export class GlobeMap {
     this.hoverTooltipEl = null;
   }
 
-  /** Minimal inline tooltip for marker kinds that lack a MapPopup template (fire, ucdp, displacement, climate, newsLocation). */
+  /** Minimal inline tooltip for marker kinds that lack a MapPopup template (fire, ucdp, displacement, climate). */
   private showFallbackTooltip(d: GlobeMarker, e: MouseEvent): void {
     let html = '';
     if (d._kind === 'fire') {
@@ -1406,7 +1412,7 @@ export class GlobeMap {
     if (!this.globe) return;
     const pov = this.globe.pointOfView();
     if (!pov) return;
-    const alt = Math.max(0.05, (pov.altitude ?? 1.8) * 0.6);
+    const alt = this.clampAltitudeForMaxZoom((pov.altitude ?? 1.8) * 0.6);
     this.globe.pointOfView({ lat: pov.lat, lng: pov.lng, altitude: alt }, 500);
   }
 
@@ -1844,18 +1850,15 @@ export class GlobeMap {
   public setCenter(lat: number, lon: number, zoom?: number): void {
     if (!this.globe) return;
     // Map deck.gl zoom levels → globe.gl altitude
-    // deck.gl: 2=world, 3=continent, 4=country, 5=region, 6+=city
-    // globe.gl altitude: 1.8=full globe, 0.6=country, 0.15=city
+    // deck.gl: 2=world, 3=continent, 4=country (max zoom for globe mode)
+    // globe.gl altitude: 1.8=full globe, 0.5=country
     let altitude = 1.2;
     if (zoom !== undefined) {
-      if (zoom >= 7) altitude = 0.08;
-      else if (zoom >= 6) altitude = 0.15;
-      else if (zoom >= 5) altitude = 0.3;
-      else if (zoom >= 4) altitude = 0.5;
+      if (zoom >= GlobeMap.MAX_GLOBE_ZOOM_LEVEL) altitude = 0.5;
       else if (zoom >= 3) altitude = 0.8;
       else altitude = 1.5;
     }
-    this.globe.pointOfView({ lat, lng: lon, altitude }, 1200);
+    this.globe.pointOfView({ lat, lng: lon, altitude: this.clampAltitudeForMaxZoom(altitude) }, 1200);
     this.applyRenderQuality();
   }
 
@@ -2009,7 +2012,7 @@ export class GlobeMap {
     const span = Math.max(maxLat - minLat, maxLon - minLon);
     // Map geographic span → altitude: large country (Russia ~170°) vs small (Luxembourg ~0.5°)
     const altitude = span > 60 ? 1.0 : span > 20 ? 0.7 : span > 8 ? 0.45 : span > 3 ? 0.25 : 0.12;
-    this.globe.pointOfView({ lat, lng, altitude }, 1200);
+    this.globe.pointOfView({ lat, lng, altitude: this.clampAltitudeForMaxZoom(altitude) }, 1200);
   }
   public highlightCountry(_code: string): void { }
   public clearCountryHighlight(): void { }
@@ -2205,6 +2208,7 @@ export class GlobeMap {
         id: `news-${i}-${d.title.slice(0, 20)}`,
         title: d.title,
         threatLevel: d.threatLevel ?? 'info',
+        timestamp: d.timestamp,
       }));
     this.flushMarkers();
   }
@@ -2398,6 +2402,7 @@ export class GlobeMap {
 
     const pov = this.globe.pointOfView();
     const altitude = pov?.altitude ?? 1.2;
+    const zoomLevel = this.getApproximateZoomLevel(altitude);
     const bucket = this.getAdaptiveQualityBucket(altitude);
     const material = this.globe.globeMaterial() as { map?: { anisotropy?: number } } | null;
     const anisotropy = material?.map?.anisotropy ?? 0;
@@ -2407,6 +2412,7 @@ export class GlobeMap {
     this.debugOverlayEl.textContent = [
       'Globe DEV Quality',
       `texture: ${texture}`,
+      `zoom: ${zoomLevel.toFixed(1)}`,
       `alt: ${altitude.toFixed(3)} (${bucket})`,
       `pixelRatio: ${pixelRatio.toFixed(2)} (device ${window.devicePixelRatio.toFixed(2)})`,
       `anisotropy: ${anisotropy}`,
@@ -2415,14 +2421,44 @@ export class GlobeMap {
     ].join('\n');
   }
 
+  private getApproximateZoomLevel(altitude: number): number {
+    const zoomStops = [
+      { altitude: 1.8, zoom: 1 },
+      { altitude: 1.5, zoom: 2 },
+      { altitude: 0.8, zoom: 3 },
+      { altitude: 0.5, zoom: 4 },
+    ];
+    const firstStop = zoomStops[0]!;
+    const lastStop = zoomStops[zoomStops.length - 1]!;
+
+    if (altitude >= firstStop.altitude) return firstStop.zoom;
+    if (altitude <= lastStop.altitude) return lastStop.zoom;
+
+    for (let index = 0; index < zoomStops.length - 1; index += 1) {
+      const current = zoomStops[index]!;
+      const next = zoomStops[index + 1]!;
+
+      if (altitude <= current.altitude && altitude >= next.altitude) {
+        const progress = (current.altitude - altitude) / (current.altitude - next.altitude);
+        return current.zoom + progress * (next.zoom - current.zoom);
+      }
+    }
+
+    return GlobeMap.MAX_GLOBE_ZOOM_LEVEL;
+  }
+
+  private clampAltitudeForMaxZoom(altitude: number): number {
+    return Math.max(GlobeMap.MIN_ALTITUDE_FOR_MAX_ZOOM, altitude);
+  }
+
   private getAdaptivePixelRatio(basePr: number, altitude: number, desktop: boolean): number {
-    const maxPr = desktop ? 1.25 : 1.5;
+    const maxPr = desktop ? 1.5 : 1.5;
     const minPr = desktop ? 1 : 1;
     let multiplier = 1;
 
     // Boost close-up rendering where texture detail matters most.
-    if (altitude <= 0.22) multiplier = 1.15;
-    else if (altitude <= 0.55) multiplier = 1.08;
+    if (altitude <= 0.55) multiplier = 1.2;
+    else if (altitude <= 0.8) multiplier = 1.1;
     else if (altitude >= 2.2) multiplier = 0.92;
     else if (altitude >= 1.6) multiplier = 0.96;
 
@@ -2448,7 +2484,7 @@ export class GlobeMap {
       const maxAnisotropy = Math.max(1, this.globe.renderer().capabilities.getMaxAnisotropy());
 
       let targetAnisotropy = 2;
-      if (bucket === 'near') targetAnisotropy = Math.min(maxAnisotropy, 8);
+      if (bucket === 'near') targetAnisotropy = Math.min(maxAnisotropy, 16);
       else if (bucket === 'mid') targetAnisotropy = Math.min(maxAnisotropy, 4);
 
       if (map.generateMipmaps !== true) {

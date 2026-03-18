@@ -16,7 +16,7 @@ import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot
 import { getCableHealthRecord } from '@/services/cable-health';
 import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle, fetchPlanespottersImage } from '@/services/military-images';
 
-export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'gpsJamming' | 'ucdpEvent';
+export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent';
 interface TechEventPopupData {
   id: string;
   title: string;
@@ -72,6 +72,14 @@ interface IranEventPopupData {
   timestamp: string | number;
   severity: string;
   relatedEvents?: IranEventPopupData[];
+}
+
+interface NewsLocationPopupData {
+  title: string;
+  lat: number;
+  lon: number;
+  threatLevel: string;
+  timestamp?: Date | string | number;
 }
 
 interface UcdpEventPopupData {
@@ -161,7 +169,7 @@ interface DatacenterClusterData {
 
 interface PopupData {
   type: PopupType;
-  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | GpsJammingPopupData;
+  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData;
   relatedNews?: NewsItem[];
   x: number;
   y: number;
@@ -558,6 +566,8 @@ export class MapPopup {
         return this.renderCommodityHubPopup(data.data as CommodityHubPopupData);
       case 'iranEvent':
         return this.renderIranEventPopup(data.data as IranEventPopupData);
+      case 'newsLocation':
+        return this.renderNewsLocationPopup(data.data as NewsLocationPopupData);
       case 'gpsJamming':
         return this.renderGpsJammingPopup(data.data as GpsJammingPopupData);
       case 'ucdpEvent':
@@ -2863,6 +2873,44 @@ export class MapPopup {
     if (v === 'high') return 'high';
     if (v === 'medium') return 'medium';
     return 'low';
+  }
+
+  private normalizeNewsSeverity(level: string): 'high' | 'medium' | 'low' {
+    const normalized = String(level || '').trim().toLowerCase();
+    if (normalized === 'critical' || normalized === 'high') return 'high';
+    if (normalized === 'elevated' || normalized === 'medium') return 'medium';
+    return 'low';
+  }
+
+  private renderNewsLocationPopup(item: NewsLocationPopupData): string {
+    const severity = this.normalizeNewsSeverity(item.threatLevel);
+    const timeAgo = item.timestamp ? this.getTimeAgo(new Date(item.timestamp)) : '';
+    const severityLabel = t(`popups.severities.${severity}`) || item.threatLevel.toUpperCase();
+
+    return `
+      <div class="popup-header iranEvent ${severity}">
+        <span class="popup-title">${svgIcon('news', '#aaaaaa', 14)} ${escapeHtml(t('components.deckgl.tooltip.news'))}</span>
+        <span class="popup-badge ${severity}">${escapeHtml(severityLabel)}</span>
+        <button class="popup-close" aria-label="Close">×</button>
+      </div>
+      <div class="popup-body">
+        <p class="popup-description">${escapeHtml(item.title)}</p>
+        <div class="popup-stats">
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.location')}</span>
+            <span class="stat-value">${item.lat.toFixed(2)}°, ${item.lon.toFixed(2)}°</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.severity')}</span>
+            <span class="stat-value">${escapeHtml(item.threatLevel.toUpperCase())}</span>
+          </div>
+          ${timeAgo ? `<div class="popup-stat">
+            <span class="stat-label">${t('popups.time')}</span>
+            <span class="stat-value">${escapeHtml(timeAgo)}</span>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
   }
 
   private renderIranEventPopup(event: IranEventPopupData): string {

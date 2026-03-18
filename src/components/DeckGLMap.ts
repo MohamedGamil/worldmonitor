@@ -3520,6 +3520,7 @@ export class DeckGLMap {
       'outages-layer': 'outage',
       'cyber-threats-layer': 'cyberThreat',
       'iran-events-layer': 'iranEvent',
+      'news-locations-layer': 'newsLocation',
       'protests-layer': 'protest',
       'military-flights-layer': 'militaryFlight',
       'military-carriers-layer': 'militaryVessel',
