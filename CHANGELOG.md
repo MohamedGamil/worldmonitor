@@ -14,16 +14,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - **Globe DEV quality overlay** — development builds now show a live GlobeMap debug HUD with current texture, altitude bucket, effective pixel ratio, anisotropy, render size, and paused state to make globe rendering tuning observable during zoom and resize testing
+- **News marker click popups in both map modes** — news location markers now support full map popups on click in both DeckGL and Globe renderers, while preserving existing hover tooltips for quick scanning
+- **Globe DEV overlay zoom telemetry** — GlobeMap development overlay now includes a derived zoom-level value, making camera-depth debugging easier alongside altitude and sampling metrics
 
 ### Fixed
 
 - **Globe starfield visibility** — background stars are now significantly more visible, distributed on a much larger shell behind the planet, and configured so the Earth sphere always remains visually in the foreground
 - **Globe background depth** — starfield rendering order and depth behavior were adjusted to keep the space backdrop behind the globe at all times, improving the depth effect without competing with Earth surface rendering
+- **Globe zoom overreach and soft close-up detail** — globe camera depth is now capped at zoom level 4 equivalent across controls and programmatic camera moves, preventing over-zoom states that made surface texture appear soft
 
 ### Performance
 
 - **Adaptive globe texture quality** — GlobeMap now adjusts effective render pixel ratio and texture anisotropy by zoom altitude, keeping Earth textures sharper when zoomed in while reducing unnecessary GPU cost when zoomed out
 - **Recursive timer scheduling in GlobeMap** — repeating GlobeMap loops for adaptive quality checks, aircraft polling, and the DEV debug overlay now use recursive `setTimeout` scheduling instead of `setInterval`, avoiding overlapping work and improving lifecycle control during pause/resume and teardown
+- **Near-zoom texture sharpening pass** — close-range GlobeMap sampling was tuned with stronger near-tier pixel-ratio scaling and higher anisotropy targets (up to device capability) to improve texture crispness at the new zoom cap
 
 ---
 
