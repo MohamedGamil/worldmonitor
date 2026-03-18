@@ -9618,7 +9618,7 @@ a.prediction-link:hover {
   background: transparent;
   border: 0 solid;
   border-radius: 4px;
-  padding: 2px 8px;
+  padding: 2px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -9628,17 +9628,24 @@ a.prediction-link:hover {
   border-color: var(--border-strong);
 }
 
+.pizzint-toggle-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 5px;
+  background: var(--text-ghost);
+  color: var(--accent);
+  border-radius: 3px;
+}
+
 .pizzint-icon {
-  font-size: 14px;
+  /* padding-top: 4px; */
 }
 
 .pizzint-defcon {
   font-size: 10px;
   font-weight: bold;
-  padding: 2px 5px;
-  border-radius: 3px;
-  background: var(--text-ghost);
-  color: var(--accent);
 }
 
 .pizzint-score {
@@ -9742,32 +9749,32 @@ a.prediction-link:hover {
 
 .pizzint-location-status.spike {
   background: var(--defcon-1);
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .pizzint-location-status.high {
   background: var(--defcon-2);
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .pizzint-location-status.elevated {
   background: var(--defcon-3);
-  color: var(--bg);
+  color: var(--bg) !important;
 }
 
 .pizzint-location-status.nominal {
   background: var(--defcon-4);
-  color: var(--accent);
+  color: var(--accent) !important;
 }
 
 .pizzint-location-status.quiet {
   background: var(--status-live);
-  color: var(--bg);
+  color: var(--bg) !important;
 }
 
 .pizzint-location-status.closed {
   background: var(--text-ghost);
-  color: var(--text-dim);
+  color: var(--text-dim) !important;
 }
 
 .pizzint-tensions {

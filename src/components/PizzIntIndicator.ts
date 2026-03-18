@@ -21,7 +21,7 @@ export class PizzIntIndicator {
   constructor() {
     this.sirenIcon = document.createElement('span');
     this.sirenIcon.className = 'pizzint-icon';
-    this.sirenIcon.innerHTML = svgIcon('siren', '#888888', 16);
+    this.sirenIcon.innerHTML = svgIcon('siren', 'currentColor', 16);
 
     const panel = h('div', { className: 'pizzint-panel hidden' },
       h('div', { className: 'pizzint-header' },
@@ -54,9 +54,12 @@ export class PizzIntIndicator {
         title: t('components.pizzint.title'),
         onClick: () => { this.isExpanded = !this.isExpanded; panel.classList.toggle('hidden', !this.isExpanded); },
       },
-        this.sirenIcon,
-        h('span', { className: 'pizzint-defcon' }, '--'),
-        h('span', { className: 'pizzint-score' }, '--%'),
+        h('span', { className: 'pizzint-toggle-badge' },
+          this.sirenIcon,
+          h('span', { className: 'pizzint-defcon' }, ''),
+        ),
+        // this.sirenIcon,
+        // h('span', { className: 'pizzint-score' }, '--%'),
       ),
       panel,
     );
@@ -76,19 +79,20 @@ export class PizzIntIndicator {
   private render(): void {
     if (!this.status) return;
 
+    const badgeEl = this.element.querySelector('.pizzint-toggle-badge') as HTMLElement;
     const defconEl = this.element.querySelector('.pizzint-defcon') as HTMLElement;
-    const scoreEl = this.element.querySelector('.pizzint-score') as HTMLElement;
+    // const scoreEl = this.element.querySelector('.pizzint-score') as HTMLElement;
     const labelEl = this.element.querySelector('.pizzint-defcon-label') as HTMLElement;
     const locationsEl = this.element.querySelector('.pizzint-locations') as HTMLElement;
     const updatedEl = this.element.querySelector('.pizzint-updated') as HTMLElement;
 
     const color = DEFCON_COLORS[this.status.defconLevel] || '#888888';
-    this.sirenIcon.innerHTML = svgIcon('siren', color, 16);
+    // this.sirenIcon.innerHTML = svgIcon('siren', color, 16);
     defconEl.textContent = t('components.pizzint.defcon', { level: String(this.status.defconLevel) });
-    defconEl.style.background = color;
-    defconEl.style.color = this.status.defconLevel <= 3 ? '#000' : '#fff';
+    badgeEl.style.background = color;
+    badgeEl.style.color = this.status.defconLevel <= 3 ? '#000' : '#fff';
 
-    scoreEl.textContent = `${this.status.aggregateActivity}%`;
+    // scoreEl.textContent = `${this.status.aggregateActivity}%`;
     labelEl.textContent = this.getDefconLabel(this.status.defconLevel);
     labelEl.style.color = color;
 
