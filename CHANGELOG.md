@@ -9,6 +9,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.4] - 2026-03-18
+
+### Added
+
+- **Globe DEV quality overlay** — development builds now show a live GlobeMap debug HUD with current texture, altitude bucket, effective pixel ratio, anisotropy, render size, and paused state to make globe rendering tuning observable during zoom and resize testing
+
+### Fixed
+
+- **Globe starfield visibility** — background stars are now significantly more visible, distributed on a much larger shell behind the planet, and configured so the Earth sphere always remains visually in the foreground
+- **Globe background depth** — starfield rendering order and depth behavior were adjusted to keep the space backdrop behind the globe at all times, improving the depth effect without competing with Earth surface rendering
+
+### Performance
+
+- **Adaptive globe texture quality** — GlobeMap now adjusts effective render pixel ratio and texture anisotropy by zoom altitude, keeping Earth textures sharper when zoomed in while reducing unnecessary GPU cost when zoomed out
+- **Recursive timer scheduling in GlobeMap** — repeating GlobeMap loops for adaptive quality checks, aircraft polling, and the DEV debug overlay now use recursive `setTimeout` scheduling instead of `setInterval`, avoiding overlapping work and improving lifecycle control during pause/resume and teardown
+
+---
+
 ## [0.1.3] - 2026-03-18
 
 ### Fixed
