@@ -9,6 +9,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.3] - 2026-03-18
+
+### Fixed
+
+- **Map render pause parity across modes** — hidden-tab render pausing now applies to both DeckGL and Globe modes via `MapContainer.setRenderPaused()`, reducing unnecessary background rendering when the document is not visible
+- **Map teardown duplication** — `MapContainer.destroy()` no longer performs overlapping/double destroy calls; map instances are destroyed once and references are nulled to prevent stale lifecycle state
+- **Virtual list observer leak** — `VirtualList` now stores its `ResizeObserver` as an instance field and disconnects it during `destroy()`, preventing observer retention after panel teardown
+- **Map pin listener ownership** — map pin toggle now uses a retained bound handler and is explicitly removed in `EventHandlerManager.destroy()`, preventing orphaned click listeners across re-initializations
+
+### Performance
+
+- **Lazy military flight history cleanup timer** — flight-history cleanup interval is no longer started at module import; it now initializes on-demand during `fetchMilitaryFlights()` usage
+- **Lazy military vessel cleanup timer with teardown stop** — vessel-history cleanup interval now starts only when military vessel streaming initializes and is stopped when the stream disconnects, reducing idle CPU wakeups
+
+---
+
 ## [0.1.2] - 2026-03-17
 
 ### Added
