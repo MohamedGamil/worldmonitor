@@ -604,6 +604,9 @@ export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'happy' ? HAPPY_MOBILE
 /** Maps map-layer toggle keys to their data-freshness source IDs (single source of truth). */
 export const LAYER_TO_SOURCE: Partial<Record<keyof MapLayers, DataSourceId[]>> = {
   military: ['opensky', 'wingbits'],
+  militaryAircraftConfirmed: ['opensky', 'wingbits'],
+  militaryAircraftUnknown: ['opensky', 'wingbits'],
+  navalActivity: ['opensky', 'wingbits'],
   ais: ['ais'],
   natural: ['usgs'],
   weather: ['weather'],

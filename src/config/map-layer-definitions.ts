@@ -24,7 +24,10 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   iranAttacks: def('iranAttacks', 'crosshair', 'iranAttacks', 'Iran Attacks'),
   hotspots: def('hotspots', 'hotspot', 'intelHotspots', 'Intel Hotspots'),
   conflicts: def('conflicts', 'sword', 'conflictZones', 'Conflict Zones'),
-  military: def('military', 'plane', 'militaryActivity', 'Military Activity'),
+  militaryAircraftConfirmed: def('militaryAircraftConfirmed', 'plane', 'militaryAircraftConfirmed', 'Confirmed Military Aircraft'),
+  militaryAircraftUnknown: def('militaryAircraftUnknown', 'plane', 'militaryAircraftUnknown', 'Unknown / Possible Civilian Aircraft'),
+  navalActivity: def('navalActivity', 'vessel', 'navalActivity', 'Naval Activity'),
+  military: def('military', 'plane', 'militaryActivity', 'Military Activity', []),
 
   bases: def('bases', 'target', 'militaryBases', 'Military Bases'),
   nuclear: def('nuclear', 'nuclear', 'nuclearSites', 'Nuclear Sites'),
@@ -77,7 +80,7 @@ const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
     // 'fires',
 
     'hotspots', 'conflicts',
-    'military',
+    'militaryAircraftConfirmed', 'militaryAircraftUnknown', 'navalActivity',
     'ucdpEvents', 'displacement',
     'bases',
     'nuclear', 'irradiators', 'spaceports',

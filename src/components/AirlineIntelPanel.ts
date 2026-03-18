@@ -396,7 +396,7 @@ export class AirlineIntelPanel extends Panel {
       .price-input { background:var(--input-bg,#1e2533);border:1px solid var(--border-color,#374151);border-radius:4px;color:var(--text-primary,#e5e7eb);padding:4px 6px;font-size:12px; }
       .demo-badge { display:inline-block;font-size:10px;padding:2px 6px;background:rgba(245,158,11,.15);border:1px solid #f59e0b;border-radius:3px;color:#f59e0b;margin-bottom:6px; }
       .tp-badge { display:inline-block;font-size:10px;padding:2px 6px;background:rgba(96,165,250,.12);border:1px solid #60a5fa;border-radius:3px;color:#60a5fa;margin-bottom:6px; }
-      .no-data { color:var(--text-secondary,#9ca3af);font-size:12px;text-align:center;padding:20px 0; }
+      .no-data { color:var(--text-dim,#9ca3af); }
       .news-link { color:var(--text-primary,#e5e7eb);text-decoration:none;font-size:12px;line-height:1.4; }
       .news-link:hover { color:var(--accent,#60a5fa); }
     `;

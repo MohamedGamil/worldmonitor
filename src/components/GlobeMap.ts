@@ -69,6 +69,7 @@ interface FlightMarker extends BaseMarker {
   callsign: string;
   type: string;
   heading: number;
+  isInteresting?: boolean;
 }
 interface VesselMarker extends BaseMarker {
   _kind: 'vessel';
@@ -373,7 +374,8 @@ export class GlobeMap {
 
   // Current data
   private hotspots: HotspotMarker[] = [];
-  private flights: FlightMarker[] = [];
+  private confirmedMilitaryFlights: FlightMarker[] = [];
+  private unknownAircraftFlights: FlightMarker[] = [];
   private vessels: VesselMarker[] = [];
   /** Full source objects, keyed by id — used to supply complete data to MapPopup */
   private flightDataMap = new Map<string, MilitaryFlight>();
@@ -914,6 +916,12 @@ export class GlobeMap {
 
   private pulseStyle(duration: string): string {
     return this._pulseEnabled ? `animation:globe-pulse ${duration} ease-out infinite;` : 'animation:none;';
+  }
+
+  private isConfirmedMilitaryFlight(flight: MilitaryFlight): boolean {
+    return flight.enriched?.confirmedMilitary === true
+      || flight.confidence !== 'low'
+      || flight.operator !== 'other';
   }
 
   private buildMarkerElement(d: GlobeMarker): HTMLElement {
@@ -1522,8 +1530,13 @@ export class GlobeMap {
     if (this.layers.nuclear) markers.push(...this.nuclearSiteMarkers);
     if (this.layers.irradiators) markers.push(...this.irradiatorSiteMarkers);
     if (this.layers.spaceports) markers.push(...this.spaceportSiteMarkers);
-    if (this.layers.military) {
-      markers.push(...this.flights);
+    if (this.layers.military || this.layers.militaryAircraftConfirmed) {
+      markers.push(...this.confirmedMilitaryFlights);
+    }
+    if (this.layers.military || this.layers.militaryAircraftUnknown) {
+      markers.push(...this.unknownAircraftFlights);
+    }
+    if (this.layers.military || this.layers.navalActivity) {
       markers.push(...this.vessels);
     }
     if (this.layers.weather) markers.push(...this.weatherMarkers);
@@ -1689,9 +1702,11 @@ export class GlobeMap {
 
   public setMilitaryFlights(flights: MilitaryFlight[]): void {
     this.flightDataMap.clear();
-    this.flights = flights.map(f => {
+    const confirmed: FlightMarker[] = [];
+    const unknown: FlightMarker[] = [];
+    flights.forEach(f => {
       this.flightDataMap.set(f.id, f);
-      return {
+      const marker: FlightMarker = {
         _kind: 'flight' as const,
         _lat: f.lat,
         _lng: f.lon,
@@ -1701,7 +1716,11 @@ export class GlobeMap {
         heading: (f as any).heading ?? 0,
         isInteresting: f.isInteresting ?? false,
       };
+      if (this.isConfirmedMilitaryFlight(f)) confirmed.push(marker);
+      else unknown.push(marker);
     });
+    this.confirmedMilitaryFlights = confirmed;
+    this.unknownAircraftFlights = unknown;
     this.flushMarkers();
   }
 
@@ -1750,6 +1769,10 @@ export class GlobeMap {
   // ─── Layer control ────────────────────────────────────────────────────────
 
   private static readonly LAYER_CHANNELS: Map<string, { markers: boolean; arcs: boolean; paths: boolean; polygons: boolean }> = new Map([
+    ['militaryAircraftConfirmed', { markers: true, arcs: false, paths: false, polygons: false }],
+    ['militaryAircraftUnknown', { markers: true, arcs: false, paths: false, polygons: false }],
+    ['navalActivity', { markers: true, arcs: false, paths: false, polygons: false }],
+    ['military', { markers: true, arcs: false, paths: false, polygons: false }],
     ['ciiChoropleth', { markers: false, arcs: false, paths: false, polygons: true }],
     ['tradeRoutes', { markers: false, arcs: true, paths: false, polygons: false }],
     ['pipelines', { markers: false, arcs: false, paths: true, polygons: false }],

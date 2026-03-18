@@ -1,5 +1,5 @@
 import type { AppContext, AppModule } from '@/app/app-context';
-import type { NewsItem, MapLayers, SocialUnrestEvent } from '@/types';
+import type { MilitaryFlight, NewsItem, MapLayers, SocialUnrestEvent } from '@/types';
 import type { MarketData } from '@/types';
 import type { TimeRange } from '@/components';
 import {
@@ -438,6 +438,9 @@ export class DataLoaderManager implements AppModule {
           await this.loadFlightDelays();
           break;
         case 'military':
+        case 'militaryAircraftConfirmed':
+        case 'militaryAircraftUnknown':
+        case 'navalActivity':
           await this.loadMilitary();
           break;
         case 'techEvents':
@@ -1327,7 +1330,12 @@ export class DataLoaderManager implements AppModule {
             this.refreshCiiAndBrief();
           }
         }).catch(() => { });
-        if (this.ctx.mapLayers.military) {
+        if (
+          this.ctx.mapLayers.military
+          || this.ctx.mapLayers.militaryAircraftConfirmed
+          || this.ctx.mapLayers.militaryAircraftUnknown
+          || this.ctx.mapLayers.navalActivity
+        ) {
           this.ctx.map?.setMilitaryFlights(flightData.flights, flightData.clusters);
           this.ctx.map?.setMilitaryVessels(vesselData.vessels, vesselData.clusters);
           this.ctx.map?.updateMilitaryForEscalation(flightData.flights, vesselData.vessels);
@@ -1754,6 +1762,19 @@ export class DataLoaderManager implements AppModule {
   }
 
   async loadMilitary(): Promise<void> {
+    const splitFlightCounts = (flights: MilitaryFlight[]) => {
+      let confirmed = 0;
+      let unknown = 0;
+      for (const flight of flights) {
+        const isConfirmed = flight.enriched?.confirmedMilitary === true
+          || flight.confidence !== 'low'
+          || flight.operator !== 'other';
+        if (isConfirmed) confirmed += 1;
+        else unknown += 1;
+      }
+      return { confirmed, unknown };
+    };
+
     const cached = this.ctx.intelligenceCache.military;
     // Use the intelligence cache only when it contains real data.
     // An empty cache (0 flights AND 0 vessels) means the initial fetch either
@@ -1761,6 +1782,7 @@ export class DataLoaderManager implements AppModule {
     // fresh network call so the layer recovers automatically.
     if (cached && (cached.flights.length > 0 || cached.vessels.length > 0)) {
       const { flights, flightClusters, vessels, vesselClusters } = cached;
+      const flightCounts = splitFlightCounts(flights);
       this.ctx.map?.setMilitaryFlights(flights, flightClusters);
       this.ctx.map?.setMilitaryVessels(vessels, vesselClusters);
       this.ctx.map?.updateMilitaryForEscalation(flights, vessels);
@@ -1768,6 +1790,9 @@ export class DataLoaderManager implements AppModule {
       const insightsPanel = this.ctx.panels['insights'] as InsightsPanel | undefined;
       insightsPanel?.setMilitaryFlights(flights);
       const hasData = flights.length > 0 || vessels.length > 0;
+      this.ctx.map?.setLayerReady('militaryAircraftConfirmed', flightCounts.confirmed > 0);
+      this.ctx.map?.setLayerReady('militaryAircraftUnknown', flightCounts.unknown > 0);
+      this.ctx.map?.setLayerReady('navalActivity', vessels.length > 0);
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flights.length + vessels.length;
       this.ctx.statusPanel?.updateFeed('Military', {
@@ -1790,6 +1815,7 @@ export class DataLoaderManager implements AppModule {
         fetchMilitaryFlights(),
         fetchMilitaryVessels(),
       ]);
+      const flightCounts = splitFlightCounts(flightData.flights);
       this.ctx.intelligenceCache.military = {
         flights: flightData.flights,
         flightClusters: flightData.clusters,
@@ -1838,6 +1864,9 @@ export class DataLoaderManager implements AppModule {
       insightsPanel?.setMilitaryFlights(flightData.flights);
 
       const hasData = flightData.flights.length > 0 || vesselData.vessels.length > 0;
+      this.ctx.map?.setLayerReady('militaryAircraftConfirmed', flightCounts.confirmed > 0);
+      this.ctx.map?.setLayerReady('militaryAircraftUnknown', flightCounts.unknown > 0);
+      this.ctx.map?.setLayerReady('navalActivity', vesselData.vessels.length > 0);
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flightData.flights.length + vesselData.vessels.length;
       this.ctx.statusPanel?.updateFeed('Military', {
@@ -1848,6 +1877,9 @@ export class DataLoaderManager implements AppModule {
       this.ctx.statusPanel?.updateApi('OpenSky', { status: 'ok' });
       dataFreshness.recordUpdate('opensky', flightData.flights.length);
     } catch (error) {
+      this.ctx.map?.setLayerReady('militaryAircraftConfirmed', false);
+      this.ctx.map?.setLayerReady('militaryAircraftUnknown', false);
+      this.ctx.map?.setLayerReady('navalActivity', false);
       this.ctx.map?.setLayerReady('military', false);
       this.ctx.statusPanel?.updateFeed('Military', { status: 'error', errorMessage: String(error) });
       this.ctx.statusPanel?.updateApi('OpenSky', { status: 'error' });

@@ -1065,7 +1065,10 @@
         "kindness": "مبادرات إنسانية",
         "happiness": "مؤشر السعادة الأساسي",
         "speciesRecovery": "استعادة الحياة البرية",
-        "renewableInstallations": "مشاريع الطاقة المتجددة"
+        "renewableInstallations": "مشاريع الطاقة المتجددة",
+        "militaryAircraftConfirmed": "طائرات عسكرية",
+        "militaryAircraftUnknown": "طائرات مدنية",
+        "navalActivity": "نشاط بحري"
       },
       "tooltip": {
         "earthquake": "زلزال",

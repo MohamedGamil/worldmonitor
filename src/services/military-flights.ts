@@ -19,14 +19,36 @@ import { isFeatureAvailable } from './runtime-config';
 // OpenSky API path — route through Vercel so Railway secret never reaches the browser.
 const OPENSKY_PROXY_URL = '/api/opensky';
 const wsRelayUrl = import.meta.env.VITE_WS_RELAY_URL || '';
-const DIRECT_OPENSKY_BASE_URL = wsRelayUrl
-  ? wsRelayUrl.replace('wss://', 'https://').replace('ws://', 'http://').replace(/\/$/, '') + '/opensky'
-  : '';
 const isLocalhostRuntime = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+function toHttpBaseFromWsUrl(url: string): string {
+  if (!url) return '';
+  return url
+    .replace(/^wss:\/\//i, 'https://')
+    .replace(/^ws:\/\//i, 'http://')
+    .replace(/\/+$/, '');
+}
+
+function buildDirectOpenSkyUrl(query: string): string {
+  const httpBase = toHttpBaseFromWsUrl(wsRelayUrl);
+  if (!httpBase) return '';
+
+  // In local Docker runs we often point WS at `/ws/relay` on the backend.
+  // The HTTP OpenSky endpoint on that host is `/api/opensky`, not `/ws/relay/opensky`.
+  const wsRelayPathPattern = /\/ws\/relay\/?$/i;
+  if (wsRelayPathPattern.test(httpBase)) {
+    const backendBase = httpBase.replace(wsRelayPathPattern, '');
+    return `${backendBase}/api/opensky?${query}`;
+  }
+
+  // Direct relay hosts expose OpenSky at `/opensky`.
+  return `${httpBase}/opensky?${query}`;
+}
 
 // Cache configuration
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes - reduce upstream API pressure
 let flightCache: { data: MilitaryFlight[]; timestamp: number } | null = null;
+let militaryRequestInFlight: Promise<{ flights: MilitaryFlight[]; clusters: MilitaryFlightCluster[] }> | null = null;
 
 // Track flight history for trails
 const flightHistory = new Map<string, { positions: [number, number][]; lastUpdate: number }>();
@@ -268,12 +290,14 @@ interface RegionResult {
 async function fetchQueryRegion(region: QueryRegion): Promise<RegionResult> {
   const query = `lamin=${region.lamin}&lamax=${region.lamax}&lomin=${region.lomin}&lomax=${region.lomax}`;
   const urls = [`${OPENSKY_PROXY_URL}?${query}`];
-  if (isLocalhostRuntime && DIRECT_OPENSKY_BASE_URL) {
-    urls.push(`${DIRECT_OPENSKY_BASE_URL}?${query}`);
+  if (isLocalhostRuntime) {
+    const directUrl = buildDirectOpenSkyUrl(query);
+    if (directUrl) urls.push(directUrl);
   }
+  const candidateUrls = Array.from(new Set(urls));
 
   try {
-    for (const url of urls) {
+    for (const url of candidateUrls) {
       const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
       if (!response.ok) {
         if (response.status === 429) {
@@ -526,13 +550,17 @@ export async function fetchMilitaryFlights(): Promise<{
   flights: MilitaryFlight[];
   clusters: MilitaryFlightCluster[];
 }> {
+  if (militaryRequestInFlight) {
+    return militaryRequestInFlight;
+  }
+
   ensureFlightHistoryCleanup();
 
   if (!isFeatureAvailable('openskyRelay')) {
     return { flights: [], clusters: [] };
   }
 
-  return breaker.execute(async () => {
+  militaryRequestInFlight = breaker.execute(async () => {
     // Check cache
     if (flightCache && Date.now() - flightCache.timestamp < CACHE_TTL) {
       const clusters = clusterFlights(flightCache.data);
@@ -555,6 +583,12 @@ export async function fetchMilitaryFlights(): Promise<{
 
     return { flights, clusters };
   }, { flights: [], clusters: [] });
+
+  try {
+    return await militaryRequestInFlight;
+  } finally {
+    militaryRequestInFlight = null;
+  }
 }
 
 /**

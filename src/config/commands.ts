@@ -11,7 +11,7 @@ export interface Command {
 }
 
 export const LAYER_PRESETS: Record<string, (keyof MapLayers)[]> = {
-  military: ['bases', 'nuclear', 'flights', 'military', 'waterways'],
+  military: ['bases', 'nuclear', 'flights', 'militaryAircraftConfirmed', 'militaryAircraftUnknown', 'navalActivity', 'waterways'],
   finance: ['stockExchanges', 'financialCenters', 'centralBanks', 'commodityHubs', 'economic', 'tradeRoutes'],
   infra: ['cables', 'pipelines', 'datacenters', 'spaceports', 'minerals'],
   intel: ['conflicts', 'hotspots', 'protests', 'ucdpEvents', 'displacement'],
