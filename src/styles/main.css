@@ -12239,12 +12239,26 @@ a.prediction-link:hover {
 
 /* --- Intelligence Findings Badge --- */
 .intel-findings-badge {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 2px;
+  border: 0 solid;
+  background: transparent;
+}
+
+.intel-findings-badge:hover .findings-badge-inner-wrap {
+  background: var(--overlay-light);
+  border-color: var(--accent);
+}
+
+.findings-badge-inner-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 1;
   padding: 4px 4px;
   background: transparent;
-  border: 0 solid transparent;
+  border: 2px solid transparent;
   border-radius: 50%;
   color: var(--text);
   font-size: 11px;
@@ -12253,21 +12267,19 @@ a.prediction-link:hover {
   position: relative;
 }
 
-.intel-findings-badge:hover {
-  background: var(--overlay-light);
-  border-color: var(--accent);
-}
-
-.intel-findings-badge.active {
+.intel-findings-badge.active .findings-badge-inner-wrap {
   background: var(--overlay-medium);
   border-color: var(--accent);
 }
 
 .intel-findings-badge .findings-icon {
-  display: none;
+  position: relative;
+  z-index: 1;
+  display: flex;
   align-items: center;
-  width: 18px;
-  height: 18px;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -12278,25 +12290,40 @@ a.prediction-link:hover {
 }
 
 .intel-findings-badge .findings-count {
-  /* background: transparent !important; */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-size: 8px;
+  line-height: 1;
+  border: 2px solid transparent;
+  background: var(--accent);
+  color: var(--bg);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1px 5px;
   border-radius: 100%;
   font-size: 10px;
   font-weight: 700;
   min-width: 22px;
   text-align: center;
+  opacity: 0;
 }
 
-.intel-findings-badge.status-none {
+.intel-findings-badge.status-none .findings-badge-inner-wrap {
   border-color: var(--overlay-heavy);
 }
 
 .intel-findings-badge.status-none .findings-count {
+  opacity: 0;
   background: var(--overlay-heavy);
   color: var(--text-dim);
 }
 
-.intel-findings-badge.status-low {
+.intel-findings-badge.status-low .findings-badge-inner-wrap {
   border-color: rgba(74, 158, 255, 0.4);
 }
 
@@ -12309,7 +12336,7 @@ a.prediction-link:hover {
   color: var(--semantic-low);
 }
 
-.intel-findings-badge.status-high {
+.intel-findings-badge.status-high .findings-badge-inner-wrap {
   background: var(--overlay-medium);
   border-color: rgba(243, 54, 51, 0.65);
   animation: findings-pulse 2s infinite;
@@ -12324,7 +12351,7 @@ a.prediction-link:hover {
   color: var(--text);
 }
 
-.intel-findings-badge.pulse {
+.intel-findings-badge.pulse .findings-badge-inner-wrap {
   animation: findings-new 0.5s ease-out;
 }
 

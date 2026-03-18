@@ -60,13 +60,19 @@ export class IntelligenceFindingsBadge {
     this.badge = document.createElement('button');
     this.badge.className = 'intel-findings-badge';
     this.badge.title = t('components.intelligenceFindings.badgeTitle');
-    this.badge.innerHTML = `<span class="findings-icon">${svgIcon('flash-circle', 'currentColor', 14)}</span><span class="findings-count">0</span>`;
+    this.badge.innerHTML = `
+      <span class="findings-badge-inner-wrap">
+        <span class="findings-icon">${svgIcon('flash-circle', 'currentColor', 14)}</span>
+        <span class="findings-count">0</span>
+      </span>
+    `;
 
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'intel-findings-dropdown';
 
     this.badge.addEventListener('click', (e) => {
       e.stopPropagation();
+      console.info('Intelligence findings badge clicked', e);
       this.toggleDropdown();
     });
 
