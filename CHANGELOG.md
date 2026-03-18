@@ -9,6 +9,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.5] - 2026-03-18
+
+### Added
+
+- **Globe auto-spin toggle control** — GlobeMap `.zoom-controls` now includes a dedicated spin toggle button (globe icon) that lets users explicitly start/stop globe auto-rotation on demand
+
+### Changed
+
+- **Globe default rotation behavior** — globe auto-rotation is now disabled by default; auto-spin starts only after the user enables it from the new spin toggle button
+- **Civilian aircraft icon rollout** — introduced and wired a dedicated `plane-civilian` SVG icon across map layers and marker render paths to visually distinguish civilian/unknown air traffic from confirmed military aircraft
+- **Flight Delays layer iconography** — flight-delay layer toggle and in-map flight-delay markers now use the new civilian plane SVG icon in flat and globe map modes
+
+### Performance
+
+- **Civilian plane SVG optimization** — updated civilian aircraft icon source to optimized `plane.svg` geometry and reduced inline SVG payload overhead for icon rendering paths
+
+---
+
 ## [0.1.4] - 2026-03-18
 
 ### Added
