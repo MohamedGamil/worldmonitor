@@ -496,8 +496,9 @@ function cleanupFlightHistory(): void {
   }
 }
 
-// Set up periodic cleanup
-if (typeof window !== 'undefined') {
+function ensureFlightHistoryCleanup(): void {
+  if (typeof window === 'undefined') return;
+  if (historyCleanupIntervalId) return;
   historyCleanupIntervalId = setInterval(cleanupFlightHistory, HISTORY_CLEANUP_INTERVAL);
 }
 
@@ -525,6 +526,8 @@ export async function fetchMilitaryFlights(): Promise<{
   flights: MilitaryFlight[];
   clusters: MilitaryFlightCluster[];
 }> {
+  ensureFlightHistoryCleanup();
+
   if (!isFeatureAvailable('openskyRelay')) {
     return { flights: [], clusters: [] };
   }

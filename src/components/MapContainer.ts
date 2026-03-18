@@ -911,6 +911,10 @@ export class MapContainer {
       this.pauseReasons.delete(reason);
     }
     const isPaused = this.pauseReasons.size > 0;
+    if (this.useGlobe) {
+      this.globeMap?.setRenderPaused(isPaused);
+      return;
+    }
     if (this.useDeckGL) {
       this.deckGLMap?.setRenderPaused(isPaused);
     }
@@ -927,15 +931,14 @@ export class MapContainer {
 
   public destroy(): void {
     document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
-    if (this.useDeckGL) {
-      this.deckGLMap?.destroy();
-    } else {
-      this.svgMap?.destroy();
-    }
     this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.globeMap?.destroy();
+    this.globeMap = null;
     this.deckGLMap?.destroy();
+    this.deckGLMap = null;
     this.svgMap?.destroy();
+    this.svgMap = null;
     this.clearCache();
   }
 

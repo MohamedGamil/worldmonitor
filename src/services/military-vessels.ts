@@ -441,6 +441,12 @@ function cleanup(): void {
   }
 }
 
+function ensureVesselHistoryCleanup(): void {
+  if (typeof window === 'undefined') return;
+  if (historyCleanupIntervalId) return;
+  historyCleanupIntervalId = setInterval(cleanup, HISTORY_CLEANUP_INTERVAL);
+}
+
 /**
  * Cluster nearby vessels
  */
@@ -488,11 +494,6 @@ function clusterVessels(vessels: MilitaryVessel[]): MilitaryVesselCluster[] {
   return clusters;
 }
 
-// Initialize cleanup interval
-if (typeof window !== 'undefined') {
-  historyCleanupIntervalId = setInterval(cleanup, HISTORY_CLEANUP_INTERVAL);
-}
-
 /** Stop the periodic history cleanup (for teardown / testing). */
 export function stopVesselHistoryCleanup(): void {
   if (historyCleanupIntervalId) {
@@ -507,6 +508,8 @@ export function stopVesselHistoryCleanup(): void {
  */
 export function initMilitaryVesselStream(): void {
   if (isTracking) return;
+
+  ensureVesselHistoryCleanup();
 
   // Invalidate ALL caches when stream starts - fresh data should be read
   vesselCache = null;
@@ -530,6 +533,7 @@ export function disconnectMilitaryVesselStream(): void {
 
   unregisterAisCallback(processAisPosition);
   isTracking = false;
+  stopVesselHistoryCleanup();
 }
 
 /**

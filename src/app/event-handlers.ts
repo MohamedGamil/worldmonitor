@@ -83,6 +83,8 @@ export class EventHandlerManager implements AppModule {
   private boundMapEndResizeHandler: (() => void) | null = null;
   private boundMapResizeVisChangeHandler: (() => void) | null = null;
   private boundMapFullscreenEscHandler: ((e: KeyboardEvent) => void) | null = null;
+  private boundMapPinToggleHandler: (() => void) | null = null;
+  private mapPinButton: HTMLElement | null = null;
   private boundMobileMenuKeyHandler: ((e: KeyboardEvent) => void) | null = null;
   private idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private snapshotIntervalId: ReturnType<typeof setInterval> | null = null;
@@ -224,6 +226,11 @@ export class EventHandlerManager implements AppModule {
     if (this.boundMapFullscreenEscHandler) {
       document.removeEventListener('keydown', this.boundMapFullscreenEscHandler);
       this.boundMapFullscreenEscHandler = null;
+    }
+    if (this.boundMapPinToggleHandler && this.mapPinButton) {
+      this.mapPinButton.removeEventListener('click', this.boundMapPinToggleHandler);
+      this.boundMapPinToggleHandler = null;
+      this.mapPinButton = null;
     }
     if (this.boundMobileMenuKeyHandler) {
       document.removeEventListener('keydown', this.boundMobileMenuKeyHandler);
@@ -1112,17 +1119,20 @@ export class EventHandlerManager implements AppModule {
     const pinBtn = document.getElementById('mapPinBtn');
     if (!mapSection || !pinBtn) return;
 
+    this.mapPinButton = pinBtn;
+
     const isPinned = localStorage.getItem('map-pinned') === 'true';
     if (isPinned) {
       mapSection.classList.add('pinned');
       pinBtn.classList.add('active');
     }
 
-    pinBtn.addEventListener('click', () => {
+    this.boundMapPinToggleHandler = () => {
       const nowPinned = mapSection.classList.toggle('pinned');
       pinBtn.classList.toggle('active', nowPinned);
       localStorage.setItem('map-pinned', String(nowPinned));
-    });
+    };
+    pinBtn.addEventListener('click', this.boundMapPinToggleHandler);
 
     this.setupMapFullscreen(mapSection);
     this.setupMapDimensionToggle();
