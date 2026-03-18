@@ -1179,7 +1179,7 @@ export class MapPopup {
       'closure': t('popups.flight.closure'),
     };
     const delayTypeLabel = delayTypeLabels[delay.delayType] || t('popups.flight.delays');
-    const icon = delay.delayType === 'closure' ? svgIcon('stop', '#ff2020', 14) : delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff4400', 14) : delay.severity === 'severe' ? svgIcon('plane', '#ff4444', 14) : svgIcon('plane', '#ffaa00', 14);
+    const icon = delay.delayType === 'closure' ? svgIcon('stop', '#ff2020', 14) : delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff4400', 14) : delay.severity === 'severe' ? svgIcon('plane-civilian', '#ff4444', 14) : svgIcon('plane-civilian', '#ffaa00', 14);
     const sourceLabels: Record<string, string> = {
       'faa': t('popups.flight.sources.faa'),
       'eurocontrol': t('popups.flight.sources.eurocontrol'),
@@ -2209,7 +2209,11 @@ export class MapPopup {
     };
     const callsign = escapeHtml(flight.callsign || t('popups.unknown'));
     const aircraftTypeBadge = escapeHtml(typeLabels[flight.aircraftType] || flight.aircraftType.toUpperCase());
-    const operatorLabel = escapeHtml(operatorLabels[flight.operator] || flight.operatorCountry || t('popups.unknown'));
+    const operatorLabel = escapeHtml(
+      flight.operator === 'other' && flight.operatorCountry
+        ? getLocalizedGeoName(flight.operatorCountry)
+        : (operatorLabels[flight.operator] || flight.operatorCountry || t('popups.unknown')),
+    );
     const hexCode = escapeHtml(flight.hexCode || '');
     const aircraftType = escapeHtml(typeLabels[flight.aircraftType] || flight.aircraftType);
     const squawk = flight.squawk ? escapeHtml(flight.squawk) : '';

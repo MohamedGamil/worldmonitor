@@ -10,7 +10,7 @@
  */
 
 export type IconName =
-  | 'plane' | 'ship' | 'vessel' | 'anchor' | 'satellite-dish'
+  | 'plane' | 'plane-civilian' | 'ship' | 'vessel' | 'anchor' | 'satellite-dish'
   | 'lightning' | 'shield' | 'warning' | 'fire' | 'volcano' | 'storm'
   | 'flood' | 'drought' | 'earthquake' | 'landslide' | 'snow' | 'fog'
   | 'thermometer' | 'ice' | 'water-color'
@@ -46,6 +46,12 @@ export function svgIcon(name: IconName, color: string, size = 12, extra = ''): s
       // Fighter jet silhouette (from fighter-jet-svgrepo-com.svg)
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 -64 640 640" style="${shadow}" ${extra}>
         <path fill="${c}" d="M544 224l-128-16-48-16h-24L227.158 44h39.509C278.333 44 288 41.375 288 38s-9.667-6-21.333-6H152v12h16v164h-48l-66.667-80H18.667L8 138.667V208h8v16h48v2.666l-64 8v42.667l64 8V288H16v16H8v69.333L18.667 384h34.667L120 304h48v164h-16v12h114.667c11.667 0 21.333-2.625 21.333-6s-9.667-6-21.333-6h-39.509L344 320h24l48-16 128-16c96-21.333 96-26.583 96-32 0-5.417 0-10.667-96-32z"/>
+      </svg>`;
+
+    case 'plane-civilian':
+      // Civilian aircraft silhouette (optimized from artifacts/plane.svg.md)
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 500 500" style="${shadow}" ${extra}>
+        <path fill="${c}" fill-rule="evenodd" clip-rule="evenodd" transform="matrix(0.707107 0.707107 -0.707107 0.707107 -0.000009 -0.000006)" d="M100.4 378.152C100.429 366.497 107.052 355.102 117.84 342.348L55.457 302.9C51.523 301.193 51.61 298.793 53.895 295.959L67.112 284.679C69.512 283.204 72.057 282.568 74.805 283.32L151.793 296.335 215.94 226.866 66.186 125.555C62.398 123.328 62.08 120.812 65.984 117.891L87.588 100.654 282.806 155.517 340.475 93.857C359.823 77.112 378.622 69.622 393.053 73.179 401.007 75.145 403.812 77.517 406.27 84.979 411.042 99.613 403.639 119.279 386.141 139.524L324.481 197.193 379.345 392.411 362.108 414.015C359.187 417.89 356.671 417.572 354.444 413.812L253.104 264.087 183.635 328.206 196.65 405.194C197.402 407.912 196.794 410.457 195.291 412.887L184.011 426.104C181.206 428.389 178.777 428.475 177.07 424.542L137.622 362.159C124.81 372.976 113.415 379.599 101.702 379.599 100.632 379.57 100.4 379.194 100.4 378.152Z"/>
       </svg>`;
 
     case 'ferry':

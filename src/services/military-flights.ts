@@ -103,13 +103,19 @@ function determineAircraftInfo(
   originCountry?: string,
   typeCode?: string
 ): { type: MilitaryAircraftType; operator: MilitaryOperator; country: string; confidence: 'high' | 'medium' | 'low' } {
+  const normalizedOriginCountry = (originCountry || '').trim();
+
   // Check callsign first (highest confidence)
   const callsignMatch = identifyByCallsign(callsign, originCountry);
   if (callsignMatch) {
+    const derivedCountry = getCountryFromOperator(callsignMatch.operator);
+    const country = callsignMatch.operator === 'other' && normalizedOriginCountry
+      ? normalizedOriginCountry
+      : derivedCountry;
     return {
       type: callsignMatch.aircraftType || 'unknown',
       operator: callsignMatch.operator,
-      country: getCountryFromOperator(callsignMatch.operator),
+      country,
       confidence: 'high',
     };
   }
@@ -175,33 +181,10 @@ function isMilitaryFlight(state: OpenSkyStateArray): boolean {
   const icao24 = state[0];
   const originCountry = state[2];
 
-  // Check for known military callsigns (covers all patterns from config)
-  if (callsign && identifyByCallsign(callsign, originCountry)) {
-    return true;
-  }
-
-  // Check for military hex code ranges (expanded list)
-  if (isKnownMilitaryHex(icao24)) {
-    return true;
-  }
-
-  // Extended list of countries with recognizable military patterns
-  const militaryCountries = [
-    'United States', 'United Kingdom', 'France', 'Germany', 'Israel',
-    'Turkey', 'Saudi Arabia', 'United Arab Emirates', 'Qatar', 'Kuwait',
-    'Japan', 'South Korea', 'Australia', 'Canada', 'Italy', 'Spain',
-    'Netherlands', 'Poland', 'Greece', 'Norway', 'Sweden', 'India',
-    'Pakistan', 'Egypt', 'Singapore', 'Taiwan'
-  ];
-
-  if (militaryCountries.includes(originCountry)) {
-    // Check for expanded military callsign patterns
-    const militaryPattern = /^(RCH|REACH|DUKE|KING|GOLD|NAVY|ARMY|MARINE|NATO|RAF|GAF|FAF|IAF|THK|TUR|RSAF|UAF|JPN|JASDF|ROKAF|KAF|RAAF|CANFORCE|CFC|AME|PLF|HAF|EGY|PAF|FORTE|HAWK|REAPER|COBRA|RIVET|OLIVE|SNTRY|DRAGN|BONE|DEATH|DOOM|TRIDENT|ASCOT|CNV|HMX|DUSTOFF|EVAC|MOOSE|HERKY)/i.test(callsign);
-    if (callsign && militaryPattern) {
-      return true;
-    }
-  }
-
+  // Strict filtering: only accept flights with concrete military identity
+  // to avoid civilian contamination in military layers.
+  if (callsign && identifyByCallsign(callsign, originCountry)) return true;
+  if (isKnownMilitaryHex(icao24)) return true;
   return false;
 }
 

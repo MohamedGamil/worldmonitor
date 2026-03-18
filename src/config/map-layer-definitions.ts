@@ -25,7 +25,7 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   hotspots: def('hotspots', 'hotspot', 'intelHotspots', 'Intel Hotspots'),
   conflicts: def('conflicts', 'sword', 'conflictZones', 'Conflict Zones'),
   militaryAircraftConfirmed: def('militaryAircraftConfirmed', 'plane', 'militaryAircraftConfirmed', 'Confirmed Military Aircraft'),
-  militaryAircraftUnknown: def('militaryAircraftUnknown', 'plane', 'militaryAircraftUnknown', 'Unknown / Possible Civilian Aircraft'),
+  militaryAircraftUnknown: def('militaryAircraftUnknown', 'plane-civilian', 'militaryAircraftUnknown', 'Unknown / Possible Civilian Aircraft'),
   navalActivity: def('navalActivity', 'vessel', 'navalActivity', 'Naval Activity'),
   military: def('military', 'plane', 'militaryActivity', 'Military Activity', []),
 

@@ -30,6 +30,7 @@ import { escapeHtml } from '@/utils/sanitize';
 import { getNaturalEventIcon } from '@/services/eonet';
 import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
+import { identifyByCallsign, isConfirmedMilitaryFlightRecord, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
 import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
@@ -70,6 +71,7 @@ interface FlightMarker extends BaseMarker {
   type: string;
   heading: number;
   isInteresting?: boolean;
+  isCivilian?: boolean;
 }
 interface VesselMarker extends BaseMarker {
   _kind: 'vessel';
@@ -919,9 +921,13 @@ export class GlobeMap {
   }
 
   private isConfirmedMilitaryFlight(flight: MilitaryFlight): boolean {
-    return flight.enriched?.confirmedMilitary === true
-      || flight.confidence !== 'low'
-      || flight.operator !== 'other';
+    return isConfirmedMilitaryFlightRecord(flight);
+  }
+
+  private isLikelyMilitaryPosition(position: PositionSample): boolean {
+    const callsign = (position.callsign || '').trim();
+    if (callsign && identifyByCallsign(callsign)) return true;
+    return Boolean(isKnownMilitaryHex(position.icao24));
   }
 
   private buildMarkerElement(d: GlobeMarker): HTMLElement {
@@ -969,7 +975,7 @@ export class GlobeMap {
       };
       const isInteresting = (d as unknown as { isInteresting?: boolean }).isInteresting;
       const color = isInteresting ? '#ffd200' : (typeColors[d.type] ?? '#cccccc');
-      const iconHtml = svgIcon('plane', color, isInteresting ? 17 : 15);
+      const iconHtml = svgIcon(d.isCivilian ? 'plane-civilian' : 'plane', color, isInteresting ? 17 : 15);
       const strokeRing = isInteresting
         ? `<div style="position:absolute;inset:-5px;border-radius:50%;"></div>`
         : '';
@@ -1098,7 +1104,7 @@ export class GlobeMap {
       el.title = `${d.mineral} — ${d.name}`;
     } else if (d._kind === 'flightDelay') {
       const sc = d.severity === 'severe' ? '#ff2020' : d.severity === 'major' ? '#ff6600' : d.severity === 'moderate' ? '#ffaa00' : '#ffee44';
-      el.innerHTML = svgIcon('plane', sc, 12);
+      el.innerHTML = svgIcon('plane-civilian', sc, 12);
       el.title = `${d.iata} — ${d.severity}`;
     } else if (d._kind === 'cableAdvisory') {
       const sc = d.severity === 'fault' ? '#ff2020' : '#ff8800';
@@ -1125,10 +1131,10 @@ export class GlobeMap {
       el.title = d.name;
     } else if (d._kind === 'aircraftPos') {
       const acColor = d.onGround ? '#777777' : '#a064ff';
-      const acSize = d.onGround ? '12px' : '16px';
+      const acSize = d.onGround ? 12 : 16;
       el.innerHTML = `
-        <div style="transform:rotate(${d.trackDeg ?? 0}deg);font-size:${acSize};color:${acColor};text-shadow:0 0 5px ${acColor}99;line-height:1;transition:transform 0.3s;">
-          &#9992;
+        <div style="transform:rotate(${(d.trackDeg ?? 0) +90}deg);display:inline-block;line-height:0;transition:transform 0.3s;filter:drop-shadow(0 0 5px ${acColor}99);">
+          ${svgIcon('plane-civilian', acColor, acSize)}
         </div>`;
       el.title = d.callsign ? `${d.callsign} (${d.icao24})` : d.icao24;
     } else if (d._kind === 'flash') {
@@ -1717,7 +1723,7 @@ export class GlobeMap {
         isInteresting: f.isInteresting ?? false,
       };
       if (this.isConfirmedMilitaryFlight(f)) confirmed.push(marker);
-      else unknown.push(marker);
+      else unknown.push({ ...marker, isCivilian: true });
     });
     this.confirmedMilitaryFlights = confirmed;
     this.unknownAircraftFlights = unknown;
@@ -2144,7 +2150,8 @@ export class GlobeMap {
     this.flushMarkers();
   }
   public setAircraftPositions(positions: PositionSample[]): void {
-    this.aircraftPositionMarkers = (positions ?? []).slice(0, 500).map(p => ({
+    const civilianOnly = (positions ?? []).filter((position) => !this.isLikelyMilitaryPosition(position));
+    this.aircraftPositionMarkers = civilianOnly.slice(0, 500).map(p => ({
       _kind: 'aircraftPos' as const,
       _lat: p.lat,
       _lng: p.lon,

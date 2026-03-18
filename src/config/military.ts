@@ -1,4 +1,4 @@
-import type { MilitaryAircraftType, MilitaryOperator, MilitaryVesselType } from '@/types';
+import type { MilitaryAircraftType, MilitaryFlight, MilitaryOperator, MilitaryVesselType } from '@/types';
 
 /**
  * Military callsign prefixes and patterns for aircraft identification
@@ -97,14 +97,12 @@ export const NATO_ALLIED_CALLSIGNS: CallsignPattern[] = [
 
   // Israeli Air Force
   { pattern: '^IAF', operator: 'iaf', description: 'Israeli Air Force' },
-  { pattern: '^ELAL', operator: 'iaf', description: 'IAF transport (covers)' },
 
   // Turkey
   { pattern: '^THK', operator: 'other', description: 'Turkish Air Force' },
   { pattern: '^TUR', operator: 'other', description: 'Turkish military' },
 
   // Saudi Arabia
-  { pattern: '^SVA', operator: 'other', description: 'Saudi Air Force' },
   { pattern: '^RSAF', operator: 'other', description: 'Royal Saudi Air Force' },
 
   // UAE
@@ -640,6 +638,23 @@ export function isKnownMilitaryHex(hexCode: string): { operator: MilitaryOperato
     }
   }
   return undefined;
+}
+
+/**
+ * Strict military confirmation used by map split layers.
+ *
+ * Only mark as confirmed when we have a strong military signal:
+ * - Wingbits explicitly confirms military ownership/operator
+ * - callsign matches known military patterns
+ * - hex code falls in known military ICAO ranges
+ */
+export function isConfirmedMilitaryFlightRecord(flight: MilitaryFlight): boolean {
+  if (flight.enriched?.confirmedMilitary === true) return true;
+
+  // Treat known military ICAO ranges as confirmed.
+  // Callsign-only matches can be ambiguous (e.g. shared prefixes) and are
+  // intentionally routed to the unknown/civilian split layer instead.
+  return Boolean(isKnownMilitaryHex(flight.hexCode));
 }
 
 /**

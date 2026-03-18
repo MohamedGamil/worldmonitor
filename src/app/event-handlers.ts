@@ -918,6 +918,11 @@ export class EventHandlerManager implements AppModule {
       saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
       this.syncUrlState();
 
+      // Prevent stale spinner state when users toggle layers off during an in-flight load.
+      if (!enabled) {
+        this.ctx.map?.setLayerLoading(layer, false);
+      }
+
       const sourceIds = LAYER_TO_SOURCE[layer];
       if (sourceIds) {
         for (const sourceId of sourceIds) {
@@ -932,6 +937,7 @@ export class EventHandlerManager implements AppModule {
           this.callbacks.waitForAisData();
         } else {
           disconnectAisStream();
+          this.ctx.map?.setLayerLoading('ais', false);
         }
         return;
       }

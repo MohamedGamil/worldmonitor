@@ -2467,7 +2467,7 @@ export class MapComponent {
 
         const icon = document.createElement('div');
         icon.className = 'flight-delay-icon';
-        icon.innerHTML = delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff2020', 12) : delay.severity === 'severe' ? svgIcon('plane', '#ff4444', 12) : svgIcon('plane', '#ffaa00', 12);
+        icon.innerHTML = delay.delayType === 'ground_stop' ? svgIcon('stop', '#ff2020', 12) : delay.severity === 'severe' ? svgIcon('plane-civilian', '#ff4444', 12) : svgIcon('plane-civilian', '#ffaa00', 12);
         div.appendChild(icon);
 
         if (this.state.zoom >= 3) {
@@ -2504,12 +2504,11 @@ export class MapComponent {
         div.style.left = `${pt[0]}px`;
         div.style.top = `${pt[1]}px`;
         div.style.transform = `rotate(${ac.trackDeg}deg)`;
-        div.style.fontSize = '12px';
-        div.style.color = ac.onGround ? '#888' : '#a064ff';
-        div.style.lineHeight = '1';
+        div.style.lineHeight = '0';
         div.style.pointerEvents = 'auto';
         div.style.cursor = 'pointer';
-        div.textContent = '\u25B2'; // ▲
+        const acColor = ac.onGround ? '#888' : '#a064ff';
+        div.innerHTML = svgIcon('plane-civilian', acColor, ac.onGround ? 12 : 14);
 
         div.addEventListener('click', (e) => {
           e.stopPropagation();

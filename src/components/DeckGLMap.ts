@@ -55,6 +55,7 @@ import { t, getCurrentLanguage, getLocalizedGeoName, getLocalizedCountryName } f
 import arGeoFallbacks from '@/locales/geo/ar';
 import { debounce, rafSchedule, getCurrentTheme } from '@/utils/index';
 import { localizeMapLabels } from '@/utils/map-locale';
+import { identifyByCallsign, isConfirmedMilitaryFlightRecord, isKnownMilitaryHex } from '@/config/military';
 import {
   INTEL_HOTSPOTS,
   CONFLICT_ZONES,
@@ -260,6 +261,8 @@ const MARKER_ICONS = {
   star: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><polygon points="16,2 20,12 30,12 22,19 25,30 16,23 7,30 10,19 2,12 12,12" fill="white"/></svg>`),
   // Aircraft silhouette - fighter jet (from fighter-jet-svgrepo-com.svg, pointing north, rotated by heading)
   plane: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 -64 640 640"><path fill="white" d="M544 224l-128-16-48-16h-24L227.158 44h39.509C278.333 44 288 41.375 288 38s-9.667-6-21.333-6H152v12h16v164h-48l-66.667-80H18.667L8 138.667V208h8v16h48v2.666l-64 8v42.667l64 8V288H16v16H8v69.333L18.667 384h34.667L120 304h48v164h-16v12h114.667c11.667 0 21.333-2.625 21.333-6s-9.667-6-21.333-6h-39.509L344 320h24l48-16 128-16c96-21.333 96-26.583 96-32 0-5.417 0-10.667-96-32z"/></svg>`),
+  // Civilian aircraft silhouette (optimized from artifacts/plane.svg.md)
+  planeCivilian: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 500 500"><path fill="white" fill-rule="evenodd" clip-rule="evenodd" transform="matrix(0.707107 0.707107 -0.707107 0.707107 -0.000009 -0.000006)" d="M100.4 378.152C100.429 366.497 107.052 355.102 117.84 342.348L55.457 302.9C51.523 301.193 51.61 298.793 53.895 295.959L67.112 284.679C69.512 283.204 72.057 282.568 74.805 283.32L151.793 296.335 215.94 226.866 66.186 125.555C62.398 123.328 62.08 120.812 65.984 117.891L87.588 100.654 282.806 155.517 340.475 93.857C359.823 77.112 378.622 69.622 393.053 73.179 401.007 75.145 403.812 77.517 406.27 84.979 411.042 99.613 403.639 119.279 386.141 139.524L324.481 197.193 379.345 392.411 362.108 414.015C359.187 417.89 356.671 417.572 354.444 413.812L253.104 264.087 183.635 328.206 196.65 405.194C197.402 407.912 196.794 410.457 195.291 412.887L184.011 426.104C181.206 428.389 178.777 428.475 177.07 424.542L137.622 362.159C124.81 372.976 113.415 379.599 101.702 379.599 100.632 379.57 100.4 379.194 100.4 378.152Z"/></svg>`),
   // Naval vessel silhouette (from warship-simple.svg)
   ship: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 2095 2095"><path fill="white" fill-rule="nonzero" d="M 2078.29 1175.37 C 2078.29 1187.92 2018.45 1351.02 2005.91 1370.32 C 1993.36 1389.62 1966.14 1389.62 1966.14 1389.62 L 147 1389.62 C 122.873 1271.88 16.713 1151.25 16.713 1150.28 C 16.713 1149.32 441.352 1151.25 436.526 1150.28 L 436.526 1113.61 L 275.453 1078.87 L 285.104 1046.05 L 442.413 1063.42 C 452.064 1046.05 474.261 1044.12 481.886 1044.12 C 489.606 1044.12 561.988 1044.12 561.988 1044.12 C 589.059 1044.12 593.884 1047.02 593.884 1083.69 C 593.884 1120.36 593.884 1152.21 593.884 1152.21 L 657.676 1152.21 L 657.676 1015.17 L 694.157 1015.17 L 694.157 929.278 L 645.034 929.278 L 645.034 892.605 L 664.335 892.605 L 624.767 811.538 L 639.243 803.817 L 675.916 880.059 L 675.916 705.378 L 693.288 705.378 L 693.288 881.989 L 737.586 881.989 L 737.586 863.653 C 737.586 848.211 750.228 835.665 765.67 835.665 L 771.364 835.665 C 786.902 835.665 799.448 848.211 799.448 863.653 L 799.448 881.989 L 826.567 881.989 C 843.745 881.989 848.571 884.884 848.571 913.837 L 848.571 1029.65 C 848.571 1047.02 856.291 1069.21 870.768 1044.12 C 885.244 1020 932.726 928.313 947.203 901.291 C 961.679 874.268 966.504 871.373 983.683 871.373 C 1001.06 871.373 1033.1 871.373 1064.95 871.373 C 1096.79 871.373 1094.67 895.5 1089.07 910.942 C 1084.25 925.418 1033.1 1094.31 1033.1 1094.31 L 1116.1 1094.31 L 1116.1 1017.1 C 1116.1 978.498 1146.98 947.615 1185.58 947.615 L 1262.79 947.615 C 1301.39 947.615 1332.28 978.498 1332.28 1017.1 L 1332.28 1094.31 C 1332.28 1094.31 1452.91 1092.38 1481.86 1094.31 C 1498.08 1095.27 1505.99 1100.1 1505.99 1122.29 C 1505.99 1144.49 1505.99 1167.65 1505.99 1167.65 L 1552.32 1167.65 L 1552.32 1101.06 C 1552.32 1082.72 1566.79 1068.25 1584.94 1068.25 L 1663.3 1068.25 C 1681.44 1068.25 1695.92 1082.72 1695.92 1101.06 L 1695.92 1113.61 L 1800.34 1076.93 L 1812.89 1111.68 L 1697.08 1156.07 L 1697.08 1175.37 L 1704.8 1175.37 L 2078.29 1175.37 Z"/></svg>`),
 
@@ -273,6 +276,7 @@ const MARKER_ICONS = {
 
 const RADIATION_ICON_MAPPING = { radiation: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const AIRCRAFT_ICON_MAPPING = { plane: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const CIVILIAN_AIRCRAFT_ICON_MAPPING = { 'plane-civilian': { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const SHIP_ICON_MAPPING = { ship: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const CARRIER_ICON_MAPPING = { carrier: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const DATACENTER_ICON_MAPPING = { square: { x: 0, y: 0, width: 32, height: 32, mask: true } };
@@ -1080,9 +1084,13 @@ export class DeckGLMap {
   }
 
   private isConfirmedMilitaryFlight(flight: MilitaryFlight): boolean {
-    return flight.enriched?.confirmedMilitary === true
-      || flight.confidence !== 'low'
-      || flight.operator !== 'other';
+    return isConfirmedMilitaryFlightRecord(flight);
+  }
+
+  private isLikelyMilitaryPosition(position: PositionSample): boolean {
+    const callsign = (position.callsign || '').trim();
+    if (callsign && identifyByCallsign(callsign)) return true;
+    return Boolean(isKnownMilitaryHex(position.icao24));
   }
 
   private filterMilitaryFlightClustersByPredicate(
@@ -1432,7 +1440,7 @@ export class DeckGLMap {
         const flightLayers = this.getCachedLayer('militaryAircraftUnknown', 'unknown-aircraft-flights-group', () => this.createMilitaryFlightsLayer(unknownAircraftFlights, {
           iconLayerId: 'unknown-aircraft-flights-layer',
           interestingRingLayerId: 'unknown-aircraft-flights-interesting-ring',
-        }) as any);
+        }, 'civilian') as any);
         layers.push(...((Array.isArray(flightLayers) ? flightLayers : [flightLayers]) as any));
       }
 
@@ -1864,9 +1872,9 @@ export class DeckGLMap {
       id: 'aircraft-positions-layer',
       data: this.aircraftPositions,
       getPosition: (d) => [d.lon, d.lat],
-      getIcon: () => 'plane',
-      iconAtlas: MARKER_ICONS.plane,
-      iconMapping: AIRCRAFT_ICON_MAPPING,
+      getIcon: () => 'plane-civilian',
+      iconAtlas: MARKER_ICONS.planeCivilian,
+      iconMapping: CIVILIAN_AIRCRAFT_ICON_MAPPING,
       getSize: (d) => d.onGround ? 13 : 18,
       getColor: (d) => {
         if (d.onGround) return [110, 110, 110, 150] as [number, number, number, number];
@@ -1876,7 +1884,7 @@ export class DeckGLMap {
         }
         return [160, 100, 255, 230] as [number, number, number, number]; // Purple = real OpenSky
       },
-      getAngle: (d) => -d.trackDeg -90, // Rotate plane icon to match heading (subtract 90 to align with icon orientation)
+      getAngle: (d) => -(d.trackDeg ?? 0) +90,
       sizeMinPixels: 8,
       sizeMaxPixels: 28,
       sizeScale: 1,
@@ -2296,6 +2304,7 @@ export class DeckGLMap {
       iconLayerId: 'military-flights-layer',
       interestingRingLayerId: 'military-flights-interesting-ring',
     },
+    iconVariant: 'military' | 'civilian' = 'military',
   ): Layer[] {
     const TYPE_COLORS: Record<string, [number, number, number, number]> = {
       fighter:        [255,  50,  50, 230],
@@ -2312,6 +2321,9 @@ export class DeckGLMap {
     };
     // Interesting flights use a vivid amber-gold to stand out
     const INTERESTING_COLOR: [number, number, number, number] = [255, 210, 0, 255];
+    const iconName = iconVariant === 'civilian' ? 'plane-civilian' : 'plane';
+    const iconAtlas = iconVariant === 'civilian' ? MARKER_ICONS.planeCivilian : MARKER_ICONS.plane;
+    const iconMapping = iconVariant === 'civilian' ? CIVILIAN_AIRCRAFT_ICON_MAPPING : AIRCRAFT_ICON_MAPPING;
 
     console.info(`Creating Military Flights Layer with ${flights.length} flights`, {
       sample: flights.slice(0, 5)
@@ -2325,9 +2337,9 @@ export class DeckGLMap {
       id: layerIds.iconLayerId,
       data: flights,
       getPosition: (d) => [d.lon, d.lat],
-      getIcon: () => 'plane',
-      iconAtlas: MARKER_ICONS.plane,
-      iconMapping: AIRCRAFT_ICON_MAPPING,
+      getIcon: () => iconName,
+      iconAtlas,
+      iconMapping,
       getSize: (d) => d.onGround ? 14 : 20,
       getColor: (d) => d.isInteresting ? INTERESTING_COLOR : (TYPE_COLORS[d.aircraftType] ?? COLORS.flightMilitary),
       getAngle: (d) => -(d.heading ?? 0) +90, // Rotate to match heading
@@ -4516,7 +4528,7 @@ export class DeckGLMap {
   }
 
   public setAircraftPositions(positions: PositionSample[]): void {
-    this.aircraftPositions = positions;
+    this.aircraftPositions = (positions ?? []).filter((position) => !this.isLikelyMilitaryPosition(position));
     this.markDirty('flights');
     this.render();
   }
@@ -4609,8 +4621,9 @@ export class DeckGLMap {
       neLat: ne.lat, neLon: ne.lng,
     }).then((positions) => {
       if (seq !== this.aircraftFetchSeq) return; // discard stale response
-      this.aircraftPositions = positions;
-      this.onAircraftPositionsUpdate?.(positions);
+      const civilianOnlyPositions = (positions ?? []).filter((position) => !this.isLikelyMilitaryPosition(position));
+      this.aircraftPositions = civilianOnlyPositions;
+      this.onAircraftPositionsUpdate?.(civilianOnlyPositions);
       const center = this.maplibreMap?.getCenter();
       if (center) {
         this.lastAircraftFetchCenter = [center.lng, center.lat];

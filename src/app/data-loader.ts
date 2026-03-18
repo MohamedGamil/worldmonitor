@@ -170,6 +170,7 @@ export interface DataLoaderCallbacks {
 export class DataLoaderManager implements AppModule {
   private ctx: AppContext;
   private callbacks: DataLoaderCallbacks;
+  private aisWaitToken = 0;
 
   private mapFlashCache: Map<string, number> = new Map();
   private readonly MAP_FLASH_COOLDOWN_MS = 10 * 60 * 1000;
@@ -1633,11 +1634,22 @@ export class DataLoaderManager implements AppModule {
   }
 
   waitForAisData(): void {
+    const token = ++this.aisWaitToken;
     const maxAttempts = 30;
     let attempts = 0;
 
     const checkData = () => {
       if (this.ctx.isDestroyed) return;
+
+      // Stop outdated wait loops (e.g., rapid toggle off/on creating overlaps).
+      if (token !== this.aisWaitToken) return;
+
+      // If AIS was turned off while waiting, clear loading and abort.
+      if (!this.ctx.mapLayers.ais) {
+        this.ctx.map?.setLayerLoading('ais', false);
+        return;
+      }
+
       attempts++;
       const status = getAisStatus();
 
