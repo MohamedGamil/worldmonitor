@@ -1316,9 +1316,10 @@ export class DataLoaderManager implements AppModule {
         if (isMilitaryVesselTrackingConfigured()) {
           initMilitaryVesselStream();
         }
-        const [flightData, vesselData] = await Promise.all([
+        const [flightData, vesselData, navalSnapshot] = await Promise.all([
           fetchMilitaryFlights(),
           fetchMilitaryVessels(),
+          fetchNavalActivity(),
         ]);
         this.ctx.intelligenceCache.military = {
           flights: flightData.flights,
@@ -1326,6 +1327,10 @@ export class DataLoaderManager implements AppModule {
           vessels: vesselData.vessels,
           vesselClusters: vesselData.clusters,
         };
+        if (navalSnapshot) {
+          this.ctx.intelligenceCache.naval = navalSnapshot;
+          this.ctx.map?.setNavalActivity(navalSnapshot);
+        }
         fetchUSNIFleetReport().then((report) => {
           if (report) this.ctx.intelligenceCache.usniFleet = report;
         }).catch(() => { });
@@ -1354,6 +1359,12 @@ export class DataLoaderManager implements AppModule {
           this.ctx.map?.setMilitaryFlights(flightData.flights, flightData.clusters);
           this.ctx.map?.setMilitaryVessels(vesselData.vessels, vesselData.clusters);
           this.ctx.map?.updateMilitaryForEscalation(flightData.flights, vesselData.vessels);
+          this.ctx.map?.setLayerReady('navalActivity',
+            vesselData.vessels.length > 0
+            || (navalSnapshot?.vessels.length ?? 0) > 0
+            || (navalSnapshot?.strikeGroups.length ?? 0) > 0
+            || (navalSnapshot?.clusters.length ?? 0) > 0
+          );
           const militaryCount = flightData.flights.length + vesselData.vessels.length;
           this.ctx.statusPanel?.updateFeed('Military', {
             status: militaryCount > 0 ? 'ok' : 'warning',
@@ -1813,6 +1824,7 @@ export class DataLoaderManager implements AppModule {
         vessels.length > 0
         || (cachedNaval?.vessels.length ?? 0) > 0
         || (cachedNaval?.strikeGroups.length ?? 0) > 0
+        || (cachedNaval?.clusters.length ?? 0) > 0
       );
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flights.length + vessels.length;
@@ -1898,7 +1910,12 @@ export class DataLoaderManager implements AppModule {
 
       const hasData = flightData.flights.length > 0 || vesselData.vessels.length > 0;
       this.ctx.map?.setLayerReady('militaryAircraftConfirmed', flightData.flights.length > 0);
-      this.ctx.map?.setLayerReady('navalActivity', vesselData.vessels.length > 0 || (navalSnapshot?.vessels.length ?? 0) > 0 || (navalSnapshot?.strikeGroups.length ?? 0) > 0);
+      this.ctx.map?.setLayerReady('navalActivity',
+        vesselData.vessels.length > 0
+        || (navalSnapshot?.vessels.length ?? 0) > 0
+        || (navalSnapshot?.strikeGroups.length ?? 0) > 0
+        || (navalSnapshot?.clusters.length ?? 0) > 0
+      );
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flightData.flights.length + vesselData.vessels.length;
       this.ctx.statusPanel?.updateFeed('Military', {

@@ -161,6 +161,7 @@ const VIEW_PRESETS: Record<DeckMapView, { longitude: number; latitude: number; z
 
 const MAP_INTERACTION_MODE: MapInteractionMode =
   import.meta.env.VITE_MAP_INTERACTION_MODE === 'flat' ? 'flat' : '3d';
+const SHOW_NAVAL_DEV_OVERLAY = import.meta.env.DEV;
 
 const DARK_STYLE = SITE_VARIANT === 'happy'
   ? '/map-styles/happy-dark.json'
@@ -331,6 +332,8 @@ export class DeckGLMap {
   private militaryVessels: MilitaryVessel[] = [];
   private militaryVesselClusters: MilitaryVesselCluster[] = [];
   private navalSnapshot: NavalActivitySnapshot | null = null;
+  private showNavalDevOverlay = SHOW_NAVAL_DEV_OVERLAY;
+  private navalInfoOverlayEl: HTMLElement | null = null;
   private serverBases: MilitaryBaseEnriched[] = [];
   private serverBaseClusters: ServerBaseCluster[] = [];
   private serverBasesLoaded = false;
@@ -563,7 +566,71 @@ export class DeckGLMap {
     attribution.innerHTML = '© <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
     wrapper.appendChild(attribution);
 
+    const navalOverlay = document.createElement('div');
+    navalOverlay.className = 'naval-info-overlay';
+    navalOverlay.style.cssText = [
+      'position:absolute',
+      'direction:ltr',
+      'bottom:10px',
+      'left:10px',
+      'z-index:60',
+      'display:none',
+      'min-width:220px',
+      'max-width:320px',
+      'padding:10px 12px',
+      'border-radius:8px',
+      'border:1px solid rgba(110,180,255,0.45)',
+      'background:rgba(7,12,20,0.88)',
+      'backdrop-filter:blur(4px)',
+      'color:#eaf4ff',
+      'font-size:12px',
+      'line-height:1.35',
+      'box-shadow:0 10px 24px rgba(0,0,0,0.35)',
+      'pointer-events:none',
+    ].join(';');
+    wrapper.appendChild(navalOverlay);
+    this.navalInfoOverlayEl = navalOverlay;
+
     this.container.appendChild(wrapper);
+    this.updateNavalInfoOverlay();
+  }
+
+  private updateNavalInfoOverlay(): void {
+    const overlay = this.navalInfoOverlayEl;
+    if (!overlay) return;
+    const snapshot = this.navalSnapshot;
+    const shouldShow = this.showNavalDevOverlay;
+    if (!shouldShow) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+      return;
+    }
+
+    overlay.style.display = 'block';
+    if (!snapshot) {
+      overlay.innerHTML = `
+        <div style="font-weight:700;letter-spacing:0.02em;margin-bottom:6px;color:#9ed0ff;">Naval Data Overlay</div>
+        <div style="opacity:.9;">Waiting for naval endpoint data...</div>
+      `;
+      return;
+    }
+
+    const uniqueRegions = new Set(snapshot.clusters.map((cluster) => cluster.region)).size;
+    const carrierClusters = snapshot.clusters.filter((cluster) => cluster.hasCarrier).length;
+    const assessedAt = new Date(snapshot.assessedAt);
+    const assessedLabel = Number.isNaN(assessedAt.getTime())
+      ? snapshot.assessedAt
+      : assessedAt.toLocaleString();
+
+    overlay.innerHTML = `
+      <div style="font-weight:700;letter-spacing:0.02em;margin-bottom:6px;color:#9ed0ff;">Naval Data Overlay</div>
+      <div>Strike Groups: <b>${snapshot.strikeGroups.length}</b></div>
+      <div>Tracked Vessels: <b>${snapshot.vessels.length}</b></div>
+      <div>Operational Clusters: <b>${snapshot.clusters.length}</b></div>
+      <div>Carrier Clusters: <b>${carrierClusters}</b></div>
+      <div>Active Regions: <b>${uniqueRegions}</b></div>
+      <div style="opacity:.82;margin-top:6px;">Assessed: ${assessedLabel}</div>
+    `;
   }
 
   private initMapLibre(): void {
@@ -1545,6 +1612,7 @@ export class DeckGLMap {
         const newsLayers = this.getCachedLayer('news', 'news-locations-group', () => this.createNewsLocationsLayer() as any);
         layers.push(...((Array.isArray(newsLayers) ? newsLayers : [newsLayers]) as any));
       }
+
     } // End of Step 5
 
     const result = layers.filter(Boolean) as LayersList;
@@ -3690,6 +3758,7 @@ export class DeckGLMap {
       'naval-activity-vessels-layer': 'militaryVessel',
       'military-vessel-clusters-layer': 'militaryVesselCluster',
       'naval-activity-vessel-clusters-layer': 'militaryVesselCluster',
+      'naval-overlay-layer': 'navalCluster',
       'naval-seeded-vessels-layer': 'militaryVessel',
       'naval-csg-layer': 'navalStrikeGroup',
       'naval-snapshot-clusters-layer': 'navalCluster',
@@ -3929,6 +3998,13 @@ export class DeckGLMap {
         <button class="toggle-collapse">&#9660;</button>
       </div>
       <div class="toggle-list" style="max-height: 32vh; overflow-y: auto; scrollbar-width: thin;">
+        ${SHOW_NAVAL_DEV_OVERLAY ? `
+          <label class="dev-overlay-toggle" title="Development only">
+            <input type="checkbox" ${this.showNavalDevOverlay ? 'checked' : ''}>
+            <span class="toggle-icon">DEV</span>
+            <span class="toggle-label">Naval Overlay (Dev)</span>
+          </label>
+        ` : ''}
         ${layerConfig.map(({ key, label, icon }) => `
           <label class="layer-toggle" data-layer="${key}">
             <input type="checkbox" ${this.state.layers[key as keyof MapLayers] ? 'checked' : ''}>
@@ -3967,6 +4043,14 @@ export class DeckGLMap {
       });
     });
     this.enforceLayerLimit();
+
+    const devOverlayInput = toggles.querySelector('.dev-overlay-toggle input') as HTMLInputElement | null;
+    devOverlayInput?.addEventListener('change', () => {
+      this.showNavalDevOverlay = devOverlayInput.checked;
+      this.markDirty('navalActivity');
+      this.updateNavalInfoOverlay();
+      this.render();
+    });
 
     // Help button
     const helpBtn = toggles.querySelector('.layer-help-btn');
@@ -4358,6 +4442,7 @@ export class DeckGLMap {
   public setLayers(layers: MapLayers): void {
     this.state.layers = layers;
     this.markAllDirty(); // Layer toggle affects all groups
+    this.updateNavalInfoOverlay();
     this.render();
     this.manageAircraftTimer(layers.flights || layers.militaryAircraftUnknown);
     this.render(); // Debounced
@@ -4681,6 +4766,7 @@ export class DeckGLMap {
   public setNavalActivity(snapshot: NavalActivitySnapshot): void {
     this.navalSnapshot = snapshot;
     this.markDirty('navalActivity');
+    this.updateNavalInfoOverlay();
     this.render();
   }
 
@@ -5511,6 +5597,8 @@ export class DeckGLMap {
     this.newsLocationFirstSeen.clear();
     this.happinessScores.clear();
     this.dirtyLayers.clear();
+    this.navalInfoOverlayEl?.remove();
+    this.navalInfoOverlayEl = null;
     this.timeFilterCache.clear();
     this.countriesGeoJsonData = null;
 

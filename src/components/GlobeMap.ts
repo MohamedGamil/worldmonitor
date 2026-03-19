@@ -26,6 +26,7 @@ import { getGlobeRenderScale, resolveGlobePixelRatio, resolvePerformanceProfile,
 import { getLayersForVariant, resolveLayerLabel, type MapVariant } from '@/config/map-layer-definitions';
 import type { TradeRouteSegment } from '@/config/trade-routes';
 import type { GlobeStaticReadyMessage } from '@/workers/globe-data.worker';
+const SHOW_NAVAL_DEV_OVERLAY = import.meta.env.DEV;
 import { getCountryBbox, getCountriesGeoJson } from '@/services/country-geometry';
 import { escapeHtml } from '@/utils/sanitize';
 import { getNaturalEventIcon } from '@/services/eonet';
@@ -33,7 +34,7 @@ import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
 import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
-import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup } from '@/types';
+import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup, NavalCluster } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import { fetchAircraftPositions } from '@/services/aviation';
@@ -316,6 +317,15 @@ interface NavalStrikeGroupMarker extends BaseMarker {
   region: string;
   carrier: string;
 }
+interface NavalOverlayMarker extends BaseMarker {
+  _kind: 'naval-overlay';
+  id: string;
+  name: string;
+  region: string;
+  vesselCount: number;
+  hasCarrier: boolean;
+  activityType: string;
+}
 interface GlobePath {
   id: string;
   name: string;
@@ -336,7 +346,7 @@ interface GlobePolygon {
   casualties?: string;
 }
 type GlobeMarker =
-  | ConflictMarker | HotspotMarker | FlightMarker | VesselMarker | NavalStrikeGroupMarker
+  | ConflictMarker | HotspotMarker | FlightMarker | VesselMarker | NavalStrikeGroupMarker | NavalOverlayMarker
   | WeatherMarker | NaturalMarker | IranMarker | OutageMarker
   | CyberMarker | FireMarker | ProtestMarker
   | UcdpMarker | DisplacementMarker | ClimateMarker | GpsJamMarker | TechMarker
@@ -400,6 +410,8 @@ export class GlobeMap {
   private flightDataMap = new Map<string, MilitaryFlight>();
   private vesselDataMap = new Map<string, MilitaryVessel>();
   private navalSnapshotDataMap = new Map<string, NavalStrikeGroup>();
+  private navalClusterDataMap = new Map<string, NavalCluster>();
+  private navalSnapshot: NavalActivitySnapshot | null = null;
   private navalCsgMarkers: NavalStrikeGroupMarker[] = [];
   private navalVesselMarkers: VesselMarker[] = [];
   private weatherMarkers: WeatherMarker[] = [];
@@ -461,6 +473,7 @@ export class GlobeMap {
 
   // Auto-rotate timer (like Sentinel: resume after 60 s idle)
   private autoRotateTimer: ReturnType<typeof setTimeout> | null = null;
+  private showNavalDevOverlay = SHOW_NAVAL_DEV_OVERLAY;
 
   // Overlay UI elements
   private layerTogglesEl: HTMLElement | null = null;
@@ -469,6 +482,7 @@ export class GlobeMap {
   private loadingOverlayEl: HTMLElement | null = null;
   private loadingOverlayFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private spinToggleBtnEl: HTMLButtonElement | null = null;
+  private navalInfoOverlayEl: HTMLElement | null = null;
   private autoSpinEnabled = false;
 
   // Callbacks
@@ -914,6 +928,7 @@ export class GlobeMap {
     // Add overlay UI (zoom controls + layer panel)
     this.createControls();
     this.createLayerToggles();
+    this.createNavalInfoOverlay();
 
     // Loading overlay must be appended AFTER all globe.gl and UI elements so it is
     // the last DOM child — guaranteeing it sits on top in paint order.
@@ -1038,6 +1053,15 @@ export class GlobeMap {
     } else if (d._kind === 'naval-csg') {
       el.innerHTML = svgIcon('carrier', '#ff4444', 34);
       el.title = `CSG: ${d.name} (${d.region})`;
+    } else if (d._kind === 'naval-overlay') {
+      const ringColor = d.hasCarrier ? 'rgba(255,90,90,0.65)' : 'rgba(120,180,255,0.6)';
+      const fillColor = d.hasCarrier ? 'rgba(255,90,90,0.2)' : 'rgba(120,180,255,0.18)';
+      const size = Math.min(56, 22 + (d.vesselCount || 1) * 1.4);
+      el.innerHTML = `
+        <div style="position:relative;width:${size}px;height:${size}px;">
+          <div style="position:absolute;inset:0;border-radius:50%;background:${fillColor};border:1.2px solid ${ringColor};${this.pulseStyle('3.2s')}"></div>
+        </div>`;
+      el.title = `${d.name} (${d.vesselCount} vessels)`;
     } else if (d._kind === 'weather') {
       const severityColors: Record<string, string> = {
         Extreme: '#ff0044', Severe: '#ff6600', Moderate: '#ffaa00', Minor: '#88aaff',
@@ -1307,6 +1331,21 @@ export class GlobeMap {
         }) as any, x, y });
         break;
       }
+      case 'naval-overlay': {
+        const fullCluster = this.navalClusterDataMap.get(d.id);
+        this.popup.show({ type: 'navalCluster', data: (fullCluster ?? {
+          id: d.id,
+          name: d.name,
+          lat: d._lat,
+          lon: d._lng,
+          vesselCount: d.vesselCount,
+          hasCarrier: d.hasCarrier,
+          vesselTypes: [],
+          region: d.region,
+          activityType: d.activityType,
+        }) as any, x, y });
+        break;
+      }
       case 'milbase': {
         const base = (MILITARY_BASES as any[]).find(b => b.id === d.id);
         this.popup.show({ type: 'base', data: (base ?? {
@@ -1569,6 +1608,13 @@ export class GlobeMap {
         <button class="toggle-collapse">&#9660;</button>
       </div>
       <div class="toggle-list" style="max-height:32vh;overflow-y:auto;scrollbar-width:thin;">
+        ${SHOW_NAVAL_DEV_OVERLAY ? `
+          <label class="dev-overlay-toggle" title="Development only">
+            <input type="checkbox" ${this.showNavalDevOverlay ? 'checked' : ''}>
+            <span class="toggle-icon">DEV</span>
+            <span class="toggle-label">Naval Overlay (Dev)</span>
+          </label>
+        ` : ''}
         ${layers.map(({ key, label, icon }) => `
           <label class="layer-toggle" data-layer="${key}">
             <input type="checkbox" ${this.layers[key] ? 'checked' : ''}>
@@ -1604,6 +1650,12 @@ export class GlobeMap {
     });
     this.enforceLayerLimit();
 
+    const devOverlayInput = el.querySelector('.dev-overlay-toggle input') as HTMLInputElement | null;
+    devOverlayInput?.addEventListener('change', () => {
+      this.showNavalDevOverlay = devOverlayInput.checked;
+      this.updateNavalInfoOverlay();
+    });
+
     const collapseBtn = el.querySelector('.toggle-collapse');
     const list = el.querySelector('.toggle-list') as HTMLElement | null;
     let collapsed = false;
@@ -1621,6 +1673,72 @@ export class GlobeMap {
     }, { passive: false });
 
     this.layerTogglesEl = el;
+  }
+
+  private createNavalInfoOverlay(): void {
+    const overlay = document.createElement('div');
+    overlay.className = 'naval-info-overlay';
+    overlay.style.cssText = [
+      'position:absolute',
+      'direction:ltr',
+      'bottom:10px',
+      'left:10px',
+      'z-index:1003',
+      'display:none',
+      'min-width:220px',
+      'max-width:320px',
+      'padding:10px 12px',
+      'border-radius:8px',
+      'border:1px solid rgba(110,180,255,0.45)',
+      'background:rgba(7,12,20,0.88)',
+      'backdrop-filter:blur(4px)',
+      'color:#eaf4ff',
+      'font-size:12px',
+      'line-height:1.35',
+      'box-shadow:0 10px 24px rgba(0,0,0,0.35)',
+      'pointer-events:none',
+    ].join(';');
+    this.container.appendChild(overlay);
+    this.navalInfoOverlayEl = overlay;
+    this.updateNavalInfoOverlay();
+  }
+
+  private updateNavalInfoOverlay(): void {
+    const overlay = this.navalInfoOverlayEl;
+    if (!overlay) return;
+    const snapshot = this.navalSnapshot;
+    const shouldShow = this.showNavalDevOverlay;
+    if (!shouldShow) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = '';
+      return;
+    }
+
+    overlay.style.display = 'block';
+    if (!snapshot) {
+      overlay.innerHTML = `
+        <div style="font-weight:700;letter-spacing:0.02em;margin-bottom:6px;color:#9ed0ff;">Naval Data Overlay</div>
+        <div style="opacity:.9;">Waiting for naval endpoint data...</div>
+      `;
+      return;
+    }
+
+    const uniqueRegions = new Set(snapshot.clusters.map((cluster) => cluster.region)).size;
+    const carrierClusters = snapshot.clusters.filter((cluster) => cluster.hasCarrier).length;
+    const assessedAt = new Date(snapshot.assessedAt);
+    const assessedLabel = Number.isNaN(assessedAt.getTime())
+      ? snapshot.assessedAt
+      : assessedAt.toLocaleString();
+
+    overlay.innerHTML = `
+      <div style="font-weight:700;letter-spacing:0.02em;margin-bottom:6px;color:#9ed0ff;">Naval Data Overlay</div>
+      <div>Strike Groups: <b>${snapshot.strikeGroups.length}</b></div>
+      <div>Tracked Vessels: <b>${snapshot.vessels.length}</b></div>
+      <div>Operational Clusters: <b>${snapshot.clusters.length}</b></div>
+      <div>Carrier Clusters: <b>${carrierClusters}</b></div>
+      <div>Active Regions: <b>${uniqueRegions}</b></div>
+      <div style="opacity:.82;margin-top:6px;">Assessed: ${assessedLabel}</div>
+    `;
   }
 
   // ─── Flush all current data to globe ──────────────────────────────────────
@@ -1696,7 +1814,6 @@ export class GlobeMap {
     }
     markers.push(...this.newsLocationMarkers);
     markers.push(...this.flashMarkers);
-
     try {
       this.globe.htmlElementsData(markers);
     } catch (err) { if (import.meta.env.DEV) console.warn('[GlobeMap] flush error', err); }
@@ -1867,7 +1984,9 @@ export class GlobeMap {
   }
 
   public setNavalActivity(snapshot: NavalActivitySnapshot): void {
+    this.navalSnapshot = snapshot;
     this.navalSnapshotDataMap.clear();
+    this.navalClusterDataMap.clear();
     this.navalCsgMarkers = snapshot.strikeGroups.map(csg => {
       this.navalSnapshotDataMap.set(csg.id, csg);
       return {
@@ -1880,6 +1999,9 @@ export class GlobeMap {
         carrier: csg.carrier,
       };
     });
+    snapshot.clusters.forEach((cluster) => {
+      this.navalClusterDataMap.set(cluster.id, cluster);
+    });
     this.navalVesselMarkers = snapshot.vessels
       .filter(v => !v.strikeGroupId)
       .map(v => ({
@@ -1890,6 +2012,7 @@ export class GlobeMap {
         name: v.name,
         type: v.vesselType,
       }));
+    this.updateNavalInfoOverlay();
     this.flushMarkers();
   }
 
@@ -1960,6 +2083,7 @@ export class GlobeMap {
     if (needArcs) this.flushArcs();
     if (needPaths) this.flushPaths();
     if (needPolygons) this.flushPolygons();
+    this.updateNavalInfoOverlay();
     // Keep aircraft polling synchronized with current layer state.
     this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
   }
@@ -2867,6 +2991,8 @@ export class GlobeMap {
     this.lastAppliedRenderHeight = 0;
     this.debugOverlayEl?.remove();
     this.debugOverlayEl = null;
+    this.navalInfoOverlayEl?.remove();
+    this.navalInfoOverlayEl = null;
     this.layerTogglesEl = null;
     this.spinToggleBtnEl = null;
     if (this.globe) {
