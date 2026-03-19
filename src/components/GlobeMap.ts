@@ -1392,7 +1392,7 @@ export class GlobeMap {
       'font-family:monospace',
       'color:#d4d4d4',
       'max-width:260px',
-      'z-index:10001',
+      'z-index:10050',
       'pointer-events:none',
       'line-height:1.5',
       'white-space:pre-line',
@@ -1452,7 +1452,7 @@ export class GlobeMap {
       'font-family:monospace',
       'color:#d4d4d4',
       'max-width:240px',
-      'z-index:10001',
+      'z-index:10050',
       'pointer-events:none',
       'line-height:1.5',
     ].join(';');
