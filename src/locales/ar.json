@@ -2007,7 +2007,7 @@
     },
     "flight": {
       "groundStop": "توقف أرضي",
-      "groundDelay": "برنامج تأخير أرضي",
+      "groundDelay": "تأخير أرضي",
       "departureDelay": "تأخيرات المغادرة",
       "arrivalDelay": "تأخيرات الوصول",
       "delaysReported": "تأخيرات مُبلّغة",

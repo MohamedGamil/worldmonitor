@@ -242,6 +242,15 @@ export class CircuitBreaker<T> {
     return [...this.cache.keys()];
   }
 
+  /** Return the in-flight background-refresh promise for the given cache key,
+   *  or null when no background refresh is currently in progress.
+   *  Callers can await this to get the freshest data after a stale-while-
+   *  revalidate hit instead of waiting for the next poll cycle. */
+  getBackgroundRefresh(cacheKey?: string): Promise<void> | null {
+    const resolvedKey = this.resolveCacheKey(cacheKey);
+    return this.backgroundRefreshPromises.get(resolvedKey) ?? null;
+  }
+
   private markSuccess(timestamp: number): void {
     this.state.failures = 0;
     this.state.cooldownUntil = 0;

@@ -161,6 +161,45 @@ export async function deletePersistentCache(key: string): Promise<void> {
   }
 }
 
+export async function deletePersistentCacheByPrefix(prefix: string): Promise<void> {
+  if (isIndexedDbAvailable()) {
+    try {
+      const db = await getCacheDb();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(CACHE_STORE, 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        // Bounded range covers all keys >= prefix and < prefix + '\uffff'
+        const range = IDBKeyRange.bound(prefix, prefix + '\uffff', false, true);
+        const request = tx.objectStore(CACHE_STORE).openCursor(range);
+        request.onsuccess = () => {
+          const cursor = request.result;
+          if (!cursor) return;
+          cursor.delete();
+          cursor.continue();
+        };
+        request.onerror = () => reject(request.error);
+      });
+      return;
+    } catch (error) {
+      console.warn('[persistent-cache] IndexedDB prefix-delete failed; falling back to localStorage', error);
+      cacheDbPromise = null;
+    }
+  }
+
+  if (isStorageQuotaExceeded()) return;
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(`${CACHE_PREFIX}${prefix}`)) keysToRemove.push(k);
+    }
+    for (const k of keysToRemove) localStorage.removeItem(k);
+  } catch {
+    // Ignore
+  }
+}
+
 export function cacheAgeMs(updatedAt: number): number {
   return Math.max(0, Date.now() - updatedAt);
 }
