@@ -9,6 +9,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.7] - 2026-03-19
+
+### Added
+
+- **Naval activity snapshot layer integration in both map modes** — `/api/naval-activity` snapshot entities (seeded vessels, strike groups, and theater clusters) are now rendered as first-class map data in DeckGL and Globe flows, including popup support for naval clusters and strike groups
+- **Cluster popup vessel drilldown UX** — military/naval cluster popups now support expandable vessel lists; hidden rows can be revealed inline and each vessel row is clickable to open a dedicated vessel popup
+- **Vessel country-of-origin display in popups** — vessel popups now include an explicit localized country row sourced from `operatorCountry` when available
+
+### Fixed
+
+- **`/api/naval-activity` frontend consumption parity** — corrected naval vessel data plumbing in Globe mode so snapshot vessel click popups resolve full vessel payloads (including `operatorCountry`) instead of falling back to partial marker data
+- **Naval popup robustness for incomplete telemetry** — vessel popup numeric fields now handle invalid/non-finite values safely (no `NaN` leak-through in speed/heading fields)
+- **Named vessel image matching coverage** — expanded naval Wikipedia title matching for carrier aliases/variants (including Admiral Kuznetsov variants) and improved normalized name matching for vessel image fallback
+
+### Internationalization
+
+- **Localized naval vessel fields in popups** — vessel/operator country and region-like labels in naval-related popups now consistently use localized geography resolution via `getLocalizedGeoName()`
+- **Cluster expansion translations** — added `popups.militaryCluster.showLessVessels` for English and Arabic to support expanded/collapsed vessel list UX
+- **RTL support for expanded cluster rows** — added Arabic RTL overrides for interactive vessel cluster rows and expansion toggles (alignment, accent border side, and list direction)
+
+### Performance
+
+- **Naval snapshot cache stability** — strengthened naval data fallback/promotion behavior to prefer richer last-known-good snapshots over degraded responses, reducing intermittent layer degradation in unstable upstream conditions
+
+---
+
 ## [0.1.6] - 2026-03-19
 
 ### Added
