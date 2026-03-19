@@ -1,6 +1,15 @@
 import { SITE_VARIANT } from '@/config/variant';
 
-const WS_API_URL = import.meta.env.VITE_WS_API_URL || '';
+const ENV = (() => {
+  try {
+    return import.meta.env ?? {};
+  } catch {}
+
+  return {} as Record<string, string | undefined>;
+})();
+
+const WS_API_URL = ENV.VITE_WS_API_URL || '';
+const DEFAULT_WEB_API_URL = 'https://api.marsd.app';
 const KEYED_CLOUD_API_PATTERN = /^\/api\/(?:[^/]+\/v1\/|bootstrap(?:\?|$)|polymarket(?:\?|$)|ais-snapshot(?:\?|$))/;
 
 const DEFAULT_REMOTE_HOSTS: Record<string, string> = {
@@ -12,7 +21,7 @@ const DEFAULT_REMOTE_HOSTS: Record<string, string> = {
 };
 
 const DEFAULT_LOCAL_API_PORT = 46123;
-const FORCE_DESKTOP_RUNTIME = import.meta.env.VITE_DESKTOP_RUNTIME === '1';
+const FORCE_DESKTOP_RUNTIME = ENV.VITE_DESKTOP_RUNTIME === '1';
 
 let _resolvedPort: number | null = null;
 let _portPromise: Promise<number> | null = null;
@@ -101,11 +110,11 @@ export function getApiBaseUrl(): string {
   if (!isDesktopRuntime()) {
     // VITE_BACKEND_URL is set at build time in CF Workers environment variables
     // to https://api.marsd.app so all /api/* fetches go directly to the backend.
-    const webBase = import.meta.env.VITE_BACKEND_URL;
-    return webBase && !import.meta.env.DEV ? normalizeBaseUrl(webBase) : '';
+    const webBase = ENV.VITE_BACKEND_URL;
+    return webBase && !ENV.DEV ? normalizeBaseUrl(webBase) : '';
   }
 
-  const configuredBaseUrl = import.meta.env.VITE_TAURI_API_BASE_URL;
+  const configuredBaseUrl = ENV.VITE_TAURI_API_BASE_URL;
   if (configuredBaseUrl) {
     return normalizeBaseUrl(configuredBaseUrl);
   }
@@ -143,7 +152,7 @@ export function toLocalSidecarUrl(path: string): string {
 }
 
 export function getRemoteApiBaseUrl(): string {
-  const configuredRemoteBase = import.meta.env.VITE_TAURI_REMOTE_API_BASE_URL;
+  const configuredRemoteBase = ENV.VITE_TAURI_REMOTE_API_BASE_URL;
   if (configuredRemoteBase) {
     return normalizeBaseUrl(configuredRemoteBase);
   }
@@ -185,7 +194,7 @@ const APP_HOSTS = new Set([
   'api.marsd.app',
   'localhost',
   '127.0.0.1',
-  ...extractHostnames(WS_API_URL, import.meta.env.VITE_WS_RELAY_URL),
+  ...extractHostnames(WS_API_URL, ENV.VITE_WS_RELAY_URL),
 ]);
 
 function isAppOriginUrl(urlStr: string): boolean {
@@ -696,4 +705,53 @@ export function installWebApiRedirect(): void {
   };
 
   (window as unknown as Record<string, unknown>).__wmWebRedirectPatched = true;
+}
+
+function isMarsdWebhost(hostname: string): boolean {
+  return hostname === 'marsd.app'
+    || hostname === 'www.marsd.app'
+    || hostname.endsWith('.marsd.app');
+}
+
+export function getConfiguredWebApiBaseUrl(): string {
+  if (WS_API_URL) {
+    return normalizeBaseUrl(WS_API_URL);
+  }
+
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  if (isDesktopRuntime()) {
+    return '';
+  }
+
+  const hostname = window.location?.hostname ?? '';
+  if (!isMarsdWebhost(hostname)) {
+    return '';
+  }
+
+  return DEFAULT_WEB_API_URL;
+}
+
+export function toPathAndSearch(url: string | URL): string {
+  const u = typeof url === 'string' ? new URL(url) : url;
+  return `${u.pathname}${u.search}`;
+}
+
+export function toApiUrl(path: string): string {
+  if (!path.startsWith('/')) {
+    return path;
+  }
+
+  if (isDesktopRuntime()) {
+    return toRuntimeUrl(path);
+  }
+
+  const webApiBase = getConfiguredWebApiBaseUrl();
+  if (!webApiBase) {
+    return path;
+  }
+
+  return `${webApiBase}${path}`;
 }
