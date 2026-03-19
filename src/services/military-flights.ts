@@ -166,7 +166,7 @@ function parseLastSeen(raw: MilitaryFlightsApiFlight, fallbackMs: number): Date 
 }
 
 function appendTrackFromHistory(flight: MilitaryFlight): MilitaryFlight {
-  const historyKey = flight.hexCode.toLowerCase();
+  const historyKey = (flight.hexCode || flight.id || flight.callsign).toLowerCase();
   let history = flightHistory.get(historyKey);
   if (!history) {
     history = { positions: [], lastUpdate: Date.now() };
@@ -190,10 +190,11 @@ function mapApiFlight(rawFlight: unknown, fallbackSeenMs: number): MilitaryFligh
   const lon = Number(raw.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
 
-  const hexCode = String(raw.hexCode || '').toUpperCase().trim();
-  if (!hexCode) return null;
+  const rawHexCode = String(raw.hexCode || '').toUpperCase().trim();
 
   const callsign = String(raw.callsign || '').trim();
+  const fallbackHexSeed = String(raw.id || callsign || `${lat.toFixed(4)}:${lon.toFixed(4)}`).toUpperCase().replace(/\s+/g, '');
+  const hexCode = rawHexCode || `UNK-${fallbackHexSeed}`;
   const seenAt = parseLastSeen(raw, fallbackSeenMs);
   const canonical: MilitaryFlight = {
     id: String(raw.id || `opensky-${hexCode.toLowerCase()}`),

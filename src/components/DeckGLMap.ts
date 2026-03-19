@@ -55,7 +55,7 @@ import { t, getCurrentLanguage, getLocalizedGeoName, getLocalizedCountryName } f
 import arGeoFallbacks from '@/locales/geo/ar';
 import { debounce, rafSchedule, getCurrentTheme } from '@/utils/index';
 import { localizeMapLabels } from '@/utils/map-locale';
-import { identifyByCallsign, isConfirmedMilitaryFlightRecord, isKnownMilitaryHex } from '@/config/military';
+import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import {
   INTEL_HOTSPOTS,
   CONFLICT_ZONES,
@@ -1083,35 +1083,10 @@ export class DeckGLMap {
       .filter((cluster): cluster is MilitaryVesselCluster => cluster !== null);
   }
 
-  private isConfirmedMilitaryFlight(flight: MilitaryFlight): boolean {
-    return isConfirmedMilitaryFlightRecord(flight);
-  }
-
   private isLikelyMilitaryPosition(position: PositionSample): boolean {
     const callsign = (position.callsign || '').trim();
     if (callsign && identifyByCallsign(callsign)) return true;
     return Boolean(isKnownMilitaryHex(position.icao24));
-  }
-
-  private filterMilitaryFlightClustersByPredicate(
-    clusters: MilitaryFlightCluster[],
-    predicate: (flight: MilitaryFlight) => boolean,
-    suffix: string,
-  ): MilitaryFlightCluster[] {
-    return clusters
-      .map((cluster): MilitaryFlightCluster | null => {
-        const flights = (cluster.flights ?? []).filter(predicate);
-        if (flights.length === 0) return null;
-        const nextCluster: MilitaryFlightCluster = {
-          ...cluster,
-          id: `${cluster.id}-${suffix}`,
-          flights,
-          flightCount: flights.length,
-          dominantOperator: flights[0]?.operator ?? cluster.dominantOperator,
-        };
-        return nextCluster;
-      })
-      .filter((cluster): cluster is MilitaryFlightCluster => cluster !== null);
   }
 
   private shouldShowConfirmedMilitaryAircraft(layers: MapLayers = this.state.layers): boolean {
@@ -1119,7 +1094,7 @@ export class DeckGLMap {
   }
 
   private shouldShowUnknownAircraftActivity(layers: MapLayers = this.state.layers): boolean {
-    return layers.military || layers.militaryAircraftUnknown;
+    return layers.militaryAircraftUnknown;
   }
 
   private shouldShowNavalActivity(layers: MapLayers = this.state.layers): boolean {
@@ -1221,18 +1196,8 @@ export class DeckGLMap {
     const filteredMilitaryVessels = this.cachedFilterByTime('militaryVessels', this.militaryVessels, (vessel) => vessel.lastAisUpdate);
     const filteredMilitaryFlightClusters = this.filterMilitaryFlightClustersByTime(this.militaryFlightClusters);
     const filteredMilitaryVesselClusters = this.filterMilitaryVesselClustersByTime(this.militaryVesselClusters);
-    const confirmedMilitaryFlights = filteredMilitaryFlights.filter((flight) => this.isConfirmedMilitaryFlight(flight));
-    const unknownAircraftFlights = filteredMilitaryFlights.filter((flight) => !this.isConfirmedMilitaryFlight(flight));
-    const confirmedMilitaryFlightClusters = this.filterMilitaryFlightClustersByPredicate(
-      filteredMilitaryFlightClusters,
-      (flight) => this.isConfirmedMilitaryFlight(flight),
-      'confirmed',
-    );
-    const unknownAircraftFlightClusters = this.filterMilitaryFlightClustersByPredicate(
-      filteredMilitaryFlightClusters,
-      (flight) => !this.isConfirmedMilitaryFlight(flight),
-      'unknown',
-    );
+    const confirmedMilitaryFlights = filteredMilitaryFlights;
+    const confirmedMilitaryFlightClusters = filteredMilitaryFlightClusters;
 
     // === Step 1: Base infrastructure ===
     if (this.progressiveLoadStep >= 1) {
@@ -1435,18 +1400,9 @@ export class DeckGLMap {
         layers.push(this.getCachedLayer('militaryAircraftConfirmed', 'confirmed-military-flight-clusters-layer', () => this.createMilitaryFlightClustersLayer(confirmedMilitaryFlightClusters, 'confirmed-military-flight-clusters-layer')));
       }
 
-      // Unknown / possibly civilian aircraft layer
-      if (this.shouldShowUnknownAircraftActivity(mapLayers) && unknownAircraftFlights.length > 0) {
-        const flightLayers = this.getCachedLayer('militaryAircraftUnknown', 'unknown-aircraft-flights-group', () => this.createMilitaryFlightsLayer(unknownAircraftFlights, {
-          iconLayerId: 'unknown-aircraft-flights-layer',
-          interestingRingLayerId: 'unknown-aircraft-flights-interesting-ring',
-        }, 'civilian') as any);
-        layers.push(...((Array.isArray(flightLayers) ? flightLayers : [flightLayers]) as any));
-      }
-
-      // Unknown / possibly civilian aircraft clusters layer
-      if (this.shouldShowUnknownAircraftActivity(mapLayers) && unknownAircraftFlightClusters.length > 0) {
-        layers.push(this.getCachedLayer('militaryAircraftUnknown', 'unknown-aircraft-flight-clusters-layer', () => this.createMilitaryFlightClustersLayer(unknownAircraftFlightClusters, 'unknown-aircraft-flight-clusters-layer')));
+      // Civilian aircraft activity layer (live positions)
+      if (this.shouldShowUnknownAircraftActivity(mapLayers) && !mapLayers.flights && this.aircraftPositions.length > 0) {
+        layers.push(this.getCachedLayer('militaryAircraftUnknown', 'unknown-aircraft-positions-layer', () => this.createAircraftPositionsLayer('unknown-aircraft-positions-layer')));
       }
 
       // Strategic waterways layer
@@ -1870,10 +1826,10 @@ export class DeckGLMap {
     });
   }
 
-  private createAircraftPositionsLayer(): IconLayer<PositionSample> {
+  private createAircraftPositionsLayer(layerId = 'aircraft-positions-layer'): IconLayer<PositionSample> {
     return new IconLayer<PositionSample>({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
-      id: 'aircraft-positions-layer',
+      id: layerId,
       data: this.aircraftPositions,
       getPosition: (d) => [d.lon, d.lat],
       getIcon: () => 'plane-civilian',
@@ -3830,7 +3786,9 @@ export class DeckGLMap {
         const layer = (input as HTMLInputElement).closest('.layer-toggle')?.getAttribute('data-layer') as keyof MapLayers;
         if (layer) {
           this.state.layers[layer] = (input as HTMLInputElement).checked;
-          if (layer === 'flights') this.manageAircraftTimer((input as HTMLInputElement).checked);
+          if (layer === 'flights' || layer === 'militaryAircraftUnknown') {
+            this.manageAircraftTimer(this.state.layers.flights || this.state.layers.militaryAircraftUnknown);
+          }
           this.render();
           this.onLayerChange?.(layer, (input as HTMLInputElement).checked, 'user');
           if (layer === 'ciiChoropleth') {
@@ -4234,7 +4192,7 @@ export class DeckGLMap {
     this.state.layers = layers;
     this.markAllDirty(); // Layer toggle affects all groups
     this.render();
-    this.manageAircraftTimer(layers.flights);
+    this.manageAircraftTimer(layers.flights || layers.militaryAircraftUnknown);
     this.render(); // Debounced
 
     // Update toggle checkboxes
@@ -4527,13 +4485,13 @@ export class DeckGLMap {
   public setFlightDelays(delays: AirportDelayAlert[]): void {
     this.flightDelays = delays;
     this.invalidateTimeCache('flightDelays');
-    this.markDirty('flights');
+    this.markDirty('flights', 'militaryAircraftUnknown');
     this.render();
   }
 
   public setAircraftPositions(positions: PositionSample[]): void {
     this.aircraftPositions = (positions ?? []).filter((position) => !this.isLikelyMilitaryPosition(position));
-    this.markDirty('flights');
+    this.markDirty('flights', 'militaryAircraftUnknown');
     this.render();
   }
 
@@ -4606,7 +4564,7 @@ export class DeckGLMap {
 
   private fetchViewportAircraft(): void {
     if (!this.maplibreMap) return;
-    if (!this.state.layers.flights) return;
+    if (!this.state.layers.flights && !this.state.layers.militaryAircraftUnknown) return;
     const zoom = this.maplibreMap.getZoom();
     if (zoom < 2) {
       if (this.aircraftPositions.length > 0) {
@@ -4906,8 +4864,10 @@ export class DeckGLMap {
         const layer = inp.closest('.layer-toggle')?.getAttribute('data-layer') as keyof MapLayers | null;
         if (layer) {
           this.state.layers[layer] = false;
+          this.onLayerChange?.(layer, false, 'programmatic');
         }
       }
+      this.manageAircraftTimer(this.state.layers.flights || this.state.layers.militaryAircraftUnknown);
       this.render();
     }
     const activeCount = allToggles.filter(i => i.checked).length;

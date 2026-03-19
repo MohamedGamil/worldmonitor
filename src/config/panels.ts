@@ -629,7 +629,7 @@ export const MOBILE_DEFAULT_MAP_LAYERS = SITE_VARIANT === 'happy' ? HAPPY_MOBILE
 export const LAYER_TO_SOURCE: Partial<Record<keyof MapLayers, DataSourceId[]>> = {
   military: ['opensky', 'wingbits'],
   militaryAircraftConfirmed: ['opensky', 'wingbits'],
-  militaryAircraftUnknown: ['opensky', 'wingbits'],
+  militaryAircraftUnknown: ['opensky'],
   navalActivity: ['opensky', 'wingbits'],
   ais: ['ais'],
   natural: ['usgs'],

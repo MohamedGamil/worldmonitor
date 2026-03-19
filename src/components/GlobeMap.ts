@@ -30,7 +30,7 @@ import { escapeHtml } from '@/utils/sanitize';
 import { getNaturalEventIcon } from '@/services/eonet';
 import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
-import { identifyByCallsign, isConfirmedMilitaryFlightRecord, isKnownMilitaryHex } from '@/config/military';
+import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
 import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
@@ -377,7 +377,6 @@ export class GlobeMap {
   // Current data
   private hotspots: HotspotMarker[] = [];
   private confirmedMilitaryFlights: FlightMarker[] = [];
-  private unknownAircraftFlights: FlightMarker[] = [];
   private vessels: VesselMarker[] = [];
   /** Full source objects, keyed by id — used to supply complete data to MapPopup */
   private flightDataMap = new Map<string, MilitaryFlight>();
@@ -921,10 +920,6 @@ export class GlobeMap {
 
   private pulseStyle(duration: string): string {
     return this._pulseEnabled ? `animation:globe-pulse ${duration} ease-out infinite;` : 'animation:none;';
-  }
-
-  private isConfirmedMilitaryFlight(flight: MilitaryFlight): boolean {
-    return isConfirmedMilitaryFlightRecord(flight);
   }
 
   private isLikelyMilitaryPosition(position: PositionSample): boolean {
@@ -1568,8 +1563,8 @@ export class GlobeMap {
     if (this.layers.military || this.layers.militaryAircraftConfirmed) {
       markers.push(...this.confirmedMilitaryFlights);
     }
-    if (this.layers.military || this.layers.militaryAircraftUnknown) {
-      markers.push(...this.unknownAircraftFlights);
+    if (this.layers.militaryAircraftUnknown && !this.layers.flights) {
+      markers.push(...this.aircraftPositionMarkers);
     }
     if (this.layers.military || this.layers.navalActivity) {
       markers.push(...this.vessels);
@@ -1738,7 +1733,6 @@ export class GlobeMap {
   public setMilitaryFlights(flights: MilitaryFlight[]): void {
     this.flightDataMap.clear();
     const confirmed: FlightMarker[] = [];
-    const unknown: FlightMarker[] = [];
     flights.forEach(f => {
       this.flightDataMap.set(f.id, f);
       const marker: FlightMarker = {
@@ -1751,11 +1745,9 @@ export class GlobeMap {
         heading: (f as any).heading ?? 0,
         isInteresting: f.isInteresting ?? false,
       };
-      if (this.isConfirmedMilitaryFlight(f)) confirmed.push(marker);
-      else unknown.push({ ...marker, isCivilian: true });
+      confirmed.push(marker);
     });
     this.confirmedMilitaryFlights = confirmed;
-    this.unknownAircraftFlights = unknown;
     this.flushMarkers();
   }
 
@@ -1842,8 +1834,10 @@ export class GlobeMap {
     if (needArcs) this.flushArcs();
     if (needPaths) this.flushPaths();
     if (needPolygons) this.flushPolygons();
-    // Manage aircraft polling timer when flights layer toggled
-    if (prev.flights !== this.layers.flights) this.manageAircraftTimer(this.layers.flights);
+    // Manage aircraft polling timer when flights/civilian layers toggle
+    if (prev.flights !== this.layers.flights || prev.militaryAircraftUnknown !== this.layers.militaryAircraftUnknown) {
+      this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
+    }
   }
 
   public enableLayer(layer: keyof MapLayers): void {
@@ -1853,7 +1847,7 @@ export class GlobeMap {
     if (toggle) toggle.checked = true;
     this.flushLayerChannels(layer);
     this.enforceLayerLimit();
-    if (layer === 'flights') this.manageAircraftTimer(true);
+    if (layer === 'flights' || layer === 'militaryAircraftUnknown') this.manageAircraftTimer(true);
   }
 
   private enforceLayerLimit(): void {
@@ -1869,8 +1863,10 @@ export class GlobeMap {
         if (layer) {
           this.layers[layer] = false;
           this.flushLayerChannels(layer);
+          this.onLayerChangeCb?.(layer, false, 'programmatic');
         }
       }
+      this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
     }
     const activeCount = allToggles.filter(i => i.checked).length;
     allToggles.forEach(i => {
@@ -2161,8 +2157,8 @@ export class GlobeMap {
     this.flushMarkers();
   }
   public setFlightDelays(delays: AirportDelayAlert[]): void {
-    this.flightDelayMarkers = (delays ?? [])
-      .filter(d => d.lat != null && d.lon != null && d.severity !== 'normal')
+    const mapped = (delays ?? []).filter(d => d.lat != null && d.lon != null && d.severity !== 'normal');
+    this.flightDelayMarkers = mapped
       .map(d => ({
         _kind: 'flightDelay' as const,
         _lat: d.lat,
@@ -2216,12 +2212,12 @@ export class GlobeMap {
   }
 
   private scheduleAircraftFetch(delayMs: number): void {
-    if (this.destroyed || !this.layers.flights) return;
+    if (this.destroyed || (!this.layers.flights && !this.layers.militaryAircraftUnknown)) return;
     if (this.aircraftFetchTimer) return;
 
     this.aircraftFetchTimer = setTimeout(async () => {
       this.aircraftFetchTimer = null;
-      if (this.destroyed || !this.layers.flights) return;
+      if (this.destroyed || (!this.layers.flights && !this.layers.militaryAircraftUnknown)) return;
 
       await this.fetchViewportAircraft();
       this.scheduleAircraftFetch(120_000);
@@ -2229,7 +2225,7 @@ export class GlobeMap {
   }
 
   private async fetchViewportAircraft(): Promise<void> {
-    if (!this.globe || !this.layers.flights || this.destroyed) return;
+    if (!this.globe || (!this.layers.flights && !this.layers.militaryAircraftUnknown) || this.destroyed) return;
     const pov = this.globe.pointOfView() as { lat: number; lng: number; altitude: number };
     const alt = pov?.altitude ?? 1.5;
     // Skip fetch when zoomed far out — too many positions

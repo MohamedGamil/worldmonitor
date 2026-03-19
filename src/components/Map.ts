@@ -2455,7 +2455,7 @@ export class MapComponent {
     }
 
     // Flight Delays (delay severity colors + ✈️ icons)
-    if (this.state.layers.flights) {
+    if (this.state.layers.flights || this.state.layers.militaryAircraftUnknown) {
       this.flightDelays.forEach((delay) => {
         const pos = projection([delay.lon, delay.lat]);
         if (!pos) return;
