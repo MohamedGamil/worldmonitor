@@ -195,6 +195,24 @@ body.dir-rtl {
   margin-left: 8px;
 }
 
+/* Map popup cluster expansion rows */
+[dir="rtl"] .cluster-vessels,
+[dir="rtl"] .cluster-flights {
+  direction: rtl;
+}
+
+[dir="rtl"] .cluster-vessel-item,
+[dir="rtl"] .cluster-flight-item {
+  border-left: none;
+  border-right: 2px solid var(--accent);
+  text-align: right;
+}
+
+[dir="rtl"] .cluster-vessel-item--clickable,
+[dir="rtl"] .cluster-more.cluster-expand-toggle {
+  text-align: right;
+}
+
 /* ── Letter-spacing reset for Arabic text readability ─────────────────────── */
 [dir="rtl"] .stat-label,
 [dir="rtl"] .section-label,

@@ -9213,10 +9213,41 @@ a.prediction-link:hover {
   border-left: 2px solid var(--accent);
 }
 
+.cluster-vessel-item--clickable {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.cluster-vessel-item--clickable:hover,
+.cluster-vessel-item--clickable:focus-visible {
+  background: var(--overlay-mid);
+  outline: none;
+}
+
 .cluster-more {
   padding: 4px 8px;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.cluster-more.cluster-expand-toggle {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  font: inherit;
+}
+
+.cluster-more.cluster-expand-toggle:hover,
+.cluster-more.cluster-expand-toggle:focus-visible {
+  color: var(--accent);
+  outline: none;
 }
 
 .popup-description.alert {

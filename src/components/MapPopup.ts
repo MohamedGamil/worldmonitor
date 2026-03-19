@@ -201,6 +201,10 @@ export class MapPopup {
   private container: HTMLElement;
   private popup: HTMLElement | null = null;
   private onClose?: () => void;
+  private popupAnchorX = 0;
+  private popupAnchorY = 0;
+  private clusterPopupVesselRows = new Map<string, MilitaryVessel>();
+  private clusterPopupVesselRowSeq = 0;
   private cableAdvisories: CableAdvisory[] = [];
   private repairShips: RepairShip[] = [];
   private isMobileSheet = false;
@@ -215,6 +219,10 @@ export class MapPopup {
 
   public show(data: PopupData): void {
     this.hide();
+    this.popupAnchorX = data.x;
+    this.popupAnchorY = data.y;
+    this.clusterPopupVesselRows.clear();
+    this.clusterPopupVesselRowSeq = 0;
 
     this.isMobileSheet = isMobileDevice();
     this.popup = document.createElement('div');
@@ -246,6 +254,40 @@ export class MapPopup {
     // This avoids re-querying and re-attaching listeners after innerHTML.
     this.popup.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+
+      const toggleBtn = target.closest<HTMLElement>('.cluster-expand-toggle');
+      if (toggleBtn) {
+        e.preventDefault();
+        const scope = toggleBtn.getAttribute('data-cluster-scope') || 'cluster-vessels';
+        const container = toggleBtn.closest('.cluster-vessels');
+        const hiddenRows = container?.querySelectorAll<HTMLElement>(`.cluster-vessel-item--hidden[data-cluster-scope="${scope}"]`) ?? [];
+        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+        hiddenRows.forEach((row) => {
+          row.hidden = expanded;
+        });
+        toggleBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        const showLabel = toggleBtn.getAttribute('data-show-label') || '';
+        const hideLabel = toggleBtn.getAttribute('data-hide-label') || showLabel;
+        toggleBtn.textContent = expanded ? showLabel : hideLabel;
+        return;
+      }
+
+      const vesselRow = target.closest<HTMLElement>('[data-cluster-vessel-id]');
+      if (vesselRow) {
+        e.preventDefault();
+        const vesselId = vesselRow.getAttribute('data-cluster-vessel-id') || '';
+        const vessel = this.clusterPopupVesselRows.get(vesselId);
+        if (vessel) {
+          this.show({
+            type: 'militaryVessel',
+            data: vessel,
+            x: this.popupAnchorX,
+            y: this.popupAnchorY,
+          });
+        }
+        return;
+      }
+
       if (target.closest('.popup-close') || target.closest('.map-popup-sheet-handle')) {
         this.hide();
       }
@@ -2630,12 +2672,17 @@ export class MapPopup {
       ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(csgWikiTitle)}" role="img" aria-label="${escapeHtml(csgWikiTitle)}"><div class="popup-media__skeleton"></div></div>`
       : '';
 
+    const visibleCount = 5;
+    const hiddenCount = Math.max(0, cluster.vessels.length - visibleCount);
     const vesselSummary = cluster.vessels
-      .slice(0, 5)
-      .map(v => `<div class="cluster-vessel-item">${escapeHtml(v.name)} - ${escapeHtml(tv(v.vesselType, 'popups.militaryVessel.types'))}</div>`)
+      .map((v, index) => {
+        const vesselRowId = this.registerClusterPopupVessel(v);
+        const isHidden = index >= visibleCount;
+        return `<button type="button" class="cluster-vessel-item cluster-vessel-item--clickable${isHidden ? ' cluster-vessel-item--hidden' : ''}" data-cluster-vessel-id="${escapeHtml(vesselRowId)}" data-cluster-scope="cluster-vessels"${isHidden ? ' hidden' : ''}>${escapeHtml(v.name)} - ${escapeHtml(tv(v.vesselType, 'popups.militaryVessel.types'))}</button>`;
+      })
       .join('');
-    const moreVessels = cluster.vesselCount > 5
-      ? `<div class="cluster-more">${t('popups.militaryCluster.moreVessels', { count: String(cluster.vesselCount - 5) })}</div>`
+    const moreVessels = hiddenCount > 0
+      ? `<button type="button" class="cluster-more cluster-expand-toggle" data-cluster-toggle="cluster-vessels" data-cluster-scope="cluster-vessels" data-show-label="${escapeHtml(t('popups.militaryCluster.moreVessels', { count: String(hiddenCount) }))}" data-hide-label="${escapeHtml(t('popups.militaryCluster.showLessVessels'))}" aria-expanded="false">${escapeHtml(t('popups.militaryCluster.moreVessels', { count: String(hiddenCount) }))}</button>`
       : '';
 
     return `
@@ -2685,12 +2732,19 @@ export class MapPopup {
       ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(wikiTitle)}" role="img" aria-label="${escapeHtml(wikiTitle)}"><div class="popup-media__skeleton"></div></div>`
       : '';
 
-    const escortList = (csg.escorts ?? [])
-      .slice(0, 6)
-      .map(e => `<div class="cluster-vessel-item">${escapeHtml(getLocalizedGeoName(e) || e)}</div>`)
+    const visibleEscortCount = 6;
+    const escorts = csg.escorts ?? [];
+    const hiddenEscortCount = Math.max(0, escorts.length - visibleEscortCount);
+    const escortList = escorts
+      .map((escortName, index) => {
+        const drilldownVessel = this.buildClusterEscortVessel(csg, escortName, index);
+        const vesselRowId = this.registerClusterPopupVessel(drilldownVessel);
+        const isHidden = index >= visibleEscortCount;
+        return `<button type="button" class="cluster-vessel-item cluster-vessel-item--clickable${isHidden ? ' cluster-vessel-item--hidden' : ''}" data-cluster-vessel-id="${escapeHtml(vesselRowId)}" data-cluster-scope="csg-escorts"${isHidden ? ' hidden' : ''}>${escapeHtml(getLocalizedGeoName(escortName) || escortName)}</button>`;
+      })
       .join('');
-    const moreEscorts = (csg.escorts?.length ?? 0) > 6
-      ? `<div class="cluster-more">+${(csg.escorts!.length - 6)} more</div>`
+    const moreEscorts = hiddenEscortCount > 0
+      ? `<button type="button" class="cluster-more cluster-expand-toggle" data-cluster-toggle="csg-escorts" data-cluster-scope="csg-escorts" data-show-label="${escapeHtml(t('popups.militaryCluster.moreVessels', { count: String(hiddenEscortCount) }))}" data-hide-label="${escapeHtml(t('popups.militaryCluster.showLessVessels'))}" aria-expanded="false">${escapeHtml(t('popups.militaryCluster.moreVessels', { count: String(hiddenEscortCount) }))}</button>`
       : '';
 
     return `
@@ -2790,6 +2844,31 @@ export class MapPopup {
   private sanitizeClassToken(value: string | undefined, fallback = 'unknown'): string {
     const token = String(value || '').trim().replace(/[^A-Za-z0-9_-]/g, '').replace(/^[^A-Za-z_]/, '');
     return token || fallback;
+  }
+
+  private registerClusterPopupVessel(vessel: MilitaryVessel): string {
+    this.clusterPopupVesselRowSeq += 1;
+    const id = `cluster-vessel-${this.clusterPopupVesselRowSeq}`;
+    this.clusterPopupVesselRows.set(id, vessel);
+    return id;
+  }
+
+  private buildClusterEscortVessel(csg: NavalStrikeGroup, escortName: string, index: number): MilitaryVessel {
+    return {
+      id: `csg-escort-${csg.id}-${index}`,
+      mmsi: '',
+      name: escortName,
+      vesselType: 'unknown',
+      operator: 'other',
+      operatorCountry: '',
+      lat: csg.lat,
+      lon: csg.lon,
+      heading: 0,
+      speed: 0,
+      lastAisUpdate: new Date(),
+      confidence: 'low',
+      note: csg.name,
+    };
   }
 
   private renderNaturalEventPopup(event: NaturalEvent): string {

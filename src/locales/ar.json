@@ -2393,6 +2393,7 @@
         "unknown": "نشاط بحري"
       },
       "moreVessels": "+{{count}} سفينة إضافية",
+      "showLessVessels": "عرض سفن أقل",
       "vesselsCount": "{{count}} سفينة",
       "vessels": "سفن",
       "trackedVessels": "سفن مُتتبَّعة",

@@ -2346,6 +2346,7 @@
         "unknown": "Naval Activity"
       },
       "moreVessels": "+{{count}} more vessels",
+      "showLessVessels": "Show fewer vessels",
       "vesselsCount": "{{count}} VESSELS",
       "vessels": "VESSELS",
       "trackedVessels": "TRACKED VESSELS",
