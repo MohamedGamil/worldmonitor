@@ -753,6 +753,29 @@ export interface MilitaryFlight {
   confidence: 'high' | 'medium' | 'low';
   isInteresting?: boolean;     // Flagged for unusual activity
   note?: string;
+  admissionReason?: string;
+  classificationReason?: string;
+  operatorInferenceReason?: string;
+  aircraftTypeInferenceReason?: string;
+  callsignMatch?: string;
+  hexMatch?: string;
+  lastSeenMs?: number;
+  sourceHints?: {
+    militaryHint?: boolean;
+    militaryOperatorHint?: boolean;
+    commercialHint?: boolean;
+  };
+  sourceMeta?: {
+    source?: string;
+    operatorName?: string;
+    operatorCode?: string;
+    ownerName?: string;
+    aircraftModel?: string;
+    aircraftTypeLabel?: string;
+    aircraftTypeCode?: string;
+    aircraftDescription?: string;
+    registration?: string;
+  };
   // Wingbits enrichment data
   enriched?: {
     manufacturer?: string;

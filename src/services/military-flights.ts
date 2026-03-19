@@ -16,6 +16,8 @@ import {
 } from './wingbits';
 import { isFeatureAvailable } from './runtime-config';
 
+const MILITARY_FLIGHTS_API_URL = '/api/military-flights';
+
 // OpenSky API path — route through Vercel so Railway secret never reaches the browser.
 const OPENSKY_PROXY_URL = '/api/opensky';
 const wsRelayUrl = import.meta.env.VITE_WS_RELAY_URL || '';
@@ -92,6 +94,163 @@ type OpenSkyStateArray = [
 interface OpenSkyResponse {
   time: number;
   states: OpenSkyStateArray[] | null;
+}
+
+interface MilitaryFlightsApiResponse {
+  flights?: unknown[];
+  fetchedAt?: number | string;
+  stats?: {
+    total?: number;
+    byType?: Record<string, number>;
+  };
+  classificationAudit?: Record<string, unknown>;
+}
+
+type MilitaryFlightsApiFlight = Partial<MilitaryFlight> & {
+  id?: string;
+  callsign?: string;
+  hexCode?: string;
+  aircraftType?: string;
+  operator?: string;
+  operatorCountry?: string;
+  confidence?: 'high' | 'medium' | 'low';
+  lastSeenMs?: number;
+  lastSeen?: string | number | Date;
+};
+
+function normalizeAircraftType(type: unknown): MilitaryAircraftType {
+  const normalized = String(type || 'unknown').toLowerCase() as MilitaryAircraftType;
+  const allowed: MilitaryAircraftType[] = [
+    'fighter',
+    'bomber',
+    'transport',
+    'tanker',
+    'awacs',
+    'reconnaissance',
+    'helicopter',
+    'drone',
+    'patrol',
+    'special_ops',
+    'vip',
+    'unknown',
+  ];
+  return allowed.includes(normalized) ? normalized : 'unknown';
+}
+
+function normalizeOperator(operator: unknown): MilitaryOperator {
+  const normalized = String(operator || 'other').toLowerCase() as MilitaryOperator;
+  const allowed: MilitaryOperator[] = [
+    'usaf', 'usn', 'usmc', 'usa', 'raf', 'rn', 'faf', 'gaf', 'plaaf', 'plan', 'vks', 'iaf', 'nato', 'other',
+  ];
+  return allowed.includes(normalized) ? normalized : 'other';
+}
+
+function normalizeConfidence(confidence: unknown): 'high' | 'medium' | 'low' {
+  if (confidence === 'high' || confidence === 'medium' || confidence === 'low') return confidence;
+  return 'low';
+}
+
+function parseLastSeen(raw: MilitaryFlightsApiFlight, fallbackMs: number): Date {
+  if (typeof raw.lastSeenMs === 'number' && Number.isFinite(raw.lastSeenMs)) {
+    return new Date(raw.lastSeenMs);
+  }
+  if (raw.lastSeen instanceof Date) return raw.lastSeen;
+  if (typeof raw.lastSeen === 'number' && Number.isFinite(raw.lastSeen)) {
+    return raw.lastSeen > 1_000_000_000_000 ? new Date(raw.lastSeen) : new Date(raw.lastSeen * 1000);
+  }
+  if (typeof raw.lastSeen === 'string') {
+    const parsed = Date.parse(raw.lastSeen);
+    if (Number.isFinite(parsed)) return new Date(parsed);
+  }
+  return new Date(fallbackMs);
+}
+
+function appendTrackFromHistory(flight: MilitaryFlight): MilitaryFlight {
+  const historyKey = flight.hexCode.toLowerCase();
+  let history = flightHistory.get(historyKey);
+  if (!history) {
+    history = { positions: [], lastUpdate: Date.now() };
+    flightHistory.set(historyKey, history);
+  }
+  history.positions.push([flight.lat, flight.lon]);
+  if (history.positions.length > HISTORY_MAX_POINTS) {
+    history.positions.shift();
+  }
+  history.lastUpdate = Date.now();
+  return {
+    ...flight,
+    track: history.positions.length > 1 ? [...history.positions] : undefined,
+  };
+}
+
+function mapApiFlight(rawFlight: unknown, fallbackSeenMs: number): MilitaryFlight | null {
+  if (!rawFlight || typeof rawFlight !== 'object') return null;
+  const raw = rawFlight as MilitaryFlightsApiFlight;
+  const lat = Number(raw.lat);
+  const lon = Number(raw.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+  const hexCode = String(raw.hexCode || '').toUpperCase().trim();
+  if (!hexCode) return null;
+
+  const callsign = String(raw.callsign || '').trim();
+  const seenAt = parseLastSeen(raw, fallbackSeenMs);
+  const canonical: MilitaryFlight = {
+    id: String(raw.id || `opensky-${hexCode.toLowerCase()}`),
+    callsign: callsign || `UNKN-${hexCode.substring(0, 4)}`,
+    hexCode,
+    registration: raw.registration,
+    aircraftType: normalizeAircraftType(raw.aircraftType),
+    aircraftModel: raw.aircraftModel,
+    operator: normalizeOperator(raw.operator),
+    operatorCountry: String(raw.operatorCountry || 'Unknown'),
+    lat,
+    lon,
+    altitude: Number.isFinite(Number(raw.altitude)) ? Number(raw.altitude) : 0,
+    heading: Number.isFinite(Number(raw.heading)) ? Number(raw.heading) : 0,
+    speed: Number.isFinite(Number(raw.speed)) ? Number(raw.speed) : 0,
+    verticalRate: Number.isFinite(Number(raw.verticalRate)) ? Number(raw.verticalRate) : undefined,
+    onGround: Boolean(raw.onGround),
+    squawk: raw.squawk,
+    origin: raw.origin,
+    destination: raw.destination,
+    lastSeen: seenAt,
+    firstSeen: raw.firstSeen ? new Date(raw.firstSeen) : undefined,
+    confidence: normalizeConfidence(raw.confidence),
+    isInteresting: Boolean(raw.isInteresting),
+    note: raw.note,
+    enriched: raw.enriched,
+    admissionReason: raw.admissionReason,
+    classificationReason: raw.classificationReason,
+    operatorInferenceReason: raw.operatorInferenceReason,
+    aircraftTypeInferenceReason: raw.aircraftTypeInferenceReason,
+    callsignMatch: raw.callsignMatch,
+    hexMatch: raw.hexMatch,
+    sourceMeta: raw.sourceMeta,
+    sourceHints: raw.sourceHints,
+    lastSeenMs: typeof raw.lastSeenMs === 'number' ? raw.lastSeenMs : seenAt.getTime(),
+  };
+
+  return appendTrackFromHistory(canonical);
+}
+
+async function fetchFromMilitaryFlightsApi(): Promise<MilitaryFlight[]> {
+  const response = await fetch(MILITARY_FLIGHTS_API_URL, { headers: { Accept: 'application/json' } });
+  if (!response.ok) {
+    throw new Error(`Military flights API failed (${response.status})`);
+  }
+
+  const payload = await response.json() as MilitaryFlightsApiResponse;
+  const fallbackSeenMs = typeof payload.fetchedAt === 'number'
+    ? payload.fetchedAt
+    : Date.now();
+  const flights = Array.isArray(payload.flights)
+    ? payload.flights
+      .map((raw) => mapApiFlight(raw, fallbackSeenMs))
+      .filter((flight): flight is MilitaryFlight => flight !== null)
+    : [];
+
+  return flights;
 }
 
 /**
@@ -539,10 +698,6 @@ export async function fetchMilitaryFlights(): Promise<{
 
   ensureFlightHistoryCleanup();
 
-  if (!isFeatureAvailable('openskyRelay')) {
-    return { flights: [], clusters: [] };
-  }
-
   militaryRequestInFlight = breaker.execute(async () => {
     // Check cache
     if (flightCache && Date.now() - flightCache.timestamp < CACHE_TTL) {
@@ -550,10 +705,17 @@ export async function fetchMilitaryFlights(): Promise<{
       return { flights: flightCache.data, clusters };
     }
 
-    // Fetch from OpenSky (regional queries for efficiency).
-    // fetchFromOpenSky() throws only when ALL regions fail with HTTP errors;
-    // returning zero identified military flights is a valid (not error) state.
-    let flights = await fetchFromOpenSky();
+    // Preferred source is the seeded military endpoint.
+    // Fallback to direct OpenSky relay only when explicitly enabled.
+    let flights: MilitaryFlight[];
+    try {
+      flights = await fetchFromMilitaryFlightsApi();
+    } catch (error) {
+      if (!isFeatureAvailable('openskyRelay')) {
+        throw error;
+      }
+      flights = await fetchFromOpenSky();
+    }
 
     // Enrich with Wingbits aircraft details (owner, operator, type)
     flights = await enrichFlightsWithWingbits(flights);

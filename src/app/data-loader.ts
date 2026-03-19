@@ -12,6 +12,7 @@ import {
   LAYER_TO_SOURCE,
 } from '@/config';
 import { INTEL_HOTSPOTS, CONFLICT_ZONES } from '@/config/geo';
+import { isConfirmedMilitaryFlightRecord } from '@/config/military';
 import { tokenizeForMatch, matchKeyword } from '@/utils/keyword-match';
 import {
   fetchCategoryFeeds,
@@ -1778,9 +1779,7 @@ export class DataLoaderManager implements AppModule {
       let confirmed = 0;
       let unknown = 0;
       for (const flight of flights) {
-        const isConfirmed = flight.enriched?.confirmedMilitary === true
-          || flight.confidence !== 'low'
-          || flight.operator !== 'other';
+        const isConfirmed = isConfirmedMilitaryFlightRecord(flight);
         if (isConfirmed) confirmed += 1;
         else unknown += 1;
       }
