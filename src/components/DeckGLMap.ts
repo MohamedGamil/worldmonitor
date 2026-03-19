@@ -566,36 +566,39 @@ export class DeckGLMap {
     attribution.innerHTML = '© <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
     wrapper.appendChild(attribution);
 
-    const navalOverlay = document.createElement('div');
-    navalOverlay.className = 'naval-info-overlay';
-    navalOverlay.style.cssText = [
-      'position:absolute',
-      'direction:ltr',
-      'bottom:10px',
-      'left:10px',
-      'z-index:60',
-      'display:none',
-      'min-width:220px',
-      'max-width:320px',
-      'padding:10px 12px',
-      'border-radius:8px',
-      'border:1px solid rgba(110,180,255,0.45)',
-      'background:rgba(7,12,20,0.88)',
-      'backdrop-filter:blur(4px)',
-      'color:#eaf4ff',
-      'font-size:12px',
-      'line-height:1.35',
-      'box-shadow:0 10px 24px rgba(0,0,0,0.35)',
-      'pointer-events:none',
-    ].join(';');
-    wrapper.appendChild(navalOverlay);
-    this.navalInfoOverlayEl = navalOverlay;
+    if (SHOW_NAVAL_DEV_OVERLAY) {
+      const navalOverlay = document.createElement('div');
+      navalOverlay.className = 'naval-info-overlay';
+      navalOverlay.style.cssText = [
+        'position:absolute',
+        'direction:ltr',
+        'bottom:10px',
+        'left:10px',
+        'z-index:60',
+        'display:none',
+        'min-width:220px',
+        'max-width:320px',
+        'padding:10px 12px',
+        'border-radius:8px',
+        'border:1px solid rgba(110,180,255,0.45)',
+        'background:rgba(7,12,20,0.88)',
+        'backdrop-filter:blur(4px)',
+        'color:#eaf4ff',
+        'font-size:12px',
+        'line-height:1.35',
+        'box-shadow:0 10px 24px rgba(0,0,0,0.35)',
+        'pointer-events:none',
+      ].join(';');
+      wrapper.appendChild(navalOverlay);
+      this.navalInfoOverlayEl = navalOverlay;
+    }
 
     this.container.appendChild(wrapper);
     this.updateNavalInfoOverlay();
   }
 
   private updateNavalInfoOverlay(): void {
+    if (!SHOW_NAVAL_DEV_OVERLAY) return;
     const overlay = this.navalInfoOverlayEl;
     if (!overlay) return;
     const snapshot = this.navalSnapshot;

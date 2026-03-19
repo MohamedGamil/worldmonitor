@@ -928,7 +928,9 @@ export class GlobeMap {
     // Add overlay UI (zoom controls + layer panel)
     this.createControls();
     this.createLayerToggles();
-    this.createNavalInfoOverlay();
+    if (SHOW_NAVAL_DEV_OVERLAY) {
+      this.createNavalInfoOverlay();
+    }
 
     // Loading overlay must be appended AFTER all globe.gl and UI elements so it is
     // the last DOM child — guaranteeing it sits on top in paint order.
@@ -1676,6 +1678,7 @@ export class GlobeMap {
   }
 
   private createNavalInfoOverlay(): void {
+    if (!SHOW_NAVAL_DEV_OVERLAY) return;
     const overlay = document.createElement('div');
     overlay.className = 'naval-info-overlay';
     overlay.style.cssText = [
@@ -1704,6 +1707,7 @@ export class GlobeMap {
   }
 
   private updateNavalInfoOverlay(): void {
+    if (!SHOW_NAVAL_DEV_OVERLAY) return;
     const overlay = this.navalInfoOverlayEl;
     if (!overlay) return;
     const snapshot = this.navalSnapshot;
