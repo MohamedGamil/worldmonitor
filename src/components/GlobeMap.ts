@@ -18,6 +18,7 @@ import Globe from 'globe.gl';
 import { isDesktopRuntime } from '@/services/runtime';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
 import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES } from '@/config/geo';
+import { PORTS, type Port } from '@/config/ports';
 import { t } from '@/services/i18n';
 import { svgIcon } from '@/utils/icons';
 import { SITE_VARIANT } from '@/config/variant';
@@ -43,7 +44,8 @@ import type { IranEvent } from '@/services/conflict';
 import type { DisplacementFlow } from '@/services/displacement';
 import type { ClimateAnomaly } from '@/services/climate';
 import type { GpsJamHex } from '@/services/gps-interference';
-import { MapPopup } from './MapPopup';
+import { haversineKm } from '@/utils/distance';
+import { MapPopup, type EnrichedAircraftPopupData } from './MapPopup';
 
 // ─── Marker discriminated union ─────────────────────────────────────────────
 interface BaseMarker {
@@ -298,6 +300,15 @@ interface AisDisruptionMarker extends BaseMarker {
   severity: AisDisruptionEvent['severity'];
   description: string;
 }
+interface PortMarker extends BaseMarker {
+  _kind: 'port';
+  id: string;
+  name: string;
+  type: Port['type'];
+  country: string;
+  rank?: number;
+  note?: string;
+}
 interface GlobePath {
   id: string;
   name: string;
@@ -324,7 +335,7 @@ type GlobeMarker =
   | UcdpMarker | DisplacementMarker | ClimateMarker | GpsJamMarker | TechMarker
   | ConflictZoneMarker | MilBaseMarker | NuclearSiteMarker | IrradiatorSiteMarker | SpaceportSiteMarker
   | EarthquakeMarker | EconomicMarker | DatacenterMarker | WaterwayMarker | MineralMarker
-  | FlightDelayMarker | CableAdvisoryMarker | RepairShipMarker | AisDisruptionMarker
+  | FlightDelayMarker | CableAdvisoryMarker | RepairShipMarker | AisDisruptionMarker | PortMarker
   | NewsLocationMarker | FlashMarker | AircraftPositionMarker;
 
 interface GlobeControlsLike {
@@ -412,6 +423,17 @@ export class GlobeMap {
   private cableAdvisoryMarkers: CableAdvisoryMarker[] = [];
   private repairShipMarkers: RepairShipMarker[] = [];
   private aisMarkers: AisDisruptionMarker[] = [];
+  private portMarkers: PortMarker[] = PORTS.map(p => ({
+    _kind: 'port' as const,
+    _lat: p.lat,
+    _lng: p.lon,
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    country: p.country,
+    rank: p.rank,
+    note: p.note,
+  }));
   private tradeRouteSegments: TradeRouteSegment[] = [];
   private globePaths: GlobePath[] = [];
   private cableFaultIds = new Set<string>();
@@ -556,9 +578,10 @@ export class GlobeMap {
     controls.enablePan = false;
     controls.enableZoom = true;
     controls.zoomSpeed = 1.4;
-    // globe.gl radius is ~100 world units; distance 150 ~= altitude 0.5 (zoom level 4 cap)
-    controls.minDistance = 150;
-    controls.maxDistance = 600;
+    // globe.gl radius is ~100 world units; cameraDistance = 100 * (1 + altitude)
+    // minDistance 150 → altitude 0.5; maxDistance must match MAX_GLOBE_ZOOM_LEVEL.
+    controls.minDistance = 100 * (1 + GlobeMap.MIN_ALTITUDE_FOR_MAX_ZOOM); // 150 → alt 0.5
+    controls.maxDistance = 100 * (1 + GlobeMap.MAX_GLOBE_ZOOM_LEVEL);      // 500 → alt 4.0
     controls.enableDamping = !desktop;
 
     // Force the canvas to visually fill the container so it expands with CSS transitions.
@@ -779,7 +802,11 @@ export class GlobeMap {
       .htmlAltitude((d: object) => {
         const m = d as GlobeMarker;
         if (m._kind === 'flight' || m._kind === 'vessel') return 0.012;
-        if (m._kind === 'aircraftPos') return (m as AircraftPositionMarker).onGround ? 0.001 : 0.009;
+        if (m._kind === 'aircraftPos') {
+          const aircraft = m as AircraftPositionMarker;
+          if (this.layers.flights) return aircraft.onGround ? 0.004 : 0.014;
+          return aircraft.onGround ? 0.001 : 0.009;
+        }
         if (m._kind === 'hotspot') return 0.005;
         return 0.003;
       })
@@ -890,6 +917,10 @@ export class GlobeMap {
 
     // Navigate to initial view
     this.setView(this.currentView);
+
+    // Start polling immediately when flights/unknown-aircraft layers are
+    // already enabled on initial load.
+    this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
 
     // dayNight toggle excluded by catalog (renderers: ['flat'])
 
@@ -1127,14 +1158,35 @@ export class GlobeMap {
       const sc = d.severity === 'high' ? '#ff2020' : d.severity === 'elevated' ? '#ff8800' : '#44aaff';
       el.innerHTML = svgIcon('anchor', sc, 12);
       el.title = d.name;
+    } else if (d._kind === 'port') {
+      const pc = d.type === 'naval' ? '#4488ff' : d.type === 'oil' ? '#ff8800' : d.type === 'lng' ? '#ffee44' : d.type === 'container' ? '#44ddff' : d.type === 'bulk' ? '#bb8844' : '#44cc88';
+      el.innerHTML = svgIcon('anchor', pc, 11);
+      el.title = `${d.name}\n${d.type}${d.country ? ' · ' + d.country : ''}${d.rank != null ? ' · rank ' + d.rank : ''}`;
     } else if (d._kind === 'aircraftPos') {
-      const acColor = d.onGround ? '#777777' : '#a064ff';
-      const acSize = d.onGround ? 12 : 16;
+      const isFlightLayerAircraft = this.layers.flights;
+      const acColor = d.onGround
+        ? (isFlightLayerAircraft ? '#b0b0b0' : '#777777')
+        : (isFlightLayerAircraft ? '#1fe3ff' : '#a064ff');
+      const acSize = d.onGround ? (isFlightLayerAircraft ? 13 : 12) : (isFlightLayerAircraft ? 18 : 16);
+      const flightDelayContext = isFlightLayerAircraft ? this.findNearestDelayAirport(this.toPositionSample(d)) : null;
+      const delayLabel = flightDelayContext
+        ? `\nNear delay airport: ${flightDelayContext.iata} (${flightDelayContext.distanceKm < 10 ? flightDelayContext.distanceKm.toFixed(1) : flightDelayContext.distanceKm.toFixed(0)} km)`
+        : '';
+      const altLabel = d.onGround
+        ? t('popups.aircraft.ground')
+        : d.altitudeFt > 100
+          ? `FL${Math.round(d.altitudeFt / 100)} (${d.altitudeFt.toLocaleString()} ft)`
+          : `${d.altitudeFt.toLocaleString()} ft`;
+      const speedLabel = `${Math.round(d.groundSpeedKts)} kts`;
+      const headingLabel = `${Math.round(d.trackDeg || 0)}°`;
+
       el.innerHTML = `
-        <div style="transform:rotate(${(d.trackDeg ?? 0) +90}deg);display:inline-block;line-height:0;transition:transform 0.3s;filter:drop-shadow(0 0 5px ${acColor}99);">
-          ${svgIcon('plane-civilian', acColor, acSize)}
+        <div style="position:relative;display:inline-block;line-height:0;">
+          <div style="transform:rotate(${(d.trackDeg ?? 0) + 90}deg);display:inline-block;line-height:0;transition:transform 0.3s;filter:drop-shadow(0 0 6px ${acColor}bb);position:relative;z-index:1;">
+            ${svgIcon('plane-civilian', acColor, acSize)}
+          </div>
         </div>`;
-      el.title = d.callsign ? `${d.callsign} (${d.icao24})` : d.icao24;
+      el.title = `${d.callsign ? `${d.callsign} (${d.icao24})` : d.icao24}\n${altLabel} · ${speedLabel} · ${headingLabel}${delayLabel}`;
     } else if (d._kind === 'flash') {
       el.style.pointerEvents = 'none';
       el.innerHTML = `
@@ -1247,10 +1299,18 @@ export class GlobeMap {
       case 'cableAdvisory': this.popup.show({ type: 'cable-advisory', data: d as any, x, y }); break;
       case 'repairShip':    this.popup.show({ type: 'repair-ship', data: d as any, x, y }); break;
       case 'aisDisruption': this.popup.show({ type: 'ais', data: d as any, x, y }); break;
+      case 'port':          this.popup.show({ type: 'port', data: d as any, x, y }); break;
       case 'gpsjam':        this.popup.show({ type: 'gpsJamming', data: { h3: d.id, lat: d._lat, lon: d._lng, level: d.level, pct: d.pct, good: 0, bad: 0, total: 0 } as any, x, y }); break;
       case 'newsLocation':  this.popup.show({ type: 'newsLocation', data: { title: d.title, lat: d._lat, lon: d._lng, threatLevel: d.threatLevel, timestamp: d.timestamp }, x, y }); break;
       case 'tech':          this.popup.show({ type: 'techEvent', data: d as any, x, y }); break;
-      case 'aircraftPos':   this.popup.show({ type: 'aircraft', data: d as any, x, y }); break;
+      case 'aircraftPos': {
+        const aircraft = d as AircraftPositionMarker;
+        const payload = this.layers.flights
+          ? this.enrichFlightLayerAircraftPopupData(aircraft)
+          : this.toPositionSample(aircraft);
+        this.popup.show({ type: 'aircraft', data: payload as any, x, y });
+        break;
+      }
       case 'ucdp': {
         const ucdpData = d as UcdpMarker;
         this.popup.show({
@@ -1458,7 +1518,7 @@ export class GlobeMap {
     if (!this.globe) return;
     const pov = this.globe.pointOfView();
     if (!pov) return;
-    const alt = Math.min(4.0, (pov.altitude ?? 1.8) * 1.6);
+    const alt = Math.min(GlobeMap.MAX_GLOBE_ZOOM_LEVEL, (pov.altitude ?? 1.8) * 1.6);
     this.globe.pointOfView({ lat: pov.lat, lng: pov.lng, altitude: alt }, 500);
   }
 
@@ -1581,6 +1641,7 @@ export class GlobeMap {
     if (this.layers.flights) markers.push(...this.flightDelayMarkers);
     if (this.layers.flights) markers.push(...this.aircraftPositionMarkers);
     if (this.layers.ais) markers.push(...this.aisMarkers);
+    if (this.layers.ais) markers.push(...this.portMarkers);
     if (this.layers.iranAttacks) markers.push(...this.iranMarkers);
     if (this.layers.outages) markers.push(...this.outageMarkers);
     if (this.layers.cyberThreats) markers.push(...this.cyberMarkers);
@@ -1834,10 +1895,8 @@ export class GlobeMap {
     if (needArcs) this.flushArcs();
     if (needPaths) this.flushPaths();
     if (needPolygons) this.flushPolygons();
-    // Manage aircraft polling timer when flights/civilian layers toggle
-    if (prev.flights !== this.layers.flights || prev.militaryAircraftUnknown !== this.layers.militaryAircraftUnknown) {
-      this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
-    }
+    // Keep aircraft polling synchronized with current layer state.
+    this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
   }
 
   public enableLayer(layer: keyof MapLayers): void {
@@ -2194,6 +2253,82 @@ export class GlobeMap {
     this.flushMarkers();
   }
 
+  private toPositionSample(marker: AircraftPositionMarker): PositionSample {
+    return {
+      icao24: marker.icao24,
+      callsign: marker.callsign,
+      lat: marker._lat,
+      lon: marker._lng,
+      altitudeFt: marker.altitudeFt,
+      groundSpeedKts: marker.groundSpeedKts,
+      trackDeg: marker.trackDeg,
+      verticalRate: marker.verticalRate,
+      onGround: marker.onGround,
+      source: marker.source,
+      observedAt: marker.observedAt,
+    };
+  }
+
+  private enrichFlightLayerAircraftPopupData(marker: AircraftPositionMarker): EnrichedAircraftPopupData {
+    const position = this.toPositionSample(marker);
+    const nearestDelayAirport = this.findNearestDelayAirport(position);
+    const speedMach = !position.onGround && position.groundSpeedKts >= 250
+      ? Number((position.groundSpeedKts / 661).toFixed(2))
+      : null;
+
+    return {
+      ...position,
+      popupContext: 'flight-delays-aircraft',
+      phase: this.deriveCivilianFlightPhase(position),
+      verticalTrend: position.verticalRate > 0.5
+        ? 'climbing'
+        : position.verticalRate < -0.5
+          ? 'descending'
+          : 'level',
+      speedKmh: Math.round(position.groundSpeedKts * 1.852),
+      speedMach,
+      ageSeconds: Math.max(0, Math.round((Date.now() - position.observedAt.getTime()) / 1000)),
+      inferredCountry: nearestDelayAirport?.country,
+      nearestDelayAirport,
+    };
+  }
+
+  private deriveCivilianFlightPhase(position: PositionSample): EnrichedAircraftPopupData['phase'] {
+    if (position.onGround || position.altitudeFt < 100) return 'ground';
+    if (position.altitudeFt < 3000) return Math.abs(position.verticalRate) > 0.8 ? 'climb' : 'taxi';
+    if (position.verticalRate > 1.5) return 'climb';
+    if (position.verticalRate < -1.5) return position.altitudeFt < 12000 ? 'approach' : 'descent';
+    return 'cruise';
+  }
+
+  private findNearestDelayAirport(position: PositionSample): EnrichedAircraftPopupData['nearestDelayAirport'] {
+    if (!this.flightDelayMarkers.length) return null;
+
+    let nearest: FlightDelayMarker | null = null;
+    let minDistanceKm = Number.POSITIVE_INFINITY;
+
+    for (const delay of this.flightDelayMarkers) {
+      const distanceKm = haversineKm(position.lat, position.lon, delay._lat, delay._lng);
+      if (distanceKm < minDistanceKm) {
+        minDistanceKm = distanceKm;
+        nearest = delay;
+      }
+    }
+
+    if (!nearest || minDistanceKm > 350) return null;
+
+    return {
+      iata: nearest.iata,
+      name: nearest.name,
+      city: nearest.city,
+      country: nearest.country,
+      severity: nearest.severity,
+      delayType: nearest.delayType,
+      avgDelayMinutes: nearest.avgDelayMinutes,
+      distanceKm: minDistanceKm,
+    };
+  }
+
   private manageAircraftTimer(enabled: boolean): void {
     if (enabled) {
       if (!this.aircraftFetchTimer) {
@@ -2219,22 +2354,24 @@ export class GlobeMap {
       this.aircraftFetchTimer = null;
       if (this.destroyed || (!this.layers.flights && !this.layers.militaryAircraftUnknown)) return;
 
-      await this.fetchViewportAircraft();
-      this.scheduleAircraftFetch(120_000);
+      const nextDelay = await this.fetchViewportAircraft();
+      this.scheduleAircraftFetch(nextDelay);
     }, Math.max(0, delayMs));
   }
 
-  private async fetchViewportAircraft(): Promise<void> {
-    if (!this.globe || (!this.layers.flights && !this.layers.militaryAircraftUnknown) || this.destroyed) return;
+  private async fetchViewportAircraft(): Promise<number> {
+    if (!this.globe || (!this.layers.flights && !this.layers.militaryAircraftUnknown) || this.destroyed) return 120_000;
     const pov = this.globe.pointOfView() as { lat: number; lng: number; altitude: number };
     const alt = pov?.altitude ?? 1.5;
-    // Skip fetch when zoomed far out — too many positions
-    if (alt > 2.2) {
+    // Skip fetch only when at the very edge of max zoom-out (last 12% of the reachable
+    // altitude range). Below that threshold aircraft are shown at all accessible altitudes.
+    // Return a short retry so the poller recovers quickly after zoom-in.
+    if (alt > GlobeMap.MAX_GLOBE_ZOOM_LEVEL - 0.5) {
       if (this.aircraftPositionMarkers.length > 0) {
         this.aircraftPositionMarkers = [];
         this.flushMarkers();
       }
-      return;
+      return 5_000;
     }
     // Estimate visible region from globe POV altitude
     const degSpan = Math.min(160, alt * 100 + 20);
@@ -2247,11 +2384,12 @@ export class GlobeMap {
     const seq = ++this.aircraftFetchSeq;
     try {
       const positions = await fetchAircraftPositions({ swLat, swLon, neLat, neLon });
-      if (seq !== this.aircraftFetchSeq || this.destroyed) return;
+      if (seq !== this.aircraftFetchSeq || this.destroyed) return 120_000;
       this.setAircraftPositions(positions);
     } catch (err) {
       if (import.meta.env.DEV) console.warn('[GlobeMap] aircraft fetch error', err);
     }
+    return 120_000;
   }
 
   public setNewsLocations(data: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }>): void {
@@ -2504,7 +2642,7 @@ export class GlobeMap {
   }
 
   private clampAltitudeForMaxZoom(altitude: number): number {
-    return Math.max(GlobeMap.MIN_ALTITUDE_FOR_MAX_ZOOM, altitude);
+    return Math.min(GlobeMap.MAX_GLOBE_ZOOM_LEVEL, Math.max(GlobeMap.MIN_ALTITUDE_FOR_MAX_ZOOM, altitude));
   }
 
   private getAdaptivePixelRatio(basePr: number, altitude: number, desktop: boolean): number {

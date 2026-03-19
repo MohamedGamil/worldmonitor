@@ -46,7 +46,8 @@ import {
   COMMODITY_HUBS,
 } from '@/config';
 import { tokenizeForMatch, matchKeyword, findMatchingKeywords } from '@/utils/keyword-match';
-import { MapPopup } from './MapPopup';
+import { haversineKm } from '@/utils/distance';
+import { MapPopup, type EnrichedAircraftPopupData } from './MapPopup';
 import {
   updateHotspotEscalation,
   getHotspotEscalation,
@@ -2515,7 +2516,7 @@ export class MapComponent {
           const rect = this.container.getBoundingClientRect();
           this.popup.show({
             type: 'aircraft',
-            data: ac,
+            data: this.enrichFlightLayerAircraftPopupData(ac),
             x: e.clientX - rect.left,
             y: e.clientY - rect.top,
           });
@@ -3693,6 +3694,67 @@ export class MapComponent {
   public setAircraftPositions(positions: PositionSample[]): void {
     this.aircraftPositions = positions;
     this.render();
+  }
+
+  private enrichFlightLayerAircraftPopupData(position: PositionSample): EnrichedAircraftPopupData {
+    const nearestDelayAirport = this.findNearestDelayAirport(position);
+    const inferredCountry = nearestDelayAirport?.country || getCountryAtCoordinates(position.lat, position.lon)?.name;
+    const speedMach = !position.onGround && position.groundSpeedKts >= 250
+      ? Number((position.groundSpeedKts / 661).toFixed(2))
+      : null;
+
+    return {
+      ...position,
+      popupContext: 'flight-delays-aircraft',
+      phase: this.deriveCivilianFlightPhase(position),
+      verticalTrend: position.verticalRate > 0.5
+        ? 'climbing'
+        : position.verticalRate < -0.5
+          ? 'descending'
+          : 'level',
+      speedKmh: Math.round(position.groundSpeedKts * 1.852),
+      speedMach,
+      ageSeconds: Math.max(0, Math.round((Date.now() - position.observedAt.getTime()) / 1000)),
+      inferredCountry: inferredCountry || undefined,
+      nearestDelayAirport,
+    };
+  }
+
+  private deriveCivilianFlightPhase(position: PositionSample): EnrichedAircraftPopupData['phase'] {
+    if (position.onGround || position.altitudeFt < 100) return 'ground';
+    if (position.altitudeFt < 3000) return Math.abs(position.verticalRate) > 0.8 ? 'climb' : 'taxi';
+    if (position.verticalRate > 1.5) return 'climb';
+    if (position.verticalRate < -1.5) return position.altitudeFt < 12000 ? 'approach' : 'descent';
+    return 'cruise';
+  }
+
+  private findNearestDelayAirport(position: PositionSample): EnrichedAircraftPopupData['nearestDelayAirport'] {
+    if (!this.flightDelays.length) return null;
+
+    let nearest: AirportDelayAlert | null = null;
+    let minDistanceKm = Number.POSITIVE_INFINITY;
+
+    for (const delay of this.flightDelays) {
+      if (delay.lat == null || delay.lon == null) continue;
+      const distanceKm = haversineKm(position.lat, position.lon, delay.lat, delay.lon);
+      if (distanceKm < minDistanceKm) {
+        minDistanceKm = distanceKm;
+        nearest = delay;
+      }
+    }
+
+    if (!nearest || minDistanceKm > 350) return null;
+
+    return {
+      iata: nearest.iata,
+      name: nearest.name,
+      city: nearest.city,
+      country: nearest.country,
+      severity: nearest.severity,
+      delayType: nearest.delayType,
+      avgDelayMinutes: nearest.avgDelayMinutes,
+      distanceKm: minDistanceKm,
+    };
   }
 
   public setMilitaryFlights(flights: MilitaryFlight[], clusters: MilitaryFlightCluster[] = []): void {

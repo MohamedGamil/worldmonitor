@@ -2042,7 +2042,8 @@
         "research": "بحث"
       },
       "statuses": {
-        "active": "نشطة",
+        "active": "نشط",
+        "inactive": "غير نشط",
         "contested": "متنازع عليها",
         "decommissioned": "خارج الخدمة"
       },

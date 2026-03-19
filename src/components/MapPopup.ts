@@ -17,6 +17,28 @@ import { getCableHealthRecord } from '@/services/cable-health';
 import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle, fetchPlanespottersImage } from '@/services/military-images';
 
 export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent';
+export interface AircraftDelayContext {
+  iata: string;
+  name: string;
+  city: string;
+  country: string;
+  severity: string;
+  delayType: string;
+  avgDelayMinutes: number;
+  distanceKm: number;
+}
+
+export interface EnrichedAircraftPopupData extends PositionSample {
+  popupContext?: 'flight-delays-aircraft' | 'civilian-aircraft';
+  phase?: 'ground' | 'taxi' | 'climb' | 'cruise' | 'descent' | 'approach';
+  verticalTrend?: 'climbing' | 'descending' | 'level';
+  speedKmh?: number;
+  speedMach?: number | null;
+  ageSeconds?: number;
+  inferredCountry?: string;
+  nearestDelayAirport?: AircraftDelayContext | null;
+}
+
 interface TechEventPopupData {
   id: string;
   title: string;
@@ -169,7 +191,7 @@ interface DatacenterClusterData {
 
 interface PopupData {
   type: PopupType;
-  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData;
+  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | EnrichedAircraftPopupData | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData;
   relatedNews?: NewsItem[];
   x: number;
   y: number;
@@ -525,7 +547,7 @@ export class MapPopup {
       case 'flight':
         return this.renderFlightPopup(data.data as AirportDelayAlert);
       case 'aircraft':
-        return this.renderAircraftPopup(data.data as PositionSample);
+        return this.renderAircraftPopup(data.data as EnrichedAircraftPopupData);
       case 'militaryFlight':
         return this.renderMilitaryFlightPopup(data.data as MilitaryFlight);
       case 'militaryVessel':
@@ -1236,13 +1258,53 @@ export class MapPopup {
     `;
   }
 
-  private renderAircraftPopup(pos: PositionSample): string {
+  private formatAircraftFreshness(ageSeconds: number): string {
+    const clamped = Math.max(0, Math.round(ageSeconds));
+    if (clamped < 60) return t('popups.timeAgo.s', { count: String(clamped) });
+    if (clamped < 3600) return t('popups.timeAgo.m', { count: String(Math.round(clamped / 60)) });
+    if (clamped < 86_400) return t('popups.timeAgo.h', { count: String(Math.round(clamped / 3600)) });
+    return t('popups.timeAgo.d', { count: String(Math.round(clamped / 86_400)) });
+  }
+
+  private deriveAircraftPhaseLabel(pos: PositionSample, phase?: EnrichedAircraftPopupData['phase']): string {
+    const value = phase ?? (pos.onGround ? 'ground' : 'cruise');
+    if (value === 'ground') return t('popups.aircraft.ground');
+    if (value === 'taxi') return 'Taxi';
+    if (value === 'climb') return 'Climb';
+    if (value === 'descent') return 'Descent';
+    if (value === 'approach') return 'Approach';
+    return 'Cruise';
+  }
+
+  private renderAircraftPopup(pos: EnrichedAircraftPopupData): string {
+    const isFlightDelayAircraft = pos.popupContext === 'flight-delays-aircraft';
     const callsign = escapeHtml(pos.callsign || pos.icao24);
+    const trackCallsign = (pos.callsign || '').trim().replace(/\s+/g, '');
     const onGroundBadge = pos.onGround ? 'low' : 'elevated';
     const statusLabel = pos.onGround ? t('popups.aircraft.ground') : t('popups.aircraft.airborne');
     const altDisplay = pos.altitudeFt > 100
       ? `FL${Math.round(pos.altitudeFt / 100)} (${pos.altitudeFt.toLocaleString()} ft)`
       : pos.onGround ? t('popups.aircraft.ground') : `${pos.altitudeFt.toLocaleString()} ft`;
+    const phaseLabel = this.deriveAircraftPhaseLabel(pos, pos.phase);
+    const speedKmh = pos.speedKmh ?? Math.round(pos.groundSpeedKts * 1.852);
+    const speedMach = pos.speedMach ?? (!pos.onGround && pos.groundSpeedKts >= 250
+      ? Number((pos.groundSpeedKts / 661).toFixed(2))
+      : null);
+    const ageSeconds = pos.ageSeconds ?? Math.max(0, Math.round((Date.now() - pos.observedAt.getTime()) / 1000));
+    const freshnessLabel = this.formatAircraftFreshness(ageSeconds);
+    const nearestAirport = pos.nearestDelayAirport ?? null;
+    const inferredCountry = nearestAirport?.country || pos.inferredCountry || '';
+    const airportContextLabel = nearestAirport
+      ? `${escapeHtml(nearestAirport.iata)} · ${escapeHtml(nearestAirport.city)}, ${escapeHtml(getLocalizedGeoName(nearestAirport.country))}`
+      : '';
+    const airportDelayLabel = nearestAirport
+      ? `${escapeHtml(nearestAirport.severity)} · ${nearestAirport.avgDelayMinutes > 0 ? `+${nearestAirport.avgDelayMinutes} ${t('popups.timeUnits.m')}` : t('popups.monitoring')}`
+      : '';
+    const airportDistanceLabel = nearestAirport
+      ? `${nearestAirport.distanceKm < 10
+        ? nearestAirport.distanceKm.toFixed(1)
+        : nearestAirport.distanceKm.toFixed(0)} km`
+      : '';
 
     // Vertical rate — only on PositionSample from server (may include verticalRate)
     const vr = pos.verticalRate;
@@ -1257,10 +1319,16 @@ export class MapPopup {
       .toLowerCase();
     const isSimulated = srcLabel.includes('simulated');
 
-    // Wikipedia image — resolve from callsign when the callsign maps to a known aircraft
+    // Flight-delay aircraft popup media: try hex-photo first via data-hex-code,
+    // then use wiki title fallback if available.
     const wikiTitle = pos.callsign ? getCallsignWikiTitle(pos.callsign) : null;
-    const mediaHtml = wikiTitle
-      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(wikiTitle)}" role="img" aria-label="${escapeHtml(wikiTitle)}"><div class="popup-media__skeleton"></div></div>`
+    const hasHexCode = Boolean((pos.icao24 || '').trim());
+    const hexAttr = hasHexCode ? ` data-hex-code="${escapeHtml(pos.icao24.trim().toLowerCase())}"` : '';
+    const mediaHtml = isFlightDelayAircraft && (wikiTitle || hasHexCode)
+      ? `<div class="popup-media popup-media--loading"${wikiTitle ? ` data-wiki-query="${encodeURIComponent(wikiTitle)}"` : ''}${hexAttr} role="img" aria-label="${escapeHtml(wikiTitle || pos.callsign || pos.icao24)}"><div class="popup-media__skeleton"></div></div>`
+      : '';
+    const trackFlightHtml = isFlightDelayAircraft && trackCallsign
+      ? `<div class="popup-actions" style="margin-top:8px;"><a href="https://www.flightaware.com/live/flight/${encodeURIComponent(trackCallsign)}" target="_blank" rel="noopener noreferrer" class="popup-action-link" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent,#60a5fa);text-decoration:none;">↗ ${escapeHtml(t('popups.militaryFlight.trackFlight'))}</a></div>`
       : '';
 
     return `
@@ -1272,7 +1340,7 @@ export class MapPopup {
       </div>
       ${mediaHtml}
       <div class="popup-body">
-        <div class="popup-subtitle">ICAO24: ${escapeHtml(pos.icao24)}</div>
+        <div class="popup-subtitle">ICAO24: ${escapeHtml(pos.icao24)}${pos.popupContext === 'flight-delays-aircraft' ? ' · Delay-network track' : ''}</div>
         ${isSimulated ? `<div class="popup-notice" style="color:var(--semantic-elevated);font-size:11px;margin-bottom:6px;">${svgIcon('warning', '#ffaa00', 11)} Simulated data — live feed unavailable</div>` : ''}
         <div class="popup-stats">
           <div class="popup-stat">
@@ -1281,11 +1349,15 @@ export class MapPopup {
           </div>
           <div class="popup-stat">
             <span class="stat-label">${t('popups.aircraft.speed')}</span>
-            <span class="stat-value">${Math.round(pos.groundSpeedKts)} kts</span>
+            <span class="stat-value">${Math.round(pos.groundSpeedKts)} kts · ${speedKmh.toLocaleString()} km/h${speedMach ? ` · M${speedMach.toFixed(2)}` : ''}</span>
           </div>
           <div class="popup-stat">
             <span class="stat-label">${t('popups.aircraft.heading')}</span>
             <span class="stat-value">${Math.round(pos.trackDeg)}&deg;</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">Phase</span>
+            <span class="stat-value">${phaseLabel}</span>
           </div>
           ${vrDisplay ? `
           <div class="popup-stat">
@@ -1300,11 +1372,27 @@ export class MapPopup {
             <span class="stat-label">${t('popups.source')}</span>
             <span class="stat-value">${escapeHtml(srcLabel)}</span>
           </div>
+          ${inferredCountry ? `
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.country')}</span>
+            <span class="stat-value">${escapeHtml(getLocalizedGeoName(inferredCountry))}</span>
+          </div>` : ''}
+          ${airportContextLabel ? `
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.near')}</span>
+            <span class="stat-value">${airportContextLabel} (${airportDistanceLabel})</span>
+          </div>` : ''}
+          ${airportDelayLabel ? `
+          <div class="popup-stat">
+            <span class="stat-label">Delay context</span>
+            <span class="stat-value">${airportDelayLabel}</span>
+          </div>` : ''}
           <div class="popup-stat">
             <span class="stat-label">${t('popups.updated')}</span>
-            <span class="stat-value">${pos.observedAt.toLocaleTimeString()}</span>
+            <span class="stat-value">${pos.observedAt.toLocaleTimeString()} · ${freshnessLabel}</span>
           </div>
         </div>
+        ${trackFlightHtml}
       </div>
     `;
   }
