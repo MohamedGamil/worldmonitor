@@ -34,7 +34,7 @@ import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
 import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
-import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup, NavalCluster } from '@/types';
+import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup, NavalCluster, SeededVessel } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import { fetchAircraftPositions } from '@/services/aviation';
@@ -409,6 +409,7 @@ export class GlobeMap {
   /** Full source objects, keyed by id — used to supply complete data to MapPopup */
   private flightDataMap = new Map<string, MilitaryFlight>();
   private vesselDataMap = new Map<string, MilitaryVessel>();
+  private navalVesselDataMap = new Map<string, SeededVessel>();
   private navalSnapshotDataMap = new Map<string, NavalStrikeGroup>();
   private navalClusterDataMap = new Map<string, NavalCluster>();
   private navalSnapshot: NavalActivitySnapshot | null = null;
@@ -1318,9 +1319,17 @@ export class GlobeMap {
       }
       case 'vessel': {
         const fullVessel = this.vesselDataMap.get(d.id);
+        const navalVessel = this.navalVesselDataMap.get(d.id);
         this.popup.show({ type: 'militaryVessel', data: (fullVessel ?? {
-          id: d.id, mmsi: '', name: d.name, vesselType: d.type as any,
-          operator: 'other' as any, operatorCountry: '', lat: d._lat, lon: d._lng,
+          id: d.id,
+          mmsi: '',
+          name: navalVessel?.name || d.name,
+          vesselType: (navalVessel?.vesselType || d.type) as any,
+          operator: (navalVessel?.operator || 'other') as any,
+          operatorCountry: navalVessel?.operatorCountry || '',
+          lat: navalVessel?.lat ?? d._lat,
+          lon: navalVessel?.lon ?? d._lng,
+          hullNumber: navalVessel?.hullNumber,
           heading: 0, speed: 0, lastAisUpdate: new Date(), confidence: 'low' as const,
         }) as any, x, y });
         break;
@@ -1989,6 +1998,7 @@ export class GlobeMap {
 
   public setNavalActivity(snapshot: NavalActivitySnapshot): void {
     this.navalSnapshot = snapshot;
+    this.navalVesselDataMap.clear();
     this.navalSnapshotDataMap.clear();
     this.navalClusterDataMap.clear();
     this.navalCsgMarkers = snapshot.strikeGroups.map(csg => {
@@ -2008,14 +2018,17 @@ export class GlobeMap {
     });
     this.navalVesselMarkers = snapshot.vessels
       .filter(v => !v.strikeGroupId)
-      .map(v => ({
-        _kind: 'vessel' as const,
-        _lat: v.lat,
-        _lng: v.lon,
-        id: v.id,
-        name: v.name,
-        type: v.vesselType,
-      }));
+      .map(v => {
+        this.navalVesselDataMap.set(v.id, v);
+        return {
+          _kind: 'vessel' as const,
+          _lat: v.lat,
+          _lng: v.lon,
+          id: v.id,
+          name: v.name,
+          type: v.vesselType,
+        };
+      });
     this.updateNavalInfoOverlay();
     this.flushMarkers();
   }
@@ -2978,6 +2991,7 @@ export class GlobeMap {
     this.reversedRingCache.clear();
     this.flightDataMap.clear();
     this.vesselDataMap.clear();
+    this.navalVesselDataMap.clear();
     if (this.loadingOverlayFallbackTimer) {
       clearTimeout(this.loadingOverlayFallbackTimer);
       this.loadingOverlayFallbackTimer = null;

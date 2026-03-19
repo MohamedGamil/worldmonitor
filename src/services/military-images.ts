@@ -648,6 +648,9 @@ const VESSEL_NAME_TO_WIKI: Record<string, string> = {
 
   // ── Russian carrier ───────────────────────────────────────────────────────
   'Admiral Kuznetsov':          'Admiral Kuznetsov aircraft carrier',
+  'RFS Admiral Kuznetsov':      'Admiral Kuznetsov aircraft carrier',
+  'RF Admiral Kuznetsov':       'Admiral Kuznetsov aircraft carrier',
+  'Admiral Flota Sovetskogo Soyuza Kuznetsov': 'Admiral Kuznetsov aircraft carrier',
 
   // ── Indian carrier ────────────────────────────────────────────────────────
   'INS Vikrant':                'INS Vikrant (R11)',
@@ -778,8 +781,25 @@ export function getVesselWikiTitle(
   // Skip very short codes
   if (name.length < 4) return null;
 
+  const normalizedName = name
+    .replace(/^(RFS|RF|INS|ITS|USNS|USS|HMS)\s+/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
   // 1. Exact match
   if (VESSEL_NAME_TO_WIKI[name]) return VESSEL_NAME_TO_WIKI[name];
+
+  // 1b. Exact match after normalizing prefixes/case
+  const normalizedExact = Object.entries(VESSEL_NAME_TO_WIKI).find(([key]) => {
+    const normalizedKey = key
+      .replace(/^(RFS|RF|INS|ITS|USNS|USS|HMS)\s+/i, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    return normalizedKey === normalizedName;
+  });
+  if (normalizedExact) return normalizedExact[1] as string;
 
   // 2. Partial match — longest key that is a prefix of the vessel name
   //    Handles e.g. "Yuan Wang 5" → key "Yuan Wang"
@@ -790,6 +810,22 @@ export function getVesselWikiTitle(
     ? ((VESSEL_NAME_TO_WIKI[prefixKey] as string | undefined) ?? null)
     : null;
   if (prefixValue) return prefixValue;
+
+  // 2b. Normalized partial match for prefixed/variant names
+  const normalizedPrefixKey = Object.keys(VESSEL_NAME_TO_WIKI)
+    .filter((key) => {
+      const normalizedKey = key
+        .replace(/^(RFS|RF|INS|ITS|USNS|USS|HMS)\s+/i, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+      return normalizedName.startsWith(normalizedKey) || normalizedName.includes(normalizedKey);
+    })
+    .sort((a, b) => b.length - a.length)[0];
+  const normalizedPrefixValue: string | null = normalizedPrefixKey
+    ? ((VESSEL_NAME_TO_WIKI[normalizedPrefixKey] as string | undefined) ?? null)
+    : null;
+  if (normalizedPrefixValue) return normalizedPrefixValue;
 
   // 3. Type-based fallback (shows a representative ship of the class)
   if (vesselType) {

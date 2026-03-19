@@ -2435,13 +2435,22 @@ export class MapPopup {
     const badgeType = vessel.vesselType === 'unknown' && vessel.aisShipType
       ? vessel.aisShipType.toUpperCase()
       : (typeLabels[vessel.vesselType] || vessel.vesselType.toUpperCase());
+    const unknownLabel = t('popups.unknown');
+    const operatorCountryLabel = vessel.operatorCountry ? getLocalizedGeoName(vessel.operatorCountry) : '';
     const vesselName = escapeHtml(vessel.name || `${t('popups.militaryVessel.vessel')} ${vessel.mmsi}`);
-    const vesselOperator = escapeHtml(operatorLabels[vessel.operator] || vessel.operatorCountry || t('popups.unknown'));
+    const vesselOperator = escapeHtml(
+      vessel.operator === 'other' && operatorCountryLabel
+        ? operatorCountryLabel
+        : (operatorLabels[vessel.operator] || operatorCountryLabel || unknownLabel),
+    );
     const vesselTypeLabel = escapeHtml(displayType);
     const vesselBadgeType = escapeHtml(badgeType);
     const vesselMmsi = escapeHtml(vessel.mmsi || '—');
     const vesselHull = vessel.hullNumber ? escapeHtml(vessel.hullNumber) : '';
     const vesselNote = vessel.note ? escapeHtml(vessel.note) : '';
+    const vesselSpeed = Number.isFinite(vessel.speed) ? `${Math.round(vessel.speed)} kts` : unknownLabel;
+    const vesselHeading = Number.isFinite(vessel.heading) ? `${Math.round(vessel.heading)}°` : unknownLabel;
+    const localizedUsniRegion = vessel.usniRegion ? getLocalizedGeoName(vessel.usniRegion) : '';
 
     // Wikipedia image lookup — use vessel name as the article search term
     const vesselWikiTitle = getVesselWikiTitle(vessel.name || '', vessel.vesselType);
@@ -2465,10 +2474,16 @@ export class MapPopup {
             <span class="stat-label">${t('popups.type')}</span>
             <span class="stat-value">${vesselTypeLabel}</span>
           </div>
+          ${operatorCountryLabel ? `
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.country')}</span>
+            <span class="stat-value">${escapeHtml(operatorCountryLabel)}</span>
+          </div>
+          ` : ''}
           ${vessel.usniRegion ? `
           <div class="popup-stat">
             <span class="stat-label">${t('popups.militaryVessel.region')}</span>
-            <span class="stat-value">${escapeHtml(vessel.usniRegion)}</span>
+            <span class="stat-value">${escapeHtml(localizedUsniRegion || vessel.usniRegion)}</span>
           </div>
           ` : ''}
           ${vessel.usniStrikeGroup ? `
@@ -2479,11 +2494,11 @@ export class MapPopup {
           ` : ''}
           <div class="popup-stat">
             <span class="stat-label">${t('popups.militaryVessel.speed')}</span>
-            <span class="stat-value">${vessel.speed} kts</span>
+            <span class="stat-value">${escapeHtml(vesselSpeed)}</span>
           </div>
           <div class="popup-stat">
             <span class="stat-label">${t('popups.militaryVessel.heading')}</span>
-            <span class="stat-value">${Math.round(vessel.heading)}°</span>
+            <span class="stat-value">${escapeHtml(vesselHeading)}</span>
           </div>
           ${vessel.mmsi ? `
           <div class="popup-stat">
@@ -2594,7 +2609,7 @@ export class MapPopup {
     const rawDisplayName = isCsg ? cluster.name.slice(0, -4).trim() : cluster.name;
     const clusterName = escapeHtml(rawDisplayName);
     const activityTypeLabel = escapeHtml(activityLabels[activityType] || tv(activityType));
-    const region = cluster.region ? escapeHtml(cluster.region) : '';
+    const region = cluster.region ? escapeHtml(getLocalizedGeoName(cluster.region) || cluster.region) : '';
 
     // Subtitle: for CSG clusters use a dedicated localised label instead of the
     // generic activity label
@@ -2661,8 +2676,8 @@ export class MapPopup {
 
   private renderNavalStrikeGroupPopup(csg: NavalStrikeGroup): string {
     const csgName = escapeHtml(csg.name);
-    const region = escapeHtml(csg.region);
-    const carrierName = escapeHtml(csg.carrier);
+    const region = escapeHtml(getLocalizedGeoName(csg.region) || csg.region || t('popups.unknown'));
+    const carrierName = escapeHtml(csg.carrier || t('popups.unknown'));
     const deploymentStatus = csg.deploymentStatus ?? '';
 
     const wikiTitle = getStrikeGroupWikiTitle(csg.name, csg.escorts as any);
@@ -2672,7 +2687,7 @@ export class MapPopup {
 
     const escortList = (csg.escorts ?? [])
       .slice(0, 6)
-      .map(e => `<div class="cluster-vessel-item">${escapeHtml(e)}</div>`)
+      .map(e => `<div class="cluster-vessel-item">${escapeHtml(getLocalizedGeoName(e) || e)}</div>`)
       .join('');
     const moreEscorts = (csg.escorts?.length ?? 0) > 6
       ? `<div class="cluster-more">+${(csg.escorts!.length - 6)} more</div>`
@@ -2729,13 +2744,13 @@ export class MapPopup {
   }
 
   private renderNavalClusterPopup(cluster: NavalCluster): string {
-    const clusterName = escapeHtml(cluster.name);
-    const region = escapeHtml(cluster.region);
-    const activityType = escapeHtml(cluster.activityType ?? 'unknown');
+    const clusterName = escapeHtml(getLocalizedGeoName(cluster.name) || cluster.name);
+    const region = escapeHtml(getLocalizedGeoName(cluster.region) || cluster.region || t('popups.unknown'));
+    const activityType = escapeHtml(tv(cluster.activityType ?? 'unknown', 'popups.militaryCluster.vesselActivity'));
     const badgeClass = cluster.hasCarrier ? 'high' : 'elevated';
 
     const typeBreakdown = (cluster.vesselTypes ?? [])
-      .map(vt => `<div class="cluster-vessel-item">${escapeHtml(vt)}</div>`)
+      .map(vt => `<div class="cluster-vessel-item">${escapeHtml(tv(vt, 'popups.militaryVessel.types'))}</div>`)
       .join('');
 
     return `
