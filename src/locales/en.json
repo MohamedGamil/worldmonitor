@@ -2625,7 +2625,9 @@
     "refresh": "Refresh",
     "all": "All",
     "beta": "BETA",
-    "vs": "vs"
+    "vs": "vs",
+    "yes": "Yes",
+    "no": "No"
   },
   "geo": {
     "conflictZones": {
