@@ -489,6 +489,13 @@ export class DeckGLMap {
       this.initDeck();
       this.loadCountryBoundaries();
       this.fetchServerBases();
+      // When aircraft layers are already enabled in the initial state (no
+      // external setLayers call happens on a normal first page load), the
+      // polling timer would never start. Kick it off here after the map style
+      // has fully loaded so getZoom() and getBounds() return reliable values.
+      if (this.state.layers.flights || this.state.layers.militaryAircraftUnknown) {
+        this.manageAircraftTimer(true);
+      }
 
       this.progressiveLoadStep = 0;
       const tick = () => {

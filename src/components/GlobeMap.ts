@@ -919,7 +919,14 @@ export class GlobeMap {
     this.setView(this.currentView);
 
     // Start polling immediately when flights/unknown-aircraft layers are
-    // already enabled on initial load.
+    // already enabled on initial load. Cancel any premature timer that was
+    // scheduled before the globe was ready (e.g. from a setLayers() call that
+    // arrived while initGlobe() was still running — the fetch would have bailed
+    // with a 120 s retry because this.globe was null at that point).
+    if (this.aircraftFetchTimer) {
+      clearTimeout(this.aircraftFetchTimer);
+      this.aircraftFetchTimer = null;
+    }
     this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
 
     // dayNight toggle excluded by catalog (renderers: ['flat'])
@@ -1562,6 +1569,12 @@ export class GlobeMap {
         if (layer) {
           const checked = (input as HTMLInputElement).checked;
           this.layers[layer] = checked;
+          // Aircraft layers need their polling timer started/stopped immediately
+          // on user toggle. enforceLayerLimit() only calls manageAircraftTimer
+          // when the layer count exceeds the maximum, so handle it explicitly here.
+          if (layer === 'flights' || layer === 'militaryAircraftUnknown') {
+            this.manageAircraftTimer(this.layers.flights || this.layers.militaryAircraftUnknown);
+          }
           this.flushLayerChannels(layer);
           this.onLayerChangeCb?.(layer, checked, 'user');
           this.enforceLayerLimit();

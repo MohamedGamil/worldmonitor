@@ -9,6 +9,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.6] - 2026-03-19
+
+### Added
+
+- **AIS port markers in GlobeMap** — world port locations now render as interactive markers when the AIS layer is active in globe mode; clicking a port marker opens a popup with port name and region details
+
+### Fixed
+
+- **Aircraft initial load in DeckGL mode** — when `flights` or `militaryAircraftUnknown` layers are enabled in the initial saved state, aircraft positions are now fetched immediately on map style load without requiring the user to pan, zoom, or toggle the layer to trigger the first data request
+- **Aircraft initial load in Globe mode** — eliminated a race where `setLayers()` could arrive during the async `initGlobe()` sequence, starting the polling timer before the globe instance existed; the stale timer is now cancelled and restarted once globe initialisation completes, preventing a 120-second stall on the first load
+- **Aircraft layer toggle not starting polling in Globe mode** — enabling `flights` or `militaryAircraftUnknown` from the Globe layer panel now immediately starts aircraft position polling; previously the inline toggle handler never called `manageAircraftTimer`, so polling only started if the enforced layer limit was hit
+- **`militaryAircraftUnknown` default-on not loading flight delay data** — enabling this layer at startup now triggers `loadFlightDelays()` and marks the layer ready; previously only the `flights` flag gated that call in `loadData()`, leaving airport delay context absent for popups and the layer toggle stuck in loading state
+- **Globe layer data at max zoom depth** — `clampAltitudeForMaxZoom()` now enforces both lower and upper altitude bounds; `controls.maxDistance` is derived from `MAX_GLOBE_ZOOM_LEVEL`; the aircraft altitude skip-guard is aligned to `MAX_GLOBE_ZOOM_LEVEL - 0.5`, ensuring all data layers can fetch when the camera is at the enforced maximum zoom
+
+
+---
+
 ## [0.1.5] - 2026-03-18
 
 ### Added
