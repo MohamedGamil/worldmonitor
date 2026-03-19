@@ -1,4 +1,4 @@
-import type { ConflictZone, Hotspot, NewsItem, MilitaryBase, StrategicWaterway, APTGroup, NuclearFacility, EconomicCenter, GammaIrradiator, Pipeline, UnderseaCable, CableAdvisory, RepairShip, InternetOutage, AIDataCenter, AisDisruptionEvent, SocialUnrestEvent, MilitaryFlight, MilitaryVessel, MilitaryFlightCluster, MilitaryVesselCluster, NaturalEvent, Port, Spaceport, CriticalMineralProject, CyberThreat } from '@/types';
+import type { ConflictZone, Hotspot, NewsItem, MilitaryBase, StrategicWaterway, APTGroup, NuclearFacility, EconomicCenter, GammaIrradiator, Pipeline, UnderseaCable, CableAdvisory, RepairShip, InternetOutage, AIDataCenter, AisDisruptionEvent, SocialUnrestEvent, MilitaryFlight, MilitaryVessel, MilitaryFlightCluster, MilitaryVesselCluster, NaturalEvent, Port, Spaceport, CriticalMineralProject, CyberThreat, NavalStrikeGroup, NavalCluster } from '@/types';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import type { Earthquake } from '@/services/earthquakes';
 import type { WeatherAlert } from '@/services/weather';
@@ -16,7 +16,7 @@ import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot
 import { getCableHealthRecord } from '@/services/cable-health';
 import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle, fetchPlanespottersImage } from '@/services/military-images';
 
-export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent';
+export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent' | 'navalStrikeGroup' | 'navalCluster';
 export interface AircraftDelayContext {
   iata: string;
   name: string;
@@ -191,7 +191,7 @@ interface DatacenterClusterData {
 
 interface PopupData {
   type: PopupType;
-  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | EnrichedAircraftPopupData | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData;
+  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | EnrichedAircraftPopupData | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData | NavalStrikeGroup | NavalCluster;
   relatedNews?: NewsItem[];
   x: number;
   y: number;
@@ -556,6 +556,10 @@ export class MapPopup {
         return this.renderMilitaryFlightClusterPopup(data.data as MilitaryFlightCluster);
       case 'militaryVesselCluster':
         return this.renderMilitaryVesselClusterPopup(data.data as MilitaryVesselCluster);
+      case 'navalStrikeGroup':
+        return this.renderNavalStrikeGroupPopup(data.data as NavalStrikeGroup);
+      case 'navalCluster':
+        return this.renderNavalClusterPopup(data.data as NavalCluster);
       case 'natEvent':
         return this.renderNaturalEventPopup(data.data as NaturalEvent);
       case 'port':
@@ -2651,6 +2655,119 @@ export class MapPopup {
             ${moreVessels}
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  private renderNavalStrikeGroupPopup(csg: NavalStrikeGroup): string {
+    const csgName = escapeHtml(csg.name);
+    const region = escapeHtml(csg.region);
+    const carrierName = escapeHtml(csg.carrier);
+    const deploymentStatus = csg.deploymentStatus ?? '';
+
+    const wikiTitle = getStrikeGroupWikiTitle(csg.name, csg.escorts as any);
+    const mediaHtml = wikiTitle
+      ? `<div class="popup-media popup-media--loading" data-wiki-query="${encodeURIComponent(wikiTitle)}" role="img" aria-label="${escapeHtml(wikiTitle)}"><div class="popup-media__skeleton"></div></div>`
+      : '';
+
+    const escortList = (csg.escorts ?? [])
+      .slice(0, 6)
+      .map(e => `<div class="cluster-vessel-item">${escapeHtml(e)}</div>`)
+      .join('');
+    const moreEscorts = (csg.escorts?.length ?? 0) > 6
+      ? `<div class="cluster-more">+${(csg.escorts!.length - 6)} more</div>`
+      : '';
+
+    return `
+      <div class="popup-header military-cluster">
+        <span class="popup-title">${csgName}</span>
+        <span class="popup-badge high">CSG</span>
+        <button class="popup-close" aria-label="Close">×</button>
+      </div>
+      ${mediaHtml}
+      <div class="popup-body">
+        <div class="popup-subtitle">${t('popups.militaryCluster.csg')}</div>
+        <div class="popup-stats">
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.militaryVessel.types.carrier')}</span>
+            <span class="stat-value">${carrierName}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.region')}</span>
+            <span class="stat-value">${region}</span>
+          </div>
+          ${deploymentStatus ? `
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.militaryVessel.deploymentStatuses.deployed')}</span>
+            <span class="stat-value">${escapeHtml(deploymentStatus)}</span>
+          </div>
+          ` : ''}
+          ${csg.airWing ? `
+          <div class="popup-stat">
+            <span class="stat-label">Air Wing</span>
+            <span class="stat-value">${escapeHtml(csg.airWing)}</span>
+          </div>
+          ` : ''}
+        </div>
+        ${escortList ? `
+        <div class="popup-section">
+          <span class="section-label">${t('popups.militaryCluster.trackedVessels')}</span>
+          <div class="cluster-vessels">
+            ${escortList}
+            ${moreEscorts}
+          </div>
+        </div>
+        ` : ''}
+        ${csg.activityDescription ? `
+        <div class="popup-section">
+          <span class="section-label">${t('popups.militaryCluster.activity')}</span>
+          <div class="popup-note">${escapeHtml(csg.activityDescription)}</div>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  private renderNavalClusterPopup(cluster: NavalCluster): string {
+    const clusterName = escapeHtml(cluster.name);
+    const region = escapeHtml(cluster.region);
+    const activityType = escapeHtml(cluster.activityType ?? 'unknown');
+    const badgeClass = cluster.hasCarrier ? 'high' : 'elevated';
+
+    const typeBreakdown = (cluster.vesselTypes ?? [])
+      .map(vt => `<div class="cluster-vessel-item">${escapeHtml(vt)}</div>`)
+      .join('');
+
+    return `
+      <div class="popup-header military-cluster">
+        <span class="popup-title">${clusterName}</span>
+        <span class="popup-badge ${badgeClass}">${t('popups.militaryCluster.vesselsCount', { count: String(cluster.vesselCount) })}</span>
+        <button class="popup-close" aria-label="Close">×</button>
+      </div>
+      <div class="popup-body">
+        <div class="popup-subtitle">${region}</div>
+        <div class="popup-stats">
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.militaryCluster.vessels')}</span>
+            <span class="stat-value">${cluster.vesselCount}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.militaryCluster.activity')}</span>
+            <span class="stat-value">${activityType}</span>
+          </div>
+          ${cluster.hasCarrier ? `
+          <div class="popup-stat">
+            <span class="stat-label">${t('popups.militaryVessel.types.carrier')}</span>
+            <span class="stat-value">${t('common.yes')}</span>
+          </div>
+          ` : ''}
+        </div>
+        ${typeBreakdown ? `
+        <div class="popup-section">
+          <span class="section-label">${t('popups.type')}</span>
+          <div class="cluster-vessels">${typeBreakdown}</div>
+        </div>
+        ` : ''}
       </div>
     `;
   }

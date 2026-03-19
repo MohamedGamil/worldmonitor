@@ -24,7 +24,8 @@ import type {
   MilitaryFlightCluster,
   MilitaryVesselCluster,
   NaturalEvent,
-  UcdpGeoEvent,
+    NavalActivitySnapshot,
+    UcdpGeoEvent,
   CyberThreat,
   CableHealthRecord,
 } from '@/types';
@@ -112,6 +113,7 @@ export class MapContainer {
   private cachedMilitaryFlightClusters: MilitaryFlightCluster[] | null = null;
   private cachedMilitaryVessels: MilitaryVessel[] | null = null;
   private cachedMilitaryVesselClusters: MilitaryVesselCluster[] | null = null;
+    private cachedNavalActivity: NavalActivitySnapshot | null = null;
   private cachedNaturalEvents: NaturalEvent[] | null = null;
   private cachedFires: FireMarker[] | null = null;
   private cachedTechEvents: TechEventMarker[] | null = null;
@@ -300,6 +302,7 @@ export class MapContainer {
     if (this.cachedAircraftPositions) this.setAircraftPositions(this.cachedAircraftPositions);
     if (this.cachedMilitaryFlights) this.setMilitaryFlights(this.cachedMilitaryFlights, this.cachedMilitaryFlightClusters ?? []);
     if (this.cachedMilitaryVessels) this.setMilitaryVessels(this.cachedMilitaryVessels, this.cachedMilitaryVesselClusters ?? []);
+      if (this.cachedNavalActivity) this.setNavalActivity(this.cachedNavalActivity);
     if (this.cachedNaturalEvents) this.setNaturalEvents(this.cachedNaturalEvents);
     if (this.cachedFires) this.setFires(this.cachedFires);
     if (this.cachedTechEvents) this.setTechEvents(this.cachedTechEvents);
@@ -512,6 +515,12 @@ export class MapContainer {
     this.cachedMilitaryVesselClusters = clusters;
     if (this.useGlobe) { this.globeMap?.setMilitaryVessels(vessels); return; }
     if (this.useDeckGL) { this.deckGLMap?.setMilitaryVessels(vessels, clusters); } else { this.svgMap?.setMilitaryVessels(vessels, clusters); }
+  }
+
+  public setNavalActivity(snapshot: NavalActivitySnapshot): void {
+    this.cachedNavalActivity = snapshot;
+    if (this.useGlobe) { this.globeMap?.setNavalActivity(snapshot); return; }
+    if (this.useDeckGL) { this.deckGLMap?.setNavalActivity(snapshot); }
   }
 
   public setNaturalEvents(events: NaturalEvent[]): void {
@@ -964,6 +973,7 @@ export class MapContainer {
     this.cachedMilitaryFlightClusters = null;
     this.cachedMilitaryVessels = null;
     this.cachedMilitaryVesselClusters = null;
+      this.cachedNavalActivity = null;
     this.cachedNaturalEvents = null;
     this.cachedFires = null;
     this.cachedTechEvents = null;

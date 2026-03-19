@@ -26,7 +26,7 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   conflicts: def('conflicts', 'sword', 'conflictZones', 'Conflict Zones'),
   militaryAircraftConfirmed: def('militaryAircraftConfirmed', 'plane', 'militaryAircraftConfirmed', 'Confirmed Military Aircraft'),
   militaryAircraftUnknown: def('militaryAircraftUnknown', 'plane-civilian', 'militaryAircraftUnknown', 'Civilian Aircraft'),
-  navalActivity: def('navalActivity', 'vessel', 'navalActivity', 'Naval Activity'),
+  navalActivity: def('navalActivity', 'carrier', 'navalActivity', 'Naval Activity'),
   military: def('military', 'plane', 'militaryActivity', 'Military Activity', []),
 
   bases: def('bases', 'target', 'militaryBases', 'Military Bases'),

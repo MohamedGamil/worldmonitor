@@ -78,6 +78,7 @@ import { fetchSecurityAdvisories } from '@/services/security-advisories';
 import { fetchTelegramFeed } from '@/services/telegram-intel';
 import { fetchOrefAlerts, startOrefPolling, stopOrefPolling, onOrefAlertsUpdate } from '@/services/oref-alerts';
 import { enrichEventsWithExposure } from '@/services/population-exposure';
+import { fetchNavalActivity } from '@/services/naval-activity';
 import { debounce, getCircuitBreakerCooldownInfo } from '@/utils';
 import { isFeatureAvailable, isFeatureEnabled } from '@/services/runtime-config';
 import { isDesktopRuntime } from '@/services/runtime';
@@ -1796,15 +1797,23 @@ export class DataLoaderManager implements AppModule {
     // fresh network call so the layer recovers automatically.
     if (cached && (cached.flights.length > 0 || cached.vessels.length > 0)) {
       const { flights, flightClusters, vessels, vesselClusters } = cached;
+      const cachedNaval = this.ctx.intelligenceCache.naval;
       this.ctx.map?.setMilitaryFlights(flights, flightClusters);
       this.ctx.map?.setMilitaryVessels(vessels, vesselClusters);
+      if (cachedNaval) {
+        this.ctx.map?.setNavalActivity(cachedNaval);
+      }
       this.ctx.map?.updateMilitaryForEscalation(flights, vessels);
       this.loadCachedPosturesForBanner();
       const insightsPanel = this.ctx.panels['insights'] as InsightsPanel | undefined;
       insightsPanel?.setMilitaryFlights(flights);
       const hasData = flights.length > 0 || vessels.length > 0;
       this.ctx.map?.setLayerReady('militaryAircraftConfirmed', flights.length > 0);
-      this.ctx.map?.setLayerReady('navalActivity', vessels.length > 0);
+      this.ctx.map?.setLayerReady('navalActivity',
+        vessels.length > 0
+        || (cachedNaval?.vessels.length ?? 0) > 0
+        || (cachedNaval?.strikeGroups.length ?? 0) > 0
+      );
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flights.length + vessels.length;
       this.ctx.statusPanel?.updateFeed('Military', {
@@ -1815,6 +1824,11 @@ export class DataLoaderManager implements AppModule {
       this.ctx.statusPanel?.updateApi('OpenSky', { status: 'ok' });
       return;
     }
+
+    // Serve naval activity from cache if available, independent of military cache
+    if (this.ctx.intelligenceCache.naval) {
+      this.ctx.map?.setNavalActivity(this.ctx.intelligenceCache.naval);
+    }
     try {
       if (isMilitaryVesselTrackingConfigured()) {
         initMilitaryVesselStream();
@@ -1823,9 +1837,10 @@ export class DataLoaderManager implements AppModule {
       // service-level 15-min flightCache so we go to the upstream API rather
       // than serving the same empty result from in-module cache.
       if (!cached) clearMilitaryFlightCache();
-      const [flightData, vesselData] = await Promise.all([
+        const [flightData, vesselData, navalSnapshot] = await Promise.all([
         fetchMilitaryFlights(),
         fetchMilitaryVessels(),
+          fetchNavalActivity(),
       ]);
       this.ctx.intelligenceCache.military = {
         flights: flightData.flights,
@@ -1833,9 +1848,16 @@ export class DataLoaderManager implements AppModule {
         vessels: vesselData.vessels,
         vesselClusters: vesselData.clusters,
       };
+
+      if (navalSnapshot) {
+        this.ctx.intelligenceCache.naval = navalSnapshot;
+        this.ctx.map?.setNavalActivity(navalSnapshot);
+      }
+
       fetchUSNIFleetReport().then((report) => {
         if (report) this.ctx.intelligenceCache.usniFleet = report;
       }).catch(() => { });
+
       this.ctx.map?.setMilitaryFlights(flightData.flights, flightData.clusters);
       this.ctx.map?.setMilitaryVessels(vesselData.vessels, vesselData.clusters);
       ingestFlights(flightData.flights);
@@ -1876,7 +1898,7 @@ export class DataLoaderManager implements AppModule {
 
       const hasData = flightData.flights.length > 0 || vesselData.vessels.length > 0;
       this.ctx.map?.setLayerReady('militaryAircraftConfirmed', flightData.flights.length > 0);
-      this.ctx.map?.setLayerReady('navalActivity', vesselData.vessels.length > 0);
+      this.ctx.map?.setLayerReady('navalActivity', vesselData.vessels.length > 0 || (navalSnapshot?.vessels.length ?? 0) > 0 || (navalSnapshot?.strikeGroups.length ?? 0) > 0);
       this.ctx.map?.setLayerReady('military', hasData);
       const militaryCount = flightData.flights.length + vesselData.vessels.length;
       this.ctx.statusPanel?.updateFeed('Military', {

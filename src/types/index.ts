@@ -908,6 +908,70 @@ export interface MilitaryActivitySummary {
   lastUpdate: Date;
 }
 
+  // ─── Naval Activity Snapshot (spec 12) ───────────────────────────────────────
+
+  export interface SeededVessel {
+    id: string;
+    name: string;
+    vesselType: MilitaryVesselType;
+    operator: string;
+    operatorCountry: string;
+    lat: number;
+    lon: number;
+    lastSeen: string; // ISO timestamp
+    confidence: 'high' | 'medium' | 'low' | 'unknown';
+    source: 'ais' | 'usni' | 'config' | 'merged';
+    hullNumber?: string;
+    strikeGroupId?: string;
+    nearChokepoint?: string;
+    nearBase?: string;
+    activityDescription?: string;
+  }
+
+  export interface NavalStrikeGroup {
+    id: string;
+    name: string;
+    carrier: string;
+    escorts: string[];
+    lat: number;
+    lon: number;
+    region: string;
+    airWing?: string;
+    destroyerSquadron?: string;
+    deploymentStatus?: USNIDeploymentStatus;
+    activityDescription?: string;
+  }
+
+  export interface NavalCluster {
+    id: string;
+    name: string;
+    lat: number;
+    lon: number;
+    vesselCount: number;
+    hasCarrier: boolean;
+    vesselTypes: MilitaryVesselType[];
+    region: string;
+    activityType: 'exercise' | 'deployment' | 'transit' | 'patrol' | 'unknown';
+    strikeGroupId?: string;
+  }
+
+  export interface NavalActivitySources {
+    usniArticleUrl?: string;
+    usniArticleDate?: string;
+    usniVesselCount: number;
+    aisVesselCount: number;
+    configFallbackCount: number;
+    warnings: string[];
+  }
+
+  export interface NavalActivitySnapshot {
+    assessedAt: string; // ISO timestamp
+    sources: NavalActivitySources;
+    strikeGroups: NavalStrikeGroup[];
+    vessels: SeededVessel[];
+    clusters: NavalCluster[];
+    theaterPostures: Record<string, string>; // theaterId -> posture level
+  }
 // PizzINT - Pentagon Pizza Index Types
 export type PizzIntDefconLevel = 1 | 2 | 3 | 4 | 5;
 export type PizzIntDataFreshness = 'fresh' | 'stale';

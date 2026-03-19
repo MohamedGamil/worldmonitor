@@ -1,4 +1,5 @@
 import type { NewsItem, Monitor, PanelConfig, MapLayers, InternetOutage, SocialUnrestEvent, MilitaryFlight, MilitaryFlightCluster, MilitaryVessel, MilitaryVesselCluster, CyberThreat, USNIFleetReport } from '@/types';
+import type { NavalActivitySnapshot } from '@/types';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import type { IranEvent } from '@/generated/client/marsd/conflict/v1/service_client';
 import type { SecurityAdvisory } from '@/services/security-advisories';
@@ -61,6 +62,7 @@ export interface IntelligenceCache {
   iranEvents?: IranEvent[];
   orefAlerts?: { alertCount: number; historyCount24h: number };
   advisories?: SecurityAdvisory[];
+  naval?: NavalActivitySnapshot;
 }
 
 export interface AppModule {

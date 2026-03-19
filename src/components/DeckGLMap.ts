@@ -26,6 +26,10 @@ import type {
   MilitaryVessel,
   MilitaryFlightCluster,
   MilitaryVesselCluster,
+  NavalActivitySnapshot,
+  NavalStrikeGroup,
+  SeededVessel,
+  NavalCluster,
   NaturalEvent,
   UcdpGeoEvent,
   MapProtestCluster,
@@ -326,6 +330,7 @@ export class DeckGLMap {
   private militaryFlightClusters: MilitaryFlightCluster[] = [];
   private militaryVessels: MilitaryVessel[] = [];
   private militaryVesselClusters: MilitaryVesselCluster[] = [];
+  private navalSnapshot: NavalActivitySnapshot | null = null;
   private serverBases: MilitaryBaseEnriched[] = [];
   private serverBaseClusters: ServerBaseCluster[] = [];
   private serverBasesLoaded = false;
@@ -1397,6 +1402,12 @@ export class DeckGLMap {
         layers.push(this.getCachedLayer('navalActivity', 'naval-activity-vessel-clusters-layer', () => this.createMilitaryVesselClustersLayer(filteredMilitaryVesselClusters, 'naval-activity-vessel-clusters-layer')));
       }
 
+      // Naval snapshot layers (seeded vessels + strike groups)
+      if (this.shouldShowNavalActivity(mapLayers) && this.navalSnapshot) {
+        const snapshotLayers = this.getCachedLayer('navalActivity', 'naval-snapshot-group', () => this.createNavalSnapshotLayers(this.navalSnapshot!) as any);
+        layers.push(...((Array.isArray(snapshotLayers) ? snapshotLayers : [snapshotLayers]) as any));
+      }
+
       // Confirmed military aircraft layer
       if (this.shouldShowConfirmedMilitaryAircraft(mapLayers) && confirmedMilitaryFlights.length > 0) {
         const flightLayers = this.getCachedLayer('militaryAircraftConfirmed', 'confirmed-military-flights-group', () => this.createMilitaryFlightsLayer(confirmedMilitaryFlights, {
@@ -2267,6 +2278,81 @@ export class DeckGLMap {
       radiusMaxPixels: 25,
       pickable: true,
     });
+  }
+
+  private createNavalSnapshotLayers(snapshot: NavalActivitySnapshot): Layer[] {
+    const layers: Layer[] = [];
+    const TYPE_COLORS: Record<string, [number, number, number, number]> = {
+      carrier:    [255,  68,  68, 230],
+      destroyer:  [255, 136,   0, 230],
+      submarine:  [136,  68, 255, 220],
+      frigate:    [ 68, 170, 255, 220],
+      amphibious: [136, 255,  68, 220],
+      support:    [180, 180, 180, 200],
+    };
+    const baseParams = {
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+    };
+
+    // Standalone seeded vessels (not part of a strike group)
+    const standaloneVessels: SeededVessel[] = snapshot.vessels.filter(v => !('strikeGroupId' in v) || !v.strikeGroupId);
+    if (standaloneVessels.length > 0) {
+      layers.push(new IconLayer<SeededVessel>({
+        ...baseParams,
+        id: 'naval-seeded-vessels-layer',
+        data: standaloneVessels,
+        getPosition: (d: SeededVessel) => [d.lon, d.lat] as [number, number],
+        getColor: (d: SeededVessel) => TYPE_COLORS[d.vesselType] ?? [180, 180, 180, 200],
+        getIcon: () => 'ship',
+        iconAtlas: MARKER_ICONS.ship,
+        iconMapping: SHIP_ICON_MAPPING,
+        getSize: 24,
+        sizeMinPixels: 6,
+        sizeMaxPixels: 28,
+        sizeScale: 1,
+        billboard: false,
+        pickable: true,
+      }));
+    }
+
+    // Naval strike groups (carrier as center point)
+    if (snapshot.strikeGroups.length > 0) {
+      layers.push(new IconLayer<NavalStrikeGroup>({
+        ...baseParams,
+        id: 'naval-csg-layer',
+        data: snapshot.strikeGroups,
+        getPosition: (d: NavalStrikeGroup) => [d.lon, d.lat] as [number, number],
+        getColor: () => [255, 68, 68, 230] as [number, number, number, number],
+        getIcon: () => 'carrier',
+        iconAtlas: MARKER_ICONS.carrier,
+        iconMapping: CARRIER_ICON_MAPPING,
+        getSize: 32,
+        sizeMinPixels: 8,
+        sizeMaxPixels: 36,
+        sizeScale: 1,
+        billboard: false,
+        pickable: true,
+      }));
+    }
+
+    // Theater/regional clusters
+    if (snapshot.clusters.length > 0) {
+      layers.push(new ScatterplotLayer<NavalCluster>({
+        ...baseParams,
+        id: 'naval-snapshot-clusters-layer',
+        data: snapshot.clusters,
+        getPosition: (d: NavalCluster) => [d.lon, d.lat] as [number, number],
+        getRadius: (d: NavalCluster) => 20000 + (d.vesselCount || 1) * 4000,
+        getFillColor: (d: NavalCluster) => d.hasCarrier
+          ? [255, 68, 68, 180] as [number, number, number, number]
+          : [100, 160, 255, 160] as [number, number, number, number],
+        radiusMinPixels: 8,
+        radiusMaxPixels: 30,
+        pickable: true,
+      }) as ScatterplotLayer);
+    }
+
+    return layers;
   }
 
   private createMilitaryFlightsLayer(
@@ -3604,6 +3690,9 @@ export class DeckGLMap {
       'naval-activity-vessels-layer': 'militaryVessel',
       'military-vessel-clusters-layer': 'militaryVesselCluster',
       'naval-activity-vessel-clusters-layer': 'militaryVesselCluster',
+      'naval-seeded-vessels-layer': 'militaryVessel',
+      'naval-csg-layer': 'navalStrikeGroup',
+      'naval-snapshot-clusters-layer': 'navalCluster',
       'military-flight-clusters-layer': 'militaryFlightCluster',
       'confirmed-military-flight-clusters-layer': 'militaryFlightCluster',
       'unknown-aircraft-flight-clusters-layer': 'militaryFlightCluster',
@@ -4586,6 +4675,12 @@ export class DeckGLMap {
     this.militaryVesselClusters = clusters;
     this.invalidateTimeCache('militaryVessels');
     this.markDirty('military', 'navalActivity');
+    this.render();
+  }
+
+  public setNavalActivity(snapshot: NavalActivitySnapshot): void {
+    this.navalSnapshot = snapshot;
+    this.markDirty('navalActivity');
     this.render();
   }
 

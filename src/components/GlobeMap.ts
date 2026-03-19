@@ -33,7 +33,7 @@ import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
 import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
-import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType } from '@/types';
+import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import { fetchAircraftPositions } from '@/services/aviation';
@@ -309,6 +309,13 @@ interface PortMarker extends BaseMarker {
   rank?: number;
   note?: string;
 }
+interface NavalStrikeGroupMarker extends BaseMarker {
+  _kind: 'naval-csg';
+  id: string;
+  name: string;
+  region: string;
+  carrier: string;
+}
 interface GlobePath {
   id: string;
   name: string;
@@ -329,7 +336,7 @@ interface GlobePolygon {
   casualties?: string;
 }
 type GlobeMarker =
-  | ConflictMarker | HotspotMarker | FlightMarker | VesselMarker
+  | ConflictMarker | HotspotMarker | FlightMarker | VesselMarker | NavalStrikeGroupMarker
   | WeatherMarker | NaturalMarker | IranMarker | OutageMarker
   | CyberMarker | FireMarker | ProtestMarker
   | UcdpMarker | DisplacementMarker | ClimateMarker | GpsJamMarker | TechMarker
@@ -392,6 +399,9 @@ export class GlobeMap {
   /** Full source objects, keyed by id — used to supply complete data to MapPopup */
   private flightDataMap = new Map<string, MilitaryFlight>();
   private vesselDataMap = new Map<string, MilitaryVessel>();
+  private navalSnapshotDataMap = new Map<string, NavalStrikeGroup>();
+  private navalCsgMarkers: NavalStrikeGroupMarker[] = [];
+  private navalVesselMarkers: VesselMarker[] = [];
   private weatherMarkers: WeatherMarker[] = [];
   private naturalMarkers: NaturalMarker[] = [];
   private iranMarkers: IranMarker[] = [];
@@ -1025,6 +1035,9 @@ export class GlobeMap {
       const c = typeColors[d.type] ?? '#44aaff';
       el.innerHTML = d.type === 'carrier' ? svgIcon('carrier', c, 32) : svgIcon('vessel', c, 28);
       el.title = `${d.name} (${d.type})`;
+    } else if (d._kind === 'naval-csg') {
+      el.innerHTML = svgIcon('carrier', '#ff4444', 34);
+      el.title = `CSG: ${d.name} (${d.region})`;
     } else if (d._kind === 'weather') {
       const severityColors: Record<string, string> = {
         Extreme: '#ff0044', Severe: '#ff6600', Moderate: '#ffaa00', Minor: '#88aaff',
@@ -1283,6 +1296,14 @@ export class GlobeMap {
           id: d.id, mmsi: '', name: d.name, vesselType: d.type as any,
           operator: 'other' as any, operatorCountry: '', lat: d._lat, lon: d._lng,
           heading: 0, speed: 0, lastAisUpdate: new Date(), confidence: 'low' as const,
+        }) as any, x, y });
+        break;
+      }
+      case 'naval-csg': {
+        const fullCsg = this.navalSnapshotDataMap.get(d.id);
+        this.popup.show({ type: 'navalStrikeGroup', data: (fullCsg ?? {
+          id: d.id, name: d.name, region: d.region, carrier: d.carrier,
+          escorts: [], lat: d._lat, lon: d._lng,
         }) as any, x, y });
         break;
       }
@@ -1642,6 +1663,10 @@ export class GlobeMap {
     if (this.layers.military || this.layers.navalActivity) {
       markers.push(...this.vessels);
     }
+    if (this.layers.navalActivity) {
+      markers.push(...this.navalCsgMarkers);
+      markers.push(...this.navalVesselMarkers);
+    }
     if (this.layers.weather) markers.push(...this.weatherMarkers);
     if (this.layers.natural) {
       markers.push(...this.naturalMarkers);
@@ -1838,6 +1863,33 @@ export class GlobeMap {
         type: (v as any).vesselType ?? 'destroyer',
       };
     });
+    this.flushMarkers();
+  }
+
+  public setNavalActivity(snapshot: NavalActivitySnapshot): void {
+    this.navalSnapshotDataMap.clear();
+    this.navalCsgMarkers = snapshot.strikeGroups.map(csg => {
+      this.navalSnapshotDataMap.set(csg.id, csg);
+      return {
+        _kind: 'naval-csg' as const,
+        _lat: csg.lat,
+        _lng: csg.lon,
+        id: csg.id,
+        name: csg.name,
+        region: csg.region,
+        carrier: csg.carrier,
+      };
+    });
+    this.navalVesselMarkers = snapshot.vessels
+      .filter(v => !v.strikeGroupId)
+      .map(v => ({
+        _kind: 'vessel' as const,
+        _lat: v.lat,
+        _lng: v.lon,
+        id: v.id,
+        name: v.name,
+        type: v.vesselType,
+      }));
     this.flushMarkers();
   }
 
