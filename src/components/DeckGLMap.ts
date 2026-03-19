@@ -271,6 +271,8 @@ const MARKER_ICONS = {
   carrier: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 2095 2095"><path fill="white" fill-rule="nonzero" d="M 2079.04 1099.31 L 2079.04 1227.43 L 1977.3 1334.82 L 99.806 1334.82 C 73.429 1188.81 15.964 1099.31 15.964 1099.31 L 821.41 1099.31 L 821.41 958.006 C 805.395 958.006 792.207 944.817 792.207 928.803 C 792.207 912.788 805.395 899.599 821.41 899.599 L 826.12 899.599 C 826.12 899.599 826.12 760.177 826.12 760.177 L 844.019 760.177 L 844.019 899.599 L 892.063 899.599 L 892.063 870.396 L 892.063 851.555 C 892.063 835.541 905.252 822.352 921.266 822.352 L 997.572 822.352 C 1013.59 822.352 1026.78 835.541 1026.78 851.555 L 1026.78 870.396 L 1026.78 899.599 L 1107.79 899.599 C 1123.81 899.599 1136.99 912.788 1136.99 928.803 C 1136.99 944.817 1123.81 958.006 1107.79 958.006 L 1107.79 999.456 L 1276.42 999.456 C 1299.97 996.63 1307.5 1009.82 1307.5 1033.37 L 1307.5 1098.37 L 2079.04 1098.37 L 2079.04 1099.31 Z M 1600.48 1068.22 C 1628.74 1072.93 1660.77 1071.99 1685.26 1071.99 C 1740.84 1071.99 1831.28 1071.99 1831.28 1071.99 C 1840.7 1070.11 1874.61 1059.75 1874.61 1059.75 L 1877.44 1039.02 L 1869.9 1039.02 L 1890.63 999.456 L 1868.02 999.456 L 1830.34 1039.02 C 1830.34 1039.02 1700.34 1039.02 1676.78 1034.31 C 1652.29 1029.6 1644.76 1027.72 1636.28 1027.72 C 1627.8 1027.72 1617.43 1031.48 1613.67 1033.37 C 1595.77 1039.96 1587.29 1039.96 1580.7 1042.79 C 1554.32 1055.98 1572.22 1063.52 1600.48 1068.22 Z M 360.751 1068.22 C 389.013 1072.93 421.042 1071.99 445.535 1071.99 C 501.116 1071.99 591.552 1071.99 591.552 1071.99 C 600.972 1070.11 634.886 1059.75 634.886 1059.75 L 637.712 1039.02 L 630.175 1039.02 L 650.9 999.456 L 628.291 999.456 L 590.61 1039.02 C 590.61 1039.02 460.608 1039.02 437.057 1034.31 C 412.564 1029.6 405.027 1027.72 396.549 1027.72 C 388.071 1027.72 377.708 1031.48 373.94 1033.37 C 356.041 1039.96 347.563 1039.96 340.969 1042.79 C 314.591 1055.98 332.49 1063.52 360.751 1068.22 Z"/></svg>`),
     // Cardinal compass star - for military bases (from cardinal-compass.svg)
   compass: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="M12,24l-3-9L0,12l9-3L12,0l3,9,9,3-9,3-3,9ZM7.425,7.425l.473-1.385-3.898-2.039,2.039,3.898,1.385-.473Zm9.15,0l1.385,.473,2.039-3.897-3.898,2.039,.473,1.385ZM7.424,16.575l-1.385-.473-2.039,3.898,3.897-2.039-.473-1.385Zm9.151,0l-.473,1.385,3.898,2.039-2.039-3.898-1.385,.473Z"/></svg>`),
+  // Airport check-in: location pin with inner circle + aircraft silhouette (from airport-check-in.svg, optimized)
+  airport: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 512 512"><path fill="white" d="M132.6 287.7l118.3 175.2c2.4 3.6 7.8 3.6 10.2 0l118.3-175.2 6.1-9-.1.1c15.3-24.7 23.8-54 22.7-85.4-2.7-78.4-65.6-142.6-144-146.7C176.5 42.2 104 112.2 104 198.6c0 29.4 8.4 56.8 22.8 80.1 1.5 2.4 3.3 5.2 5.8 9zm123.4-196.7c59.4 0 107.6 48.2 107.6 107.6 0 59.4-48.2 107.6-107.6 107.6S148.4 258 148.4 198.6 196.6 91 256 91z"/><path fill="white" d="M187.5 162.6c.6 1 1.4 1.8 2.3 2.4l36.1 26 10.3 61.3c.4 2.4 1.7 4.7 3.5 6.3l6.4 5.6c1.7 1.5 4.4.3 4.4-2l.4-53 35.9 26c8.2 5.9 19.2 6.2 27.7.7l13.8-9c1.6-1 1.9-3.2.6-4.6l-1.5-1.7c-2.8-3.1-7-4.6-11.2-3.8l-15.8 3-73.4-62.3c-7.1-6.1-16.2-9.6-25.6-9.5-3 .1-6.1.4-9.2 1.4-5.6 1.7-8 8-5 13.1l.3.4z"/><path fill="white" d="M272.8 181.5c2.2 2 5.1 3 8 2.9l38.5-1.8c1.9-.4 2.4-2.8.9-4l-5.7-4.2c-1.7-1.2-3.7-1.9-5.7-1.8l-46.4-5.1c-1.9-.2-2.9 2.1-1.5 3.4z"/></svg>`),
   // Radiation symbol - ringed with three sector arms (from radiation-alt (1).svg)
   radiation: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="white" d="m12,0C5.383,0,0,5.383,0,12s5.383,12,12,12,12-5.383,12-12S18.617,0,12,0Zm0,21c-4.963,0-9-4.037-9-9S7.037,3,12,3s9,4.037,9,9-4.037,9-9,9Zm-1.5-9c0-.828.672-1.5,1.5-1.5s1.5.672,1.5,1.5-.672,1.5-1.5,1.5-1.5-.672-1.5-1.5Zm8.5,0h-3.5c0-1.221-.628-2.294-1.576-2.92l1.926-2.927c.773.508,1.459,1.177,2,2,.781,1.188,1.151,2.525,1.15,3.848Zm-10.5,0h-3.5c-.001-1.323.368-2.66,1.15-3.848.541-.822,1.227-1.491,2-2l1.926,2.927c-.948.626-1.576,1.699-1.576,2.92Zm5.338,2.969l1.841,2.973c-1.07.665-2.326,1.06-3.678,1.06s-2.608-.395-3.678-1.06l1.84-2.973c.535.332,1.162.531,1.838.531s1.303-.199,1.838-.531Z"/></svg>`),
 };
@@ -282,6 +284,7 @@ const SHIP_ICON_MAPPING = { ship: { x: 0, y: 0, width: 32, height: 32, mask: tru
 const CARRIER_ICON_MAPPING = { carrier: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const DATACENTER_ICON_MAPPING = { square: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 const COMPASS_ICON_MAPPING = { compass: { x: 0, y: 0, width: 32, height: 32, mask: true } };
+const AIRPORT_ICON_MAPPING = { airport: { x: 0, y: 0, width: 32, height: 32, mask: true } };
 
 const CONFLICT_ZONES_GEOJSON: GeoJSON.FeatureCollection = {
   type: 'FeatureCollection',
@@ -1812,9 +1815,9 @@ export class DeckGLMap {
       id: 'flight-delays-layer',
       data: delays,
       getPosition: (d) => [d.lon, d.lat],
-      getIcon: () => 'plane-civilian',
-      iconAtlas: MARKER_ICONS.planeCivilian,
-      iconMapping: CIVILIAN_AIRCRAFT_ICON_MAPPING,
+      getIcon: () => 'airport',
+      iconAtlas: MARKER_ICONS.airport,
+      iconMapping: AIRPORT_ICON_MAPPING,
       getColor: (d) => {
         if (d.severity === 'severe') return [255, 50, 50, 200] as [number, number, number, number];
         if (d.severity === 'major') return [255, 150, 0, 200] as [number, number, number, number];
@@ -1822,13 +1825,13 @@ export class DeckGLMap {
         return [180, 180, 180, 150] as [number, number, number, number];
       },
       getSize: (d) => {
-        if (d.severity === 'severe') return 18;
-        if (d.severity === 'major') return 16;
-        if (d.severity === 'moderate') return 14;
-        return 12;
+        if (d.severity === 'severe') return 26;
+        if (d.severity === 'major') return 22;
+        if (d.severity === 'moderate') return 18;
+        return 16;
       },
-      sizeMinPixels: 10,
-      sizeMaxPixels: 22,
+      sizeMinPixels: 14,
+      sizeMaxPixels: 30,
       billboard: false,
       pickable: true,
     });

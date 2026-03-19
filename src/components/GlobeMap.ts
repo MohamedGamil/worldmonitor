@@ -1140,7 +1140,7 @@ export class GlobeMap {
       el.title = `${d.mineral} — ${d.name}`;
     } else if (d._kind === 'flightDelay') {
       const sc = d.severity === 'severe' ? '#ff2020' : d.severity === 'major' ? '#ff6600' : d.severity === 'moderate' ? '#ffaa00' : '#ffee44';
-      el.innerHTML = svgIcon('plane-civilian', sc, 12);
+      el.innerHTML = svgIcon('airport', sc, 18);
       el.title = `${d.iata} — ${d.severity}`;
     } else if (d._kind === 'cableAdvisory') {
       const sc = d.severity === 'fault' ? '#ff2020' : '#ff8800';
