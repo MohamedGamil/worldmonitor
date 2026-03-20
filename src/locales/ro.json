@@ -119,6 +119,21 @@
       "stockIndex": "Indice bursier: {{value}}",
       "recentHeadlines": "**Titluri recente:**",
       "activeStrikes": "{{count}} avertismente active detectate"
+    },
+    "overview": "Inteligența de țară",
+    "close": "Aproape",
+    "updated": "Actualizat",
+    "story": "Poveste",
+    "export": "Export",
+    "loadingNews": "Se încarcă titluri de țară…",
+    "loadingMilitary": "Se încarcă zboruri, nave și baze din apropiere...",
+    "loadingInfrastructure": "Se calculează infrastructura critică din apropiere...",
+    "loadingEconomic": "Se încarcă indicatorii disponibili...",
+    "shareLink": "Distribuiți linkul",
+    "exportData": "Exportați date",
+    "indicators": {
+      "instabilityregime": "Instabilitatea regimului",
+      "displacementoutflow": "Flux de deplasare"
     }
   },
   "header": {
@@ -128,7 +143,7 @@
     "search": "Căutare",
     "settings": "SETĂRI",
     "sources": "SURSE",
-    "copyLink": "Link",
+    "copyLink": "Legătură",
     "downloadApp": "Descărcați aplicația",
     "fullscreen": "Ecran complet",
     "pinMap": "Fixați harta în partea de sus",
@@ -163,7 +178,7 @@
     "sourceRegionMarkets": "Piețe și analize",
     "sourceRegionFixedIncomeFx": "Venit fix și FX",
     "sourceRegionCommodities": "Materii prime",
-    "sourceRegionCryptoDigital": "Crypto & Digital",
+    "sourceRegionCryptoDigital": "Cripto și digital",
     "sourceRegionCentralBanks": "Bănci Centrale și Economie",
     "sourceRegionDeals": "Oferte & Corporate",
     "sourceRegionFinRegulation": "Regulamentul financiar",
@@ -176,17 +191,18 @@
     "panelCatMarketsFinance": "Piețe și finanțe",
     "panelCatTopical": "Actual",
     "panelCatDataTracking": "Date și urmărire",
-    "panelCatTechAi": "Tech & AI",
+    "panelCatTechAi": "Tehnologie și inteligență artificială",
     "panelCatStartupsVc": "Startup-uri și VC",
     "panelCatSecurityPolicy": "Securitate și politică",
     "panelCatMarkets": "Piețe",
     "panelCatFixedIncomeFx": "Venit fix și FX",
     "panelCatCommodities": "Mărfuri",
-    "panelCatCryptoDigital": "Crypto & Digital",
+    "panelCatCryptoDigital": "Cripto și digital",
     "panelCatCentralBanks": "Bănci Centrale și Eco",
     "panelCatDeals": "Oferte și instituțional",
     "panelCatGulfMena": "Golf și MENA",
-    "panelCatTradePolicy": "Politica comercială"
+    "panelCatTradePolicy": "Politica comercială",
+    "selectRegion": "Selectați Regiune"
   },
   "panels": {
     "liveNews": "Știri Live",
@@ -220,7 +236,7 @@
     "finance": "Financiar",
     "tech": "Tehnologie",
     "crypto": "Cripto",
-    "heatmap": "Sector Heatmap",
+    "heatmap": "Hartă termică a sectorului",
     "ai": "AI/ML",
     "layoffs": "Tracker concedieri",
     "monitors": "Monitoarele mele",
@@ -240,7 +256,7 @@
     "startups": "Startup-uri & VC",
     "vcblogs": "Analize VC",
     "regionalStartups": "Știri globale startup-uri",
-    "unicorns": "Unicorn Tracker",
+    "unicorns": "Urmărește unicorn",
     "accelerators": "Acceleratoare și Zile Demo",
     "security": "Securitate Cibernetică",
     "policy": "Politica și reglementarea AI",
@@ -255,13 +271,15 @@
     "events": "Evenimente tehnice",
     "serviceStatus": "Stare serviciu",
     "techReadiness": "Indicele de pregătire tehnică",
-    "gccInvestments": "GCC Investments",
+    "gccInvestments": "Investiții GCC",
     "geoHubs": "Noduri geopolitice",
     "liveWebcams": "Camere Live",
     "gulfEconomies": "Economiile Golfului",
     "gulfIndices": "Indicii Golfului",
     "gulfCurrencies": "Monede din Golf",
-    "gulfOil": "Petrolul din Golf"
+    "gulfOil": "Petrolul din Golf",
+    "airlineIntel": "Informații aeriene",
+    "worldClock": "Ceasul Mondial"
   },
   "commands": {
     "prefixes": {
@@ -294,7 +312,7 @@
       "layers": "Tastați „militar” sau „finanțare” pentru presetări ale stratului",
       "time": "Tastați „1h”, „24h” sau „7d” pentru a filtra după timp",
       "settings": "Tastați „mod întunecat”, „setări” sau „ecran complet”",
-      "mapExample": "iran",
+      "mapExample": "Iranul",
       "panelExample": "știri",
       "briefExample": "rezumat China",
       "layersExample": "straturi militare",
@@ -390,7 +408,7 @@
         "irradiator": "Iradiator",
         "techcompany": "Companie de tehnologie",
         "ailab": "Laborator AI",
-        "startup": "Startup",
+        "startup": "Lansare",
         "techevent": "Eveniment tehnic",
         "techhq": "Sediu central tech",
         "accelerator": "Accelerator"
@@ -442,7 +460,7 @@
       "whatsapp": "WhatsApp",
       "twitter": "X",
       "linkedin": "LinkedIn",
-      "copyLink": "Link",
+      "copyLink": "Legătură",
       "saved": "Salvat!",
       "copied": "Copiat!",
       "opening": "Deschidere...",
@@ -606,7 +624,18 @@
         "conflictEvents": "evenimente conflictuale",
         "activeStrikes": "lovituri active",
         "aviationDisruptions": "întreruperi la aeroport",
-        "gpsJammingZones": "Zone de bruiaj GPS"
+        "gpsJammingZones": "Zone de bruiaj GPS",
+        "criticalNews": "Știri critice",
+        "aisDisruptions": "Întreruperea AIS",
+        "satelliteFires": "Incendii prin satelit",
+        "temporalAnomalies": "Anomalii temporale",
+        "cyberThreats": "Amenințări cibernetice",
+        "activeSirens": "Sirene active",
+        "sirens24h": "Sirene / 24h",
+        "advisoryDoNotTravel": "Nu călători",
+        "advisoryReconsider": "Reconsiderați călătoriile",
+        "advisoryExerciseCaution": "Fiți atenți",
+        "advisoryLabel": "Aviz: {{count}}"
       },
       "timeAgo": {
         "m": "acum {{count}}m",
@@ -643,7 +672,16 @@
         "internetOutages": "{{count}} întreruperi de internet",
         "recentEarthquakes": "{{count}} cutremure recente",
         "stockIndex": "Indice bursier: {{value}}",
-        "recentHeadlines": "**Titluri recente:**"
+        "recentHeadlines": "**Titluri recente:**",
+        "travelAdvisoryDoNotTravel": "⚠️ Aviz de călătorie: nu călătoriți (sursă {{count}})",
+        "travelAdvisoryReconsider": "⚠️ Aviz de călătorie: Reconsiderați călătoriile (sursă {{count}})",
+        "criticalHeadlines": "🚨 Titluri critice în domeniu: {{count}}",
+        "cyberThreats": "🛡️ Indicatori de amenințare cibernetică: {{count}}",
+        "aisDisruptions": "🚢 Întreruperi ale AIS maritim: {{count}}",
+        "satelliteFires": "🔥 Detectări de incendiu prin satelit: {{count}}",
+        "temporalAnomalies": "⏱️ Alerte de anomalii temporale: {{count}}",
+        "sirens24h": "🚨 Sirene în ultimele 24 de ore: {{count}}",
+        "noAiService": "Niciun serviciu AI disponibil. Configurați GROQ_API_KEY în Setări pentru rezumate complete."
       }
     }
   },
@@ -751,7 +789,8 @@
       "mineral": "Mineral",
       "topProducers": "Producători de top",
       "risk": "Risc",
-      "sources": "FRED / NGA / USGS"
+      "sources": "FRED / NGA / USGS",
+      "aisDisruptions": "Întreruperea(e) AIS"
     },
     "tradePolicy": {
       "restrictions": "Restricții",
@@ -800,7 +839,7 @@
       "pegHealth": "Peg Health",
       "supplyVolume": "Aprovizionare și volum",
       "unavailable": "Datele Stablecoin sunt temporar indisponibile",
-      "token": "Token",
+      "token": "Jeton",
       "mcap": "MCap",
       "vol24h": "Vol 24h",
       "chg24h": "24h Modificare"
@@ -826,7 +865,7 @@
     },
     "pizzint": {
       "title": "Pentagon Pizza Index",
-      "defcon": "DEFCON {{level}}",
+      "defcon": "DEFCON {{count}}",
       "updated": "Actualizat {{timeAgo}}",
       "tensionsTitle": "Tensiuni geopolitice",
       "source": "Sursa:",
@@ -927,7 +966,8 @@
     "community": {
       "joinDiscussion": "Alăturați-vă discuției",
       "openDiscussion": "Deschideți discuția",
-      "dontShowAgain": "Nu mai afișa"
+      "dontShowAgain": "Nu mai afișa",
+      "sectionLabel": "Comunitate"
     },
     "threatLabels": {
       "critical": "CRIT",
@@ -956,7 +996,13 @@
         "elevated": "Ridicat",
         "monitoring": "Monitorizare",
         "base": "Baza",
-        "nuclear": "Nuclear"
+        "nuclear": "Nuclear",
+        "aircraft": "Avioane",
+        "ciiLow": "Scăzut (0–30)",
+        "ciiNormal": "Normal (31–50)",
+        "ciiElevated": "Înălțat (51–65)",
+        "ciiHigh": "Ridicat (66–80)",
+        "ciiCritical": "Critic (81–100)"
       },
       "layerGuide": "Ghid de straturi",
       "layersTitle": "Straturi",
@@ -1005,11 +1051,20 @@
         "financialCenters": "Centre financiare",
         "centralBanks": "Băncile Centrale",
         "commodityHubs": "Hub-uri de mărfuri",
-        "gulfInvestments": "GCC Investments",
+        "gulfInvestments": "Investiții GCC",
         "tradeRoutes": "Rute comerciale",
         "iranAttacks": "Atacurile Iranului",
         "gpsJamming": "Bruiaj GPS",
-        "dayNight": "Zi/Noapte"
+        "dayNight": "Zi/Noapte",
+        "militaryAircraftConfirmed": "Avioane militare",
+        "militaryAircraftUnknown": "Avioane civile",
+        "navalActivity": "Activitate navală",
+        "ciiChoropleth": "CII Instabilitate",
+        "positiveEvents": "Evenimente pozitive",
+        "kindness": "Acte de bunătate",
+        "happiness": "Fericirea lumii",
+        "speciesRecovery": "Recuperarea speciilor",
+        "renewableInstallations": "Energie curată"
       },
       "tooltip": {
         "earthquake": "Cutremur",
@@ -1036,7 +1091,34 @@
         "medium": "mediu",
         "news": "Știri",
         "undisclosed": "Nedezvăluită",
-        "stake": "participație"
+        "stake": "participație",
+        "basesCount": "baze {{count}}",
+        "positiveEvent": "Eveniment pozitiv",
+        "sourcesReporting": "surse de raportare",
+        "wildfire": "Foc sălbatic",
+        "brightness": "Luminozitate",
+        "deaths": "Decese",
+        "displacement": "Deplasare",
+        "refugees": "Refugiati",
+        "vsLabel": "vs",
+        "happiness": "Fericire",
+        "noData": "Fără date",
+        "cii": "CII",
+        "status": "Stare",
+        "renewable": "Regenerabil",
+        "tradeRoute": "Ruta comercială",
+        "unknown": "Necunoscut",
+        "tradeRouteStart": "Început traseu",
+        "tradeRouteEnd": "Sfârșitul traseului",
+        "tradeRouteDistance": "Distanţă",
+        "tradeRouteCargo": "Tipul de marfă",
+        "tradeRouteVolume": "Volum",
+        "tradeRouteStatus": "Stare",
+        "tradeRouteActive": "Activ",
+        "tradeRouteInactive": "Inactiv",
+        "tradeRouteLastUpdated": "Ultima actualizare",
+        "tradeRouteSourcePort": "Port sursă",
+        "tradeRouteDestinationPort": "Port de destinație"
       },
       "layerHelp": {
         "title": "Ghid pentru straturi de hartă",
@@ -1114,7 +1196,8 @@
           "financeGulfInvestments": "Investiții în fondurile suverane ale GCC și ISD",
           "tradeRoutes": "Principalele linii maritime globale care conectează porturile prin puncte strategice de blocare",
           "dayNight": "Terminator solar în timp real care arată zonele de zi și de noapte",
-          "geoBoundaries": "Zone demilitarizate, linii de încetare a focului și granițe disputate"
+          "geoBoundaries": "Zone demilitarizate, linii de încetare a focului și granițe disputate",
+          "ciiChoropleth": "Harta termică a indicelui de instabilitate a țării — colorează țările în funcție de scorul CII (verde = stabil, roșu = critic)"
         },
         "notes": {
           "timeAffects": "Afectează: cutremure, vreme, proteste, întreruperi"
@@ -1143,7 +1226,7 @@
       "mapFlashLabel": "Impuls eveniment live",
       "mapFlashDesc": "Flash locații pe hartă când sosesc știri de ultimă oră",
       "aiFlowTitle": "Setări",
-      "aiFlowCloudLabel": "Cloud AI (Groq & OpenRouter)",
+      "aiFlowCloudLabel": "Cloud AI (Groq și OpenRouter)",
       "aiFlowCloudDesc": "Trimiteți titluri în cloud pentru rezumat AI (recomandat)",
       "aiFlowBrowserLabel": "Model local de browser",
       "aiFlowBrowserDesc": "Rulați AI local în browserul dvs.",
@@ -1162,7 +1245,40 @@
       "badgeAnimDesc": "Animați insigne de actualizare pe anteturile panoului",
       "sectionIntelligence": "Informații",
       "headlineMemoryLabel": "Memorie titlu",
-      "headlineMemoryDesc": "Amintiți-vă titlurile văzute pentru a evidenția povești noi"
+      "headlineMemoryDesc": "Amintiți-vă titlurile văzute pentru a evidenția povești noi",
+      "globeRenderQualityLabel": "Calitatea randării globului",
+      "globeRenderQualityDesc": "Controlează rezoluția pânzei globului. Valorile mai mari par mai clare pe ecranele 4K, dar pot topi GPU-urile.",
+      "globeRenderScaleOptions": {
+        "1": "Eco (1x)",
+        "2": "4K (2x)",
+        "3": "Nebun (3x)",
+        "auto": "Auto (dispozitiv)",
+        "1_5": "Ascuțit (1,5x)"
+      },
+      "streamAlwaysOnLabel": "Continuați difuzarea fluxurilor live",
+      "streamAlwaysOnDesc": "Împiedică întreruperea automată a camerelor live și a știrilor live atunci când sunteți inactiv. Recomandat pentru utilizarea unui al doilea monitor/panel de perete. Dezactivați (Eco) pentru a economisi CPU/lățimea de bandă.",
+      "worldBriefTitle": "🌍 WORLD BREF",
+      "techBriefTitle": "🚀 SCURT TEHNIC",
+      "sectionBreaking": "RUPARĂ & CONFIRMATĂ",
+      "sectionFocalPoints": "🎯 PUNCTE FOCALE",
+      "sectionConvergence": "📍 CONVERGENȚĂ GEOGRAFICĂ",
+      "sectionMlDetected": "🎯 ML DETECTAT",
+      "statMultiSource": "Multi-surse",
+      "statFastMoving": "Mișcare rapidă",
+      "statAlerts": "Alerte",
+      "statClusters": "Clustere",
+      "sentimentOverall": "Per total: {{count}}",
+      "toneNegative": "Negativ",
+      "tonePositive": "Pozitiv",
+      "toneMixed": "Amestecat",
+      "focalPointStats": "Știri {{count}} • Semnale {{events}}",
+      "convergenceStats": "Tipuri de semnal {{count}} • Evenimente {{events}}",
+      "multiPerspectiveAnalysis": "Analiza multi-perspective...",
+      "usingCachedBrief": "Se utilizează scurtarea în cache...",
+      "loadingServerInsights": "Se încarcă informații despre server...",
+      "generatingLocalizedBrief": "Se generează un rezumat localizat...",
+      "sourcesCountConfirmed": "✓ Surse {{count}}",
+      "sourcesCount": "surse {{count}}"
     },
     "cascade": {
       "noImpacts": "Nu s-a detectat niciun impact asupra țării",
@@ -1330,7 +1446,7 @@
       "actors": "Actori",
       "deathsCount": "{{count}} decese",
       "moreNotShown": "{{count}} mai multe evenimente nu sunt afișate",
-      "noEvents": "No events in this category",
+      "noEvents": "Nu există evenimente în această categorie",
       "infoTooltip": "<strong>Evenimente de conflict armat</strong> Date despre conflict la nivel de eveniment de la Universitatea Uppsala (UCDP).<ul><li><strong>De stat</strong>: Guvern vs grup rebel</li><li><strong>Non-statal</strong>: Grup armat vs grup armat</li><li><strong>Unilateral</strong>: Violența împotriva civililor este cea mai bună estimare (scăzut). Dublatele ACLED sunt filtrate automat."
     },
     "giving": {
@@ -1452,7 +1568,13 @@
     },
     "countryTimeline": {
       "now": "acum",
-      "noEventsIn7Days": "Niciun eveniment în 7 zile"
+      "noEventsIn7Days": "Niciun eveniment în 7 zile",
+      "lanes": {
+        "protest": "Protest",
+        "conflict": "Conflict",
+        "natural": "Natural",
+        "military": "Militar"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>GDELT Intelligence</strong> Monitorizare în timp real a știrilor globale:<ul><li>Categorii de subiecte selectate (conflicte, cibernetice etc.)</li><li>Articole din peste 100 de limbi traduse</li><li>Actualizări la fiecare 15 minute</li></ul>Sursa: Proiectul GDELT (gdeltproject.org)"
@@ -1540,7 +1662,7 @@
         "regime": "Regimul",
         "btcTrend": "Trend BTC",
         "hashRate": "Rata de hash",
-        "momentum": "Momentum",
+        "momentum": "Impuls",
         "fearGreed": "Frica și Lăcomia"
       }
     },
@@ -1550,7 +1672,8 @@
       "openSettings": "Deschide Setări"
     },
     "languageSelector": {
-      "selectLanguage": "Selectați Limba"
+      "selectLanguage": "Selectați Limba",
+      "mapLabelsFallbackVi": "Etichetele hărților revin în prezent la engleză pentru vietnameză."
     },
     "serviceStatus": {
       "checkingServices": "Se verifică serviciile...",
@@ -1564,7 +1687,7 @@
       "nonParityFallbacks": "Alternative non-paritate ({{count}})",
       "categories": {
         "all": "Toate",
-        "cloud": "Cloud",
+        "cloud": "Nor",
         "dev": "Instrumente de dezvoltare",
         "comm": "Comunicații",
         "ai": "AI",
@@ -1628,11 +1751,62 @@
       "regionOceania": "Oceania",
       "invalidHandle": "Introduceți un handle YouTube valid (de exemplu, @ChannelName)",
       "channelNotFound": "Canalul YouTube nu a fost găsit",
-      "verifying": "Se verifică..."
+      "verifying": "Se verifică...",
+      "noResults": "Nu s-a găsit niciun canal care să se potrivească cu „{{count}}”",
+      "hlsUrl": "Adresa URL a fluxului HLS (opțional)",
+      "invalidHlsUrl": "Introduceți o adresă URL validă a fluxului HLS (.m3u8)",
+      "togglePlayback": "Comutați redarea",
+      "live": "Trăi",
+      "paused": "Întrerupt",
+      "channels": {
+        "aljazeeramubasher": "AlJazeera Mubasher",
+        "al-hadath": "Al Hadath",
+        "france24_ar": "France24 Arabic",
+        "alarabiya": "AlArabiya",
+        "aljazeera-arabic": "AlJazeera Arabic",
+        "sky-news-arabia": "Sky News Arabia",
+        "dw-arabia": "DW Arabia",
+        "iran-intl": "Iran International",
+        "asharq-news": "Asharq News",
+        "alaraby": "Alaraby",
+        "aljazeera": "AlJazeera English",
+        "bbcarabic": "BBC Arabic",
+        "cgtn-arabic": "CGTN Arabic",
+        "sky": "Sky News",
+        "dw": "DW",
+        "bloomberg": "Bloomberg",
+        "euronews": "Euronews",
+        "cnbc": "CNBC",
+        "cnn": "CNN",
+        "france24": "France 24",
+        "bbc-news": "BBC News",
+        "france24-en": "France 24 English",
+        "yahoo": "Yahoo Finance",
+        "nasa": "Sen Space Live",
+        "fox-news": "Fox News",
+        "newsmax": "Newsmax",
+        "abc-news": "ABC News",
+        "cbs-news": "CBS News",
+        "nbc-news": "NBC News",
+        "cbc-news": "CBC News"
+      }
     },
     "map": {
       "showMap": "Arată harta",
       "hideMap": "Ascunde harta"
+    },
+    "settings": {
+      "dataManagementLabel": "Managementul datelor",
+      "exportSettings": "Setări de export",
+      "importSettings": "Setări de import",
+      "exportSuccess": "Setările au fost exportate cu succes",
+      "exportFailed": "Nu s-au putut exporta setările",
+      "importSuccess": "Setări {{count}} importate",
+      "importFailed": "Nu s-au putut importa setările",
+      "reloadNow": "Reîncărcați acum"
+    },
+    "globe": {
+      "loadingGlobe": "Se încarcă globul..."
     }
   },
   "popups": {
@@ -1690,20 +1864,35 @@
         "marine": "Pușcași Marini",
         "space": "Forțe Spațiale",
         "other": "Altele"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
     },
     "protest": {
       "acledVerified": "ACLED (verificat)",
       "gdelt": "GDELT",
       "riots": "Revolte",
-      "highSeverity": "Severitate ridicată"
+      "highSeverity": "Severitate ridicată",
+      "types": {
+        "protest": "Protest",
+        "riot": "Revoltă",
+        "civil_unrest": "Tulburări civile",
+        "strike": "Grevă",
+        "demonstration": "Demonstraţie"
+      }
     },
     "gpsJamming": {
       "title": "Interferență GPS/GNSS",
       "interference": "Interferență",
       "aircraftAffected": "Aeronava afectată",
       "aircraftNormal": "Aeronavă Cloudmal",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 Hex",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "flight": {
       "groundStop": "Oprire la sol",
@@ -1741,7 +1930,12 @@
         "weapons": "COMPLEX DE ARME",
         "research": "CERCETARE"
       },
-      "description": "Instalatie nucleara sub monitorizare. Importanță strategică pentru securitatea regională și preocupările de neproliferare."
+      "description": "Instalatie nucleara sub monitorizare. Importanță strategică pentru securitatea regională și preocupările de neproliferare.",
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
+      }
     },
     "economic": {
       "types": {
@@ -1842,6 +2036,11 @@
         "elevated": "RIDICAT",
         "high": "MARE",
         "critical": "CRITIC"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "DE-ESCALATAREA"
       }
     },
     "buttons": {
@@ -1855,17 +2054,17 @@
     "whyItMatters": "DE CE CONTEZA",
     "keyEntities": "ENTITĂȚI CHEIE",
     "relatedHeadlines": "TITURI ÎNFERATE",
-    "liveIntel": "Live Intelligence",
+    "liveIntel": "Inteligență vie",
     "loadingNews": "Se încarcă știri globale...",
     "noCoverage": "Nicio acoperire globală recentă",
     "time": "Ora",
     "area": "Zona",
     "expires": "Expiră",
     "aisGapSpike": "AIS GAP SPIKE",
-    "chokepointCongestion": "CHOKEPOINT CONGESTION",
+    "chokepointCongestion": "CONGESTIAREA PENTRU CHOKEPOINT",
     "darkening": "ÎNTUNECARE",
     "density": "DENSITATE",
-    "darkShips": "DARK SHIPS",
+    "darkShips": "NAVE ÎNtunecoase",
     "vesselCount": "NUMĂR DE NAVE",
     "window": "FEREASTRĂ",
     "region": "REGIUNEA",
@@ -1936,7 +2135,7 @@
     },
     "techHQ": {
       "types": {
-        "faang": "BIG TECH",
+        "faang": "MARE TEHNICĂ",
         "unicorn": "UNICORN",
         "public": "PUBLIC",
         "tech": "TECH"
@@ -1977,7 +2176,7 @@
     "militaryFlight": {
       "types": {
         "fighter": "Luptător",
-        "bomber": "Bomber",
+        "bomber": "Bombardier",
         "transport": "Transport",
         "tanker": "Cisternă",
         "awacs": "AWACS/AEW",
@@ -1995,7 +2194,28 @@
       "hexCode": "COD HEX",
       "squawk": "SQUAWK",
       "attribution": "Sursa: OpenSky Network",
-      "trackFlight": "Urmărește pe FlightAware"
+      "trackFlight": "Urmărește pe FlightAware",
+      "operators": {
+        "usaf": "Forțele Aeriene ale SUA",
+        "usn": "Marina SUA",
+        "usmc": "Marinei americani",
+        "usa": "Armata SUA",
+        "raf": "Royal Air Force",
+        "rn": "Royal Navy",
+        "faf": "Forțele aeriene franceze",
+        "gaf": "Forțele aeriene germane",
+        "plaaf": "Forțele Aeriene PLA",
+        "plan": "Marina PLA",
+        "vks": "Aerospațial rusesc",
+        "iaf": "Forțele aeriene israeliene",
+        "nato": "NATO"
+      },
+      "highInterest": "Zbor cu interes ridicat",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "militaryVessel": {
       "aisDark": "AIS ÎNTUNEC",
@@ -2010,7 +2230,34 @@
       "usniIntel": "USNI Intel",
       "usniSource": "Sursa: USNI News Fleet Tracker",
       "approximatePosition": "Poziția aproximativă - bazată pe raportul săptămânal USNI, nu AIS în timp real.",
-      "darkDescription": "⚠ Nava s-a întunecat - semnalul AIS s-a pierdut. Poate indica operațiuni sensibile."
+      "darkDescription": "⚠ Nava s-a întunecat - semnalul AIS s-a pierdut. Poate indica operațiuni sensibile.",
+      "types": {
+        "carrier": "Portavion",
+        "destroyer": "Distrugător",
+        "frigate": "Fregată",
+        "submarine": "Submarin",
+        "amphibious": "Amfibiu",
+        "patrol": "Patrulare",
+        "auxiliary": "Auxiliar",
+        "research": "Cercetare",
+        "icebreaker": "Spărgătorul de gheață",
+        "special": "Special"
+      },
+      "operators": {
+        "usn": "Marina SUA",
+        "uscg": "Garda de Coastă a SUA",
+        "rn": "Royal Navy",
+        "fn": "Marina Franceză",
+        "plan": "Marina PLA",
+        "ruf": "Marina Rusă",
+        "jmsdf": "Japonia Maritime SDF",
+        "rokn": "Marina ROK"
+      },
+      "deploymentStatuses": {
+        "deployed": "Desfăşurat",
+        "underway": "În curs",
+        "in-port": "În Port"
+      }
     },
     "militaryCluster": {
       "flightActivity": {
@@ -2035,7 +2282,10 @@
       "moreVessels": "+{{count}} mai multe vase",
       "vesselsCount": "{{count}} NAVE",
       "vessels": "NAVE",
-      "trackedVessels": "NAVE ȘENILE"
+      "trackedVessels": "NAVE ȘENILE",
+      "showLessVessels": "Arată mai puține vase",
+      "csg": "Grupul Carrier Strike",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "ÎNCHIS",
@@ -2111,11 +2361,101 @@
       "saudi_gip_mbs": "GIP saudiți/MBS",
       "strait_watch": "Strait Watch",
       "syria_crisis": "Criza din Siria",
-      "tech_ai_hub": "Tech/AI Hub",
+      "tech_ai_hub": "Hub tehnologic/AI",
       "turkey_mit": "Turcia/MIT",
       "uae_ecsr": "EAU/ECSR",
       "venezuela_crisis": "Criza din Venezuela",
       "yemen_houthis": "Yemen/Houthi"
+    },
+    "values": {
+      "branches": {
+        "navy": "Marinei",
+        "air_force": "Forțele Aeriene",
+        "army": "Armată",
+        "marines": "Marinii",
+        "coast_guard": "Garda de Coastă",
+        "special_forces": "Forțele Speciale",
+        "space_force": "Forța Spațială",
+        "national_guard": "Garda Nationala"
+      },
+      "categories": {
+        "air_force": "Forțele Aeriene",
+        "naval": "Naval",
+        "nuclear": "Nuclear",
+        "space": "Spaţiu",
+        "training": "Antrenamentul",
+        "logistics": "Logistică",
+        "intelligence": "Inteligența"
+      },
+      "exercise": "Exercita",
+      "patrol": "Patrulare",
+      "deployment": "Desfăşurare",
+      "transit": "Tranzit",
+      "transport": "Transport",
+      "reconnaissance": "Recunoaştere",
+      "unknown": "Necunoscut",
+      "fighter": "Luptător",
+      "bomber": "Bombardier",
+      "tanker": "Cisternă",
+      "awacs": "AWACS",
+      "helicopter": "Elicopter",
+      "drone": "Trântor",
+      "special_ops": "Operațiuni speciale",
+      "vip": "VIP",
+      "carrier": "Portavion",
+      "destroyer": "Distrugător",
+      "frigate": "Fregată",
+      "submarine": "Submarin",
+      "amphibious": "Amfibiu",
+      "auxiliary": "Auxiliar",
+      "research": "Cercetare",
+      "icebreaker": "Spărgătorul de gheață",
+      "special": "Special",
+      "usaf": "Forțele Aeriene ale SUA",
+      "usn": "Marina SUA",
+      "usmc": "Marinei americani",
+      "usa": "Armata SUA",
+      "raf": "Royal Air Force",
+      "rn": "Royal Navy",
+      "faf": "Forțele aeriene franceze",
+      "gaf": "Forțele aeriene germane",
+      "plaaf": "Forțele Aeriene PLA",
+      "plan": "Marina PLA",
+      "vks": "Aerospațial rusesc",
+      "iaf": "Forțele aeriene israeliene",
+      "nato": "NATO",
+      "other": "Alte"
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
+    },
+    "aircraft": {
+      "altitude": "Altitudine",
+      "speed": "Viteza la sol",
+      "heading": "Titlu",
+      "position": "Poziţie",
+      "ground": "La sol",
+      "airborne": "Aeropurtat"
+    },
+    "confidence": "CONFIDENCE",
+    "ucdpEvent": {
+      "title": "CONFLICT ARMAT",
+      "parties": "PARTIES",
+      "deaths": "DECES (CEL MAI BUN EST.)",
+      "range": "gamă",
+      "types": {
+        "state-based": "Bazat pe stat",
+        "non-state": "Non-statal",
+        "one-sided": "Unilateral"
+      }
     }
   },
   "signals": {
@@ -2297,6 +2637,55 @@
     "currentVariant": "(actual)",
     "retry": "Reîncercați",
     "refresh": "Actualizează",
-    "all": "Toate"
+    "all": "Toate",
+    "beta": "BETA",
+    "vs": "vs",
+    "yes": "Da",
+    "no": "Nu"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "Teatrul de război din Iran",
+      "strait_hormuz": "Criza strâmtorii Ormuz",
+      "ukraine": "Războiul din Ucraina",
+      "gaza": "Conflictul din Gaza",
+      "south_lebanon": "Frontiera Israel-Liban",
+      "yemen_redsea": "Criza Mării Roșii",
+      "sudan": "Războiul civil din Sudan",
+      "myanmar": "Războiul civil din Myanmar",
+      "korean_dmz": "Zona demilitarizată coreeană",
+      "pak_afghan": "Conflictul de frontieră Pakistan-Afganistan"
+    },
+    "hotspots": {
+      "sahel": "Sahel",
+      "haiti": "Port-au-Prince",
+      "horn_africa": "Cornul Africii",
+      "dc": "DC",
+      "silicon_valley": "Silicon Valley",
+      "wall_street": "Wall Street",
+      "houston": "Houston",
+      "moscow": "Moscova",
+      "beijing": "Beijing",
+      "kyiv": "Kiev",
+      "taipei": "Taipei",
+      "tehran": "Teheranul",
+      "telaviv": "Tel Aviv",
+      "pyongyang": "Phenian",
+      "london": "Londra",
+      "brussels": "Bruxelles",
+      "caracas": "Caracas",
+      "mexico": "Mexico City",
+      "nuuk": "Nuuk",
+      "riyadh": "Riad",
+      "cairo": "Cairo",
+      "baghdad": "Bagdad",
+      "damascus": "Damasc",
+      "doha": "Doha",
+      "ankara": "Ankara",
+      "beirut": "Beirut",
+      "sanaa": "Sana'a",
+      "abudhabi": "Abu Dhabi",
+      "pak_afghan": "Frontiera Pakistan-Afganistan"
+    }
   }
 }

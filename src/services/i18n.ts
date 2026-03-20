@@ -106,7 +106,17 @@ export async function initI18n(): Promise<void> {
 
 // Helper to translate
 export function t(key: string, options?: Record<string, unknown>): string {
-  return i18next.t(key, options);
+  const translated = i18next.t(key, options);
+
+  if (translated.toLowerCase() === key.toLowerCase()) {
+    const splitStr = key.split('.');
+
+    return (splitStr.length > 1)
+      ? String(splitStr[splitStr.length - 1] || key)
+      : key;
+  }
+
+  return translated;
 }
 
 /**

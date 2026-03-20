@@ -37,7 +37,7 @@
       "displaced": "di dời",
       "climate": "Căng thẳng khí hậu",
       "conflictEvents": "sự kiện xung đột",
-      "gpsJammingZones": "GPS Jamming Zones",
+      "gpsJammingZones": "Vùng gây nhiễu GPS",
       "activeStrikes": "đình công đang diễn ra",
       "aviationDisruptions": "gián đoạn sân bay"
     },
@@ -77,6 +77,63 @@
       "stockIndex": "Chỉ số chứng khoán: {{value}}",
       "recentHeadlines": "**Tin tức gần đây:**",
       "activeStrikes": "Phát hiện {{count}} cuộc đình công đang diễn ra"
+    },
+    "overview": "Tình báo quốc gia",
+    "close": "Đóng",
+    "updated": "Đã cập nhật",
+    "story": "Câu chuyện",
+    "export": "Xuất khẩu",
+    "loadingNews": "Đang tải tiêu đề quốc gia…",
+    "loadingMilitary": "Đang tải các chuyến bay, tàu và các căn cứ lân cận…",
+    "loadingInfrastructure": "Tính toán cơ sở hạ tầng quan trọng gần đó…",
+    "loadingEconomic": "Đang tải các chỉ báo có sẵn…",
+    "shareLink": "Chia sẻ liên kết",
+    "exportData": "Xuất dữ liệu",
+    "militaryActivity": "Hoạt động quân sự",
+    "economicIndicators": "Các chỉ số kinh tế",
+    "ownFlights": "Chuyến bay riêng",
+    "foreignFlights": "Chuyến bay nước ngoài",
+    "navalVessels": "Tàu hải quân",
+    "foreignPresence": "sự hiện diện nước ngoài",
+    "nearestBases": "Căn cứ quân sự gần nhất",
+    "noBasesNearby": "Không có căn cứ nào gần đó trong phạm vi 600 km.",
+    "noInfrastructure": "Không tìm thấy cơ sở hạ tầng quan trọng trong phạm vi 600 km.",
+    "noGeometry": "Không có hình học có sẵn cho mối tương quan cơ sở hạ tầng.",
+    "noSignals": "Không có tín hiệu có mức độ nghiêm trọng cao gần đây.",
+    "assessmentUnavailable": "Đánh giá không có sẵn.",
+    "noNews": "Không có tin tức cụ thể theo quốc gia gần đây.",
+    "noIndicators": "Không có chỉ số cụ thể theo quốc gia.",
+    "nearbyPorts": "Cảng lân cận",
+    "detected": "Đã phát hiện",
+    "notDetected": "KHÔNG",
+    "ciiUnavailable": "Điểm CII không có sẵn cho quốc gia này.",
+    "chips": {
+      "criticalNews": "Tin tức quan trọng",
+      "protests": "Biểu tình",
+      "militaryAir": "Không quân quân sự",
+      "navalVessels": "Tàu hải quân",
+      "outages": "Mất điện",
+      "aisDisruptions": "Sự gián đoạn AIS",
+      "satelliteFires": "Cháy vệ tinh",
+      "temporalAnomalies": "Dị thường thời gian",
+      "cyberThreats": "Các mối đe dọa mạng",
+      "earthquakes": "Động đất",
+      "displaced": "Đã di dời",
+      "climateStress": "Căng thẳng khí hậu",
+      "conflictEvents": "Sự kiện xung đột",
+      "activeStrikes": "Tấn công chủ động",
+      "doNotTravel": "Đừng đi du lịch",
+      "reconsiderTravel": "Xem xét lại việc đi lại",
+      "exerciseCaution": "Thận trọng",
+      "advisory": "tư vấn",
+      "activeSirens": "Còi báo động đang hoạt động",
+      "sirens24h": "Còi báo động / 24h",
+      "aviationDisruptions": "Gián đoạn hàng không",
+      "gpsJammingZones": "Vùng gây nhiễu GPS"
+    },
+    "indicators": {
+      "instabilityregime": "Chế độ bất ổn",
+      "displacementoutflow": "Dòng chảy dịch chuyển"
     }
   },
   "header": {
@@ -109,21 +166,21 @@
     "sourceRegionEurope": "Châu Âu",
     "sourceRegionTopical": "Chủ đề",
     "sourceRegionIntel": "Tình báo",
-    "sourceRegionTechNews": "Tech News",
+    "sourceRegionTechNews": "Tin tức công nghệ",
     "sourceRegionAiMl": "AI & ML",
-    "sourceRegionStartupsVc": "Startups & VC",
-    "sourceRegionRegionalTech": "Regional Ecosystems",
-    "sourceRegionDeveloper": "Developer",
-    "sourceRegionCybersecurity": "Cybersecurity",
-    "sourceRegionTechPolicy": "Policy & Research",
-    "sourceRegionTechMedia": "Media & Podcasts",
-    "sourceRegionMarkets": "Markets & Analysis",
-    "sourceRegionFixedIncomeFx": "Fixed Income & FX",
-    "sourceRegionCommodities": "Commodities",
-    "sourceRegionCryptoDigital": "Crypto & Digital",
-    "sourceRegionCentralBanks": "Central Banks & Economy",
-    "sourceRegionDeals": "Deals & Corporate",
-    "sourceRegionFinRegulation": "Financial Regulation",
+    "sourceRegionStartupsVc": "Công ty khởi nghiệp & VC",
+    "sourceRegionRegionalTech": "Hệ sinh thái khu vực",
+    "sourceRegionDeveloper": "Nhà phát triển",
+    "sourceRegionCybersecurity": "An ninh mạng",
+    "sourceRegionTechPolicy": "Chính sách & Nghiên cứu",
+    "sourceRegionTechMedia": "Phương tiện & Podcast",
+    "sourceRegionMarkets": "Thị trường & Phân tích",
+    "sourceRegionFixedIncomeFx": "Thu nhập cố định & ngoại hối",
+    "sourceRegionCommodities": "Hàng hóa",
+    "sourceRegionCryptoDigital": "Tiền điện tử & kỹ thuật số",
+    "sourceRegionCentralBanks": "Ngân hàng Trung ương & Nền kinh tế",
+    "sourceRegionDeals": "Ưu đãi & Doanh nghiệp",
+    "sourceRegionFinRegulation": "Quy định tài chính",
     "sourceRegionGulfMena": "Vùng Vịnh & MENA",
     "filterPanels": "Lọc bảng điều khiển...",
     "resetLayout": "Đặt lại bố cục",
@@ -143,7 +200,9 @@
     "panelCatCentralBanks": "Ngân hàng Trung ương & Kinh tế",
     "panelCatDeals": "Giao dịch & Tổ chức",
     "panelCatGulfMena": "Vùng Vịnh & MENA",
-    "panelCatTradePolicy": "Chính sách Thương mại"
+    "panelCatTradePolicy": "Chính sách Thương mại",
+    "downloadApp": "Tải xuống ứng dụng",
+    "selectRegion": "Chọn khu vực"
   },
   "panels": {
     "liveNews": "Tin tức Trực tiếp",
@@ -211,14 +270,16 @@
     "geoHubs": "Trung tâm Địa chính trị",
     "liveWebcams": "Webcam Trực tiếp",
     "securityAdvisories": "Cảnh báo An ninh",
-    "orefSirens": "Israel Sirens",
+    "orefSirens": "Còi báo động Israel",
     "telegramIntel": "Tình báo Telegram",
     "giving": "Từ thiện Toàn cầu",
     "supplyChain": "Chuỗi Cung ứng",
     "gulfEconomies": "Kinh tế vùng Vịnh",
     "gulfIndices": "Chỉ số vùng Vịnh",
     "gulfCurrencies": "Tiền tệ vùng Vịnh",
-    "gulfOil": "Dầu vùng Vịnh"
+    "gulfOil": "Dầu vùng Vịnh",
+    "airlineIntel": "Tình báo hàng không",
+    "worldClock": "Đồng hồ thế giới"
   },
   "commands": {
     "prefixes": {
@@ -250,7 +311,68 @@
       "brief": "Nhập tên quốc gia để xem báo cáo tình báo",
       "layers": "Nhập \"military\" hoặc \"finance\" để áp dụng bộ lớp có sẵn",
       "time": "Nhập \"1h\", \"24h\" hoặc \"7d\" để lọc theo thời gian",
-      "settings": "Nhập \"dark mode\", \"settings\" hoặc \"fullscreen\""
+      "settings": "Nhập \"dark mode\", \"settings\" hoặc \"fullscreen\"",
+      "mapExample": "Iran",
+      "panelExample": "tin tức",
+      "briefExample": "ngắn gọn trung quốc",
+      "layersExample": "lớp quân sự",
+      "timeExample": "24 giờ",
+      "settingsExample": "chế độ tối"
+    },
+    "keywords": {
+      "military": "quân đội",
+      "finance": "tài chính",
+      "infrastructure": "cơ sở hạ tầng",
+      "intelligence": "trí thông minh",
+      "news": "tin tức",
+      "dark": "tối tăm",
+      "light": "ánh sáng",
+      "settings": "cài đặt",
+      "fullscreen": "toàn màn hình",
+      "refresh": "làm cho khỏe lại"
+    },
+    "labels": {
+      "layers": {
+        "military": "Hiển thị các lớp quân sự",
+        "finance": "Hiển thị các lớp tài chính",
+        "infra": "Hiển thị các lớp cơ sở hạ tầng",
+        "intel": "Hiển thị các lớp thông minh",
+        "all": "Kích hoạt tất cả các lớp",
+        "none": "Ẩn tất cả các lớp",
+        "minimal": "Lớp tối thiểu (xung đột + điểm nóng)"
+      },
+      "layer": {
+        "ais": "Chuyển đổi theo dõi tàu AIS",
+        "flights": "Chuyển đổi các chuyến bay quân sự",
+        "conflicts": "Chuyển đổi vùng xung đột",
+        "hotspots": "Chuyển đổi các điểm nóng intel",
+        "protests": "Chuyển đổi các cuộc biểu tình và bất ổn",
+        "cables": "Chuyển đổi cáp dưới biển",
+        "pipelines": "Chuyển đổi đường ống",
+        "nuclear": "Chuyển đổi cơ sở hạt nhân",
+        "bases": "Chuyển đổi căn cứ quân sự",
+        "fires": "Chuyển đổi vụ cháy vệ tinh",
+        "weather": "Chuyển đổi lớp phủ thời tiết",
+        "cyber": "Chuyển đổi các mối đe dọa mạng",
+        "displacement": "Chuyển đổi các luồng dịch chuyển",
+        "climate": "Chuyển đổi các dị thường về khí hậu",
+        "outages": "Chuyển đổi tình trạng ngừng hoạt động của Internet",
+        "tradeRoutes": "Chuyển đổi các tuyến thương mại"
+      },
+      "view": {
+        "dark": "Chuyển sang chế độ tối",
+        "light": "Chuyển sang chế độ ánh sáng",
+        "fullscreen": "Chuyển đổi toàn màn hình",
+        "settings": "Mở cài đặt",
+        "refresh": "Làm mới tất cả dữ liệu"
+      },
+      "time": {
+        "1h": "Hiển thị các sự kiện từ giờ trước",
+        "6h": "Hiển thị các sự kiện từ 6 giờ qua",
+        "24h": "Hiển thị các sự kiện trong 24 giờ qua",
+        "48h": "Hiển thị các sự kiện trong 48 giờ qua",
+        "7d": "Hiển thị các sự kiện trong 7 ngày qua"
+      }
     }
   },
   "modals": {
@@ -288,7 +410,9 @@
         "techevent": "Sự kiện Công nghệ",
         "techhq": "Trụ sở Công nghệ",
         "accelerator": "Vườn ươm"
-      }
+      },
+      "commands": "Lệnh",
+      "results": "Kết quả"
     },
     "signal": {
       "title": "PHÁT HIỆN TÌNH BÁO",
@@ -443,7 +567,7 @@
           "success": "Bạn đã vào danh sách! Chúng tôi sẽ thông báo cho bạn đầu tiên.",
           "title": "Đặt chỗ của bạn"
         },
-        "tabLabel": "Marsd"
+        "tabLabel": "sao Hỏa"
       }
     },
     "countryIntel": {
@@ -498,9 +622,20 @@
         "displaced": "di dời",
         "climate": "Căng thẳng khí hậu",
         "conflictEvents": "sự kiện xung đột",
-        "gpsJammingZones": "GPS Jamming Zones",
+        "gpsJammingZones": "Vùng gây nhiễu GPS",
         "activeStrikes": "đình công đang diễn ra",
-        "aviationDisruptions": "gián đoạn sân bay"
+        "aviationDisruptions": "gián đoạn sân bay",
+        "criticalNews": "Tin tức quan trọng",
+        "aisDisruptions": "Sự gián đoạn AIS",
+        "satelliteFires": "Cháy vệ tinh",
+        "temporalAnomalies": "Dị thường thời gian",
+        "cyberThreats": "Các mối đe dọa mạng",
+        "activeSirens": "Còi báo động đang hoạt động",
+        "sirens24h": "Còi báo động / 24h",
+        "advisoryDoNotTravel": "Đừng đi du lịch",
+        "advisoryReconsider": "Xem xét lại việc đi lại",
+        "advisoryExerciseCaution": "Thận trọng",
+        "advisoryLabel": "Tư vấn: {{count}}"
       },
       "timeAgo": {
         "m": "{{count}}ph trước",
@@ -537,21 +672,32 @@
         "recentEarthquakes": "{{count}} trận động đất gần đây",
         "stockIndex": "Chỉ số chứng khoán: {{value}}",
         "recentHeadlines": "**Tin tức gần đây:**",
-        "activeStrikes": "Phát hiện {{count}} cuộc đình công đang diễn ra"
+        "activeStrikes": "Phát hiện {{count}} cuộc đình công đang diễn ra",
+        "travelAdvisoryDoNotTravel": "⚠️ Tư vấn du lịch: Không nên đi du lịch (nguồn {{count}})",
+        "travelAdvisoryReconsider": "⚠️ Tư vấn du lịch: Xem xét lại việc đi lại (nguồn {{count}})",
+        "criticalHeadlines": "🚨 Các tiêu đề quan trọng trong phạm vi: {{count}}",
+        "cyberThreats": "🛡️ Chỉ báo mối đe dọa mạng: {{count}}",
+        "aisDisruptions": "🚢 Gián đoạn AIS hàng hải: {{count}}",
+        "satelliteFires": "🔥 Phát hiện cháy vệ tinh: {{count}}",
+        "temporalAnomalies": "⏱️ Cảnh báo bất thường về thời gian: {{count}}",
+        "sirens24h": "🚨 Còi báo động trong 24h qua: {{count}}",
+        "noAiService": "Không có dịch vụ AI có sẵn. Định cấu hình GROQ_API_KEY trong Cài đặt để có bản tóm tắt đầy đủ."
       }
     }
   },
   "components": {
     "webcams": {
       "regions": {
-        "iran": "IRAN ATTACKS",
+        "iran": "TẤN CÔNG IRAN",
         "all": "TẤT CẢ",
         "mideast": "TRUNG ĐÔNG",
         "europe": "CHÂU ÂU",
         "americas": "CHÂU MỸ",
         "asia": "CHÂU Á"
       },
-      "expand": "Mở rộng"
+      "expand": "Mở rộng",
+      "paused": "Webcam bị tạm dừng",
+      "pausedIdle": "Webcam bị tạm dừng - di chuyển chuột để tiếp tục"
     },
     "monitor": {
       "placeholder": "Từ khóa (phân cách bằng dấu phẩy)",
@@ -607,16 +753,16 @@
       "noOilDataRetry": "Dữ liệu dầu mỏ tạm thời không khả dụng - sẽ thử lại",
       "vsPreviousWeek": "so với tuần trước",
       "in": "trong",
-      "centralBanks": "Central Banks",
-      "noBisData": "BIS data temporarily unavailable - will retry",
-      "policyRate": "Policy Rate",
-      "exchangeRate": "Exchange Rate",
-      "creditToGdp": "Credit / GDP",
-      "realEer": "Real EER",
-      "change": "Change",
-      "cut": "cut",
-      "hike": "hike",
-      "hold": "hold",
+      "centralBanks": "Ngân hàng trung ương",
+      "noBisData": "Dữ liệu BIS tạm thời không có - sẽ thử lại",
+      "policyRate": "Tỷ lệ chính sách",
+      "exchangeRate": "Tỷ giá hối đoái",
+      "creditToGdp": "Tín dụng/GDP",
+      "realEer": "EER thực",
+      "change": "Thay đổi",
+      "cut": "cắt",
+      "hike": "đi lang thang",
+      "hold": "giữ",
       "fredKeyMissing": "Cần khóa API FRED — thêm trong Cài đặt để bật chỉ số kinh tế"
     },
     "tradePolicy": {
@@ -666,7 +812,7 @@
       "pegHealth": "Sức khỏe Neo giá",
       "supplyVolume": "Cung & Khối lượng",
       "unavailable": "Dữ liệu stablecoin tạm thời không khả dụng",
-      "token": "Token",
+      "token": "Mã thông báo",
       "mcap": "Vốn hóa",
       "vol24h": "KL 24h",
       "chg24h": "Thay đổi 24h"
@@ -685,14 +831,14 @@
       "live": "TRỰC TIẾP",
       "historicalPlayback": "Phát lại Lịch sử",
       "close": "Đóng",
-      "skipToStart": "Skip to start",
-      "previous": "Previous",
-      "next": "Next",
-      "skipToEnd": "Skip to end"
+      "skipToStart": "Bỏ qua để bắt đầu",
+      "previous": "Trước",
+      "next": "Kế tiếp",
+      "skipToEnd": "Chuyển đến cuối"
     },
     "pizzint": {
       "title": "Chỉ số Pizza Lầu Năm Góc",
-      "defcon": "DEFCON {{level}}",
+      "defcon": "DEFCON {{count}}",
       "updated": "Cập nhật {{timeAgo}}",
       "tensionsTitle": "Căng thẳng Địa chính trị",
       "source": "Nguồn:",
@@ -780,7 +926,8 @@
       "shareStory": "Chia sẻ bài viết",
       "printPdf": "In / PDF",
       "exportData": "Xuất dữ liệu",
-      "sourceRef": "Nguồn [{{n}}]"
+      "sourceRef": "Nguồn [{{n}}]",
+      "shareLink": "Chia sẻ liên kết"
     },
     "relatedAssets": {
       "pipeline": "Đường ống",
@@ -792,7 +939,8 @@
     "community": {
       "joinDiscussion": "Tham gia Thảo luận",
       "openDiscussion": "Mở Thảo luận",
-      "dontShowAgain": "Không hiển thị lại"
+      "dontShowAgain": "Không hiển thị lại",
+      "sectionLabel": "Cộng đồng"
     },
     "threatLabels": {
       "critical": "N.TRỌNG",
@@ -821,7 +969,13 @@
         "elevated": "Nâng cao",
         "monitoring": "Giám sát",
         "base": "Căn cứ",
-        "nuclear": "Hạt nhân"
+        "nuclear": "Hạt nhân",
+        "aircraft": "Phi cơ",
+        "ciiLow": "Thấp (0–30)",
+        "ciiNormal": "Bình thường (31–50)",
+        "ciiElevated": "Nâng cao (51–65)",
+        "ciiHigh": "Cao (66–80)",
+        "ciiCritical": "Nguy cấp (81–100)"
       },
       "layerGuide": "Hướng dẫn Lớp",
       "layersTitle": "Lớp",
@@ -872,9 +1026,18 @@
         "commodityHubs": "Trung tâm Hàng hóa",
         "gulfInvestments": "Đầu tư GCC",
         "tradeRoutes": "Tuyến Thương mại",
-        "gpsJamming": "GPS JAMMING",
+        "gpsJamming": "GẠO GPS",
         "dayNight": "Ngày/Đêm",
-        "iranAttacks": "Tấn công Iran"
+        "iranAttacks": "Tấn công Iran",
+        "militaryAircraftConfirmed": "Máy bay quân sự",
+        "militaryAircraftUnknown": "Máy bay dân sự",
+        "navalActivity": "Hoạt động hải quân",
+        "ciiChoropleth": "CII không ổn định",
+        "positiveEvents": "Sự kiện tích cực",
+        "kindness": "Hành động tử tế",
+        "happiness": "Thế Giới Hạnh Phúc",
+        "speciesRecovery": "Phục hồi loài",
+        "renewableInstallations": "Năng lượng sạch"
       },
       "tooltip": {
         "earthquake": "Động đất",
@@ -901,7 +1064,34 @@
         "medium": "trung bình",
         "news": "Tin tức",
         "undisclosed": "Không công bố",
-        "stake": "cổ phần"
+        "stake": "cổ phần",
+        "basesCount": "Đế {{count}}",
+        "positiveEvent": "Sự kiện tích cực",
+        "sourcesReporting": "nguồn báo cáo",
+        "wildfire": "cháy rừng",
+        "brightness": "Độ sáng",
+        "deaths": "Tử vong",
+        "displacement": "Sự dịch chuyển",
+        "refugees": "người tị nạn",
+        "vsLabel": "vs",
+        "happiness": "Niềm hạnh phúc",
+        "noData": "Không có dữ liệu",
+        "cii": "CII",
+        "status": "Trạng thái",
+        "renewable": "tái tạo",
+        "tradeRoute": "Tuyến đường thương mại",
+        "unknown": "Không xác định",
+        "tradeRouteStart": "Tuyến đường Bắt đầu",
+        "tradeRouteEnd": "Tuyến cuối",
+        "tradeRouteDistance": "Khoảng cách",
+        "tradeRouteCargo": "Loại hàng hóa",
+        "tradeRouteVolume": "Âm lượng",
+        "tradeRouteStatus": "Trạng thái",
+        "tradeRouteActive": "Tích cực",
+        "tradeRouteInactive": "Không hoạt động",
+        "tradeRouteLastUpdated": "Cập nhật lần cuối",
+        "tradeRouteSourcePort": "Cổng nguồn",
+        "tradeRouteDestinationPort": "Cảng đích"
       },
       "layerHelp": {
         "title": "Hướng dẫn Lớp Bản đồ",
@@ -979,7 +1169,8 @@
           "techCyberThreats": "Tấn công mạng và sự kiện an ninh",
           "techEvents": "Hội nghị và sự kiện công nghệ lớn",
           "techFires": "Cháy rừng đang hoạt động gần hạ tầng công nghệ",
-          "geoBoundaries": "Khu phi quân sự, đường ngừng bắn và ranh giới tranh chấp"
+          "geoBoundaries": "Khu phi quân sự, đường ngừng bắn và ranh giới tranh chấp",
+          "ciiChoropleth": "Bản đồ nhiệt Chỉ số bất ổn quốc gia - tô màu các quốc gia theo điểm CII (xanh=ổn định, đỏ=quan trọng)"
         },
         "notes": {
           "timeAffects": "Ảnh hưởng: Động đất, Thời tiết, Biểu tình, Gián đoạn"
@@ -999,13 +1190,13 @@
       "analyzingSentiment": "Đang phân tích cảm xúc...",
       "generatingBrief": "Đang tạo bản tin thế giới...",
       "infoTooltip": "<strong>Phân tích Hỗ trợ AI</strong><br>• <strong>Bản tin Thế giới</strong>: Tóm tắt AI (Groq/OpenRouter)<br>• <strong>Cảm xúc</strong>: Phân tích sắc thái tin tức<br>• <strong>Tốc độ</strong>: Tin đang lan nhanh<br>• <strong>Điểm Hội tụ</strong>: Tương quan thực thể tin tức với tín hiệu bản đồ (quân sự, biểu tình, gián đoạn)<br><em>Chỉ Desktop • Được hỗ trợ bởi Llama 3.3 + Phát hiện Điểm Hội tụ</em>",
-      "settingsTitle": "Settings",
-      "sectionMap": "Map",
-      "sectionAi": "AI Analysis",
-      "mapFlashLabel": "Live Event Pulse",
-      "mapFlashDesc": "Flash locations on the map when breaking news arrives",
-      "aiFlowTitle": "Settings",
-      "aiFlowCloudLabel": "Cloud AI (Groq & OpenRouter)",
+      "settingsTitle": "Cài đặt",
+      "sectionMap": "Bản đồ",
+      "sectionAi": "Phân tích AI",
+      "mapFlashLabel": "Xung sự kiện trực tiếp",
+      "mapFlashDesc": "Vị trí nhấp nháy trên bản đồ khi có tin nóng hổi",
+      "aiFlowTitle": "Cài đặt",
+      "aiFlowCloudLabel": "Đám mây AI (Groq & OpenRouter)",
       "aiFlowCloudDesc": "Gửi tiêu đề tới cloud để AI tóm tắt (khuyến nghị)",
       "aiFlowBrowserLabel": "Mô hình cục bộ trên trình duyệt",
       "aiFlowBrowserDesc": "Chạy AI cục bộ trong trình duyệt của bạn",
@@ -1018,7 +1209,7 @@
       "aiFlowStatusBrowserOnly": "Chỉ mô hình trình duyệt",
       "aiFlowStatusDisabled": "Không có nhà cung cấp AI nào được bật",
       "insightsDisabledTitle": "Phân tích AI đã bị tắt",
-      "insightsDisabledHint": "Enable providers via the settings gear in the map header",
+      "insightsDisabledHint": "Cho phép nhà cung cấp thông qua thiết bị cài đặt trong tiêu đề bản đồ",
       "sectionStreaming": "Phát trực tiếp",
       "streamQualityDesc": "Đặt chất lượng cho tất cả luồng phát trực tiếp (thấp hơn tiết kiệm băng thông)",
       "streamQualityLabel": "Chất lượng Video",
@@ -1029,7 +1220,38 @@
       "headlineMemoryLabel": "Bộ nhớ tiêu đề",
       "headlineMemoryDesc": "Ghi nhớ tiêu đề đã xem để làm nổi bật tin mới",
       "streamAlwaysOnLabel": "Giữ luồng trực tiếp luôn chạy",
-      "streamAlwaysOnDesc": "Ngăn Live Cams và Live News tự động tạm dừng khi bạn không hoạt động. Khuyến nghị cho màn hình phụ / bảng tường. Tắt (Eco) để tiết kiệm CPU/băng thông."
+      "streamAlwaysOnDesc": "Ngăn Live Cams và Live News tự động tạm dừng khi bạn không hoạt động. Khuyến nghị cho màn hình phụ / bảng tường. Tắt (Eco) để tiết kiệm CPU/băng thông.",
+      "globeRenderQualityLabel": "Chất lượng kết xuất quả cầu",
+      "globeRenderQualityDesc": "Kiểm soát độ phân giải canvas toàn cầu. Giá trị cao hơn trông sắc nét hơn trên màn hình 4K nhưng có thể làm hỏng GPU.",
+      "globeRenderScaleOptions": {
+        "1": "Sinh thái (1x)",
+        "2": "4K (2x)",
+        "3": "Điên rồ (3x)",
+        "auto": "Tự động (thiết bị)",
+        "1_5": "Sắc nét (1,5x)"
+      },
+      "worldBriefTitle": "🌍 TÓM TẮT THẾ GIỚI",
+      "techBriefTitle": "🚀 TÓM TẮT CÔNG NGHỆ",
+      "sectionBreaking": "PHÁT HIỆN & XÁC NHẬN",
+      "sectionFocalPoints": "🎯 TIÊU ĐIỂM",
+      "sectionConvergence": "📍 TỔNG HỢP ĐỊA LÝ",
+      "sectionMlDetected": "🎯ML ĐƯỢC PHÁT HIỆN",
+      "statMultiSource": "Đa nguồn",
+      "statFastMoving": "Di chuyển nhanh",
+      "statAlerts": "Cảnh báo",
+      "statClusters": "Cụm",
+      "sentimentOverall": "Tổng thể: {{count}}",
+      "toneNegative": "Tiêu cực",
+      "tonePositive": "Tích cực",
+      "toneMixed": "Hỗn hợp",
+      "focalPointStats": "Tin tức {{count}} • Tín hiệu {{events}}",
+      "convergenceStats": "Các loại tín hiệu {{count}} • Sự kiện {{events}}",
+      "multiPerspectiveAnalysis": "Phân tích đa chiều...",
+      "usingCachedBrief": "Sử dụng bản tóm tắt được lưu trong bộ nhớ đệm...",
+      "loadingServerInsights": "Đang tải thông tin chi tiết về máy chủ...",
+      "generatingLocalizedBrief": "Đang tạo bản tóm tắt được bản địa hóa...",
+      "sourcesCountConfirmed": "✓ Nguồn {{count}}",
+      "sourcesCount": "Nguồn {{count}}"
     },
     "cascade": {
       "noImpacts": "Không phát hiện tác động quốc gia",
@@ -1201,7 +1423,9 @@
       "summarize": "Tóm tắt bảng này",
       "generatingSummary": "Đang tạo tóm tắt...",
       "sources": "{{count}} nguồn",
-      "relatedAssetsNear": "Tài sản liên quan gần {{location}}"
+      "relatedAssetsNear": "Tài sản liên quan gần {{location}}",
+      "summaryError": "Không thể tạo bản tóm tắt",
+      "summaryFailed": "Tóm tắt không thành công"
     },
     "export": {
       "exportData": "Xuất Dữ liệu"
@@ -1248,7 +1472,13 @@
     },
     "countryTimeline": {
       "now": "hiện tại",
-      "noEventsIn7Days": "Không có sự kiện trong 7 ngày"
+      "noEventsIn7Days": "Không có sự kiện trong 7 ngày",
+      "lanes": {
+        "protest": "Phản kháng",
+        "conflict": "Xung đột",
+        "natural": "Tự nhiên",
+        "military": "Quân đội"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>Tình báo GDELT</strong> Giám sát tin tức toàn cầu thời gian thực:<ul><li>Danh mục chủ đề được chọn lọc (xung đột, mạng, v.v.)</li><li>Bài viết từ hơn 100 ngôn ngữ được dịch</li><li>Cập nhật mỗi 15 phút</li></ul>Nguồn: GDELT Project (gdeltproject.org)"
@@ -1297,7 +1527,7 @@
         "railways": "Đường sắt",
         "telecoms": "Viễn thông",
         "water": "Nước",
-        "logistics": "Logistics",
+        "logistics": "hậu cần",
         "mining": "Khai khoáng",
         "realEstate": "Bất động sản",
         "manufacturing": "Sản xuất"
@@ -1335,9 +1565,9 @@
         "flow": "Dòng tiền",
         "regime": "Chế độ",
         "btcTrend": "Xu hướng BTC",
-        "hashRate": "Hash Rate",
+        "hashRate": "Tỷ lệ băm",
         "fearGreed": "Sợ hãi & Tham lam",
-        "momentum": "Momentum"
+        "momentum": "Động lực"
       }
     },
     "panel": {
@@ -1425,14 +1655,52 @@
       "channelNotFound": "Không tìm thấy kênh YouTube",
       "invalidHandle": "Nhập handle YouTube hợp lệ (ví dụ: @TênKênh)",
       "signInToYouTube": "Đăng nhập YouTube",
-      "verifying": "Đang xác minh…"
+      "verifying": "Đang xác minh…",
+      "noResults": "Không tìm thấy kênh nào khớp với \"{{count}}\"",
+      "hlsUrl": "URL luồng HLS (tùy chọn)",
+      "invalidHlsUrl": "Nhập URL luồng HLS hợp lệ (.m3u8)",
+      "togglePlayback": "Chuyển đổi phát lại",
+      "live": "Sống",
+      "paused": "Đã tạm dừng",
+      "channels": {
+        "aljazeeramubasher": "AlJazeera Mubasher",
+        "al-hadath": "Al Hadath",
+        "france24_ar": "France24 Arabic",
+        "alarabiya": "AlArabiya",
+        "aljazeera-arabic": "AlJazeera Arabic",
+        "sky-news-arabia": "Sky News Arabia",
+        "dw-arabia": "DW Arabia",
+        "iran-intl": "Iran International",
+        "asharq-news": "Asharq News",
+        "alaraby": "Alaraby",
+        "aljazeera": "AlJazeera English",
+        "bbcarabic": "BBC Arabic",
+        "cgtn-arabic": "CGTN Arabic",
+        "sky": "Sky News",
+        "dw": "DW",
+        "bloomberg": "Bloomberg",
+        "euronews": "Euronews",
+        "cnbc": "CNBC",
+        "cnn": "CNN",
+        "france24": "France 24",
+        "bbc-news": "BBC News",
+        "france24-en": "France 24 English",
+        "yahoo": "Yahoo Finance",
+        "nasa": "Sen Space Live",
+        "fox-news": "Fox News",
+        "newsmax": "Newsmax",
+        "abc-news": "ABC News",
+        "cbs-news": "CBS News",
+        "nbc-news": "NBC News",
+        "cbc-news": "CBC News"
+      }
     },
     "securityAdvisories": {
       "loading": "Đang tải cảnh báo du lịch...",
       "noMatching": "Không có cảnh báo cho bộ lọc này",
       "critical": "Nghiêm trọng",
       "health": "Sức khỏe",
-      "sources": "US State Dept, AU DFAT, UK FCDO, NZ MFAT, CDC, ECDC, WHO, US Embassies",
+      "sources": "Bộ Ngoại giao Hoa Kỳ, AU DFAT, FCDO Vương quốc Anh, MFAT New Zealand, CDC, ECDC, WHO, Đại sứ quán Hoa Kỳ",
       "refresh": "Làm mới",
       "levels": {
         "doNotTravel": "Không du lịch",
@@ -1450,15 +1718,15 @@
       "infoTooltip": "<strong>Cảnh báo An ninh</strong><br>Cảnh báo du lịch và an ninh từ các cơ quan chính phủ."
     },
     "orefSirens": {
-      "checking": "Checking siren alerts...",
-      "noAlerts": "No active sirens — all clear",
-      "notConfigured": "Sirens service not configured",
-      "activeSirens": "{{count}} active siren(s)",
-      "area": "Area",
-      "time": "Time",
-      "justNow": "just now",
-      "historyCount": "{{count}} alerts in last 24h",
-      "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding.",
+      "checking": "Đang kiểm tra cảnh báo còi báo động...",
+      "noAlerts": "Không có còi báo động - tất cả đều rõ ràng",
+      "notConfigured": "Dịch vụ còi báo động chưa được định cấu hình",
+      "activeSirens": "(Các) còi báo động hoạt động {{count}}",
+      "area": "Khu vực",
+      "time": "Thời gian",
+      "justNow": "ngay bây giờ",
+      "historyCount": "Cảnh báo {{count}} trong 24h qua",
+      "infoTooltip": "<strong>Còi báo động Israel</strong><br>Cảnh báo tên lửa và còi báo động tên lửa theo thời gian thực từ Bộ Tư lệnh Mặt trận Nội địa Israel.<br><br>Dữ liệu được thăm dò 10 giây một lần. Đèn báo màu đỏ nhấp nháy có nghĩa là còi báo động đang hoạt động đang kêu.",
       "historySummary": "{{count}} cảnh báo trong 24h — {{waves}} đợt",
       "loadingHistory": "Đang tải lịch sử..."
     },
@@ -1486,7 +1754,7 @@
       "share": "Tỷ lệ",
       "tabs": {
         "categories": "Danh mục",
-        "crypto": "Crypto",
+        "crypto": "tiền điện tử",
         "institutional": "Tổ chức",
         "platforms": "Nền tảng"
       },
@@ -1510,7 +1778,35 @@
       "spikeAlert": "Phát hiện đột biến — giá cao hơn đáng kể so với trung bình 52 tuần (hàng tuần)",
       "topProducers": "Nhà sản xuất hàng đầu",
       "upstreamUnavailable": "Dữ liệu chuỗi cung ứng tạm thời không khả dụng — hiển thị dữ liệu đã lưu cache",
-      "warnings": "cảnh báo"
+      "warnings": "cảnh báo",
+      "aisDisruptions": "(Các) sự gián đoạn AIS"
+    },
+    "positiveNewsFeed": {
+      "noStories": "Chưa có truyện nào trong danh mục này"
+    },
+    "goodThingsDigest": {
+      "noStories": "Không có câu chuyện nào",
+      "summarizing": "Tóm tắt…"
+    },
+    "progressCharts": {
+      "noData": "Không có dữ liệu tiến độ"
+    },
+    "settings": {
+      "dataManagementLabel": "Quản lý dữ liệu",
+      "exportSettings": "Xuất cài đặt",
+      "importSettings": "Cài đặt nhập",
+      "exportSuccess": "Đã xuất cài đặt thành công",
+      "exportFailed": "Không xuất được cài đặt",
+      "importSuccess": "Đã nhập cài đặt {{count}}",
+      "importFailed": "Không thể nhập cài đặt",
+      "reloadNow": "Tải lại ngay bây giờ"
+    },
+    "map": {
+      "showMap": "Hiển thị bản đồ",
+      "hideMap": "Ẩn bản đồ"
+    },
+    "globe": {
+      "loadingGlobe": "Đang tải hình ảnh địa cầu…"
     }
   },
   "popups": {
@@ -1553,7 +1849,7 @@
     },
     "base": {
       "types": {
-        "us-nato": "US/NATO",
+        "us-nato": "Mỹ/NATO",
         "china": "CHINA",
         "russia": "RUSSIA",
         "france": "Pháp",
@@ -1568,20 +1864,35 @@
         "marine": "Thủy quân lục chiến",
         "space": "Lực lượng vũ trụ",
         "other": "Khác"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
     },
     "protest": {
       "acledVerified": "ACLED (đã xác minh)",
       "gdelt": "GDELT",
       "riots": "Bạo loạn",
-      "highSeverity": "Mức nghiêm trọng Cao"
+      "highSeverity": "Mức nghiêm trọng Cao",
+      "types": {
+        "protest": "Phản kháng",
+        "riot": "Cuộc náo loạn",
+        "civil_unrest": "bất ổn dân sự",
+        "strike": "Đánh đập",
+        "demonstration": "Biểu tình"
+      }
     },
     "gpsJamming": {
       "title": "Nhiễu GPS/GNSS",
       "interference": "Nhiễu",
       "aircraftAffected": "Máy bay bị ảnh hưởng",
       "aircraftNormal": "Máy bay bình thường",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 lục giác",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "flight": {
       "groundStop": "DỪNG MẶT ĐẤT",
@@ -1619,7 +1930,12 @@
         "weapons": "TỔ HỢP VŨ KHÍ",
         "research": "NGHIÊN CỨU"
       },
-      "description": "Cơ sở hạt nhân đang được giám sát. Tầm quan trọng chiến lược cho an ninh khu vực và các mối quan ngại không phổ biến vũ khí."
+      "description": "Cơ sở hạt nhân đang được giám sát. Tầm quan trọng chiến lược cho an ninh khu vực và các mối quan ngại không phổ biến vũ khí.",
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
+      }
     },
     "economic": {
       "types": {
@@ -1720,6 +2036,11 @@
         "elevated": "NÂNG CAO",
         "high": "CAO",
         "critical": "NGHIÊM TRỌNG"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "GIẢM GIÁ"
       }
     },
     "buttons": {
@@ -1814,7 +2135,7 @@
     },
     "techHQ": {
       "types": {
-        "faang": "BIG TECH",
+        "faang": "CÔNG NGHỆ LỚN",
         "unicorn": "UNICORN",
         "public": "NIÊM YẾT",
         "tech": "CÔNG NGHỆ"
@@ -1842,7 +2163,7 @@
     },
     "techHQCluster": {
       "companiesCount": "{{count}} CÔNG TY",
-      "bigTechCount": "{{count}} Big Tech",
+      "bigTechCount": "{{count}} Công nghệ lớn",
       "unicornsCount": "{{count}} Unicorn",
       "publicCount": "{{count}} Niêm yết",
       "sampled": "Hiển thị danh sách mẫu gồm {{count}} công ty."
@@ -1873,7 +2194,28 @@
       "hexCode": "MÃ HEX",
       "squawk": "SQUAWK",
       "attribution": "Nguồn: OpenSky Network",
-      "trackFlight": "Theo dõi trên FlightAware"
+      "trackFlight": "Theo dõi trên FlightAware",
+      "operators": {
+        "usaf": "Không quân Hoa Kỳ",
+        "usn": "Hải quân Mỹ",
+        "usmc": "Thủy quân lục chiến Hoa Kỳ",
+        "usa": "quân đội Mỹ",
+        "raf": "Không quân Hoàng gia",
+        "rn": "Hải quân Hoàng gia",
+        "faf": "Không quân Pháp",
+        "gaf": "Không quân Đức",
+        "plaaf": "Không quân PLA",
+        "plan": "Hải quân PLA",
+        "vks": "Hàng không vũ trụ Nga",
+        "iaf": "Không quân Israel",
+        "nato": "NATO"
+      },
+      "highInterest": "Chuyến bay lãi suất cao",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "militaryVessel": {
       "aisDark": "MẤT TÍN HIỆU AIS",
@@ -1888,7 +2230,34 @@
       "usniIntel": "Tình báo USNI",
       "usniSource": "Nguồn: USNI News Fleet Tracker",
       "approximatePosition": "Vị trí ước tính — dựa trên báo cáo hàng tuần USNI, không phải AIS thời gian thực.",
-      "darkDescription": "⚠ Tàu đã mất tín hiệu - mất tín hiệu AIS. Có thể cho thấy hoạt động nhạy cảm."
+      "darkDescription": "⚠ Tàu đã mất tín hiệu - mất tín hiệu AIS. Có thể cho thấy hoạt động nhạy cảm.",
+      "types": {
+        "carrier": "Tàu sân bay",
+        "destroyer": "Kẻ hủy diệt",
+        "frigate": "tàu khu trục",
+        "submarine": "tàu ngầm",
+        "amphibious": "đổ bộ",
+        "patrol": "tuần tra",
+        "auxiliary": "phụ trợ",
+        "research": "Nghiên cứu",
+        "icebreaker": "Tàu phá băng",
+        "special": "Đặc biệt"
+      },
+      "operators": {
+        "usn": "Hải quân Mỹ",
+        "uscg": "Lực lượng bảo vệ bờ biển Mỹ",
+        "rn": "Hải quân Hoàng gia",
+        "fn": "Hải quân Pháp",
+        "plan": "Hải quân PLA",
+        "ruf": "Hải quân Nga",
+        "jmsdf": "Lực lượng Phòng vệ Hàng hải Nhật Bản",
+        "rokn": "Hải quân Hàn Quốc"
+      },
+      "deploymentStatuses": {
+        "deployed": "Đã triển khai",
+        "underway": "Đang tiến hành",
+        "in-port": "Tại cảng"
+      }
     },
     "militaryCluster": {
       "flightActivity": {
@@ -1913,7 +2282,10 @@
       "moreVessels": "+{{count}} tàu khác",
       "vesselsCount": "{{count}} TÀU",
       "vessels": "TÀU",
-      "trackedVessels": "TÀU ĐƯỢC THEO DÕI"
+      "trackedVessels": "TÀU ĐƯỢC THEO DÕI",
+      "showLessVessels": "Hiển thị ít tàu hơn",
+      "csg": "Nhóm tấn công tàu sân bay",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "ĐÃ KẾT THÚC",
@@ -1976,24 +2348,114 @@
       "insurgency_coups": "Nổi dậy/Đảo chính",
       "iraq_pmf": "Iraq/PMF",
       "kremlin_activity": "Hoạt động Kremlin",
-      "lebanon_hezbollah": "Lebanon/Hezbollah",
+      "lebanon_hezbollah": "Liban/Hezbollah",
       "mossad_idf": "Mossad/IDF",
       "nato_hq": "Trụ sở NATO",
       "pla_mss_activity": "Hoạt động PLA/MSS",
       "pentagon_pizza_index": "Chỉ số Pizza Lầu Năm Góc",
       "piracy_conflict": "Cướp biển/Xung đột",
       "qatar_al_udeid": "Qatar/Al Udeid",
-      "saudi_gip_mbs": "Saudi GIP/MBS",
+      "saudi_gip_mbs": "GIP Ả Rập Saudi/MBS",
       "strait_watch": "Theo dõi Eo biển",
       "syria_crisis": "Khủng hoảng Syria",
       "tech_ai_hub": "Trung tâm Công nghệ/AI",
       "turkey_mit": "Thổ Nhĩ Kỳ/MIT",
       "uae_ecsr": "UAE/ECSR",
       "venezuela_crisis": "Khủng hoảng Venezuela",
-      "yemen_houthis": "Yemen/Houthis"
+      "yemen_houthis": "Yemen/Houthi"
     },
     "iranEvent": {
       "relatedEvents": "Sự kiện Liên quan"
+    },
+    "values": {
+      "branches": {
+        "navy": "hải quân",
+        "air_force": "Không quân",
+        "army": "Quân đội",
+        "marines": "Thủy quân lục chiến",
+        "coast_guard": "Cảnh sát biển",
+        "special_forces": "Lực lượng đặc biệt",
+        "space_force": "Lực lượng không gian",
+        "national_guard": "Vệ binh quốc gia"
+      },
+      "categories": {
+        "air_force": "Không quân",
+        "naval": "hải quân",
+        "nuclear": "Hạt nhân",
+        "space": "Không gian",
+        "training": "Đào tạo",
+        "logistics": "hậu cần",
+        "intelligence": "Tình báo"
+      },
+      "exercise": "Bài tập",
+      "patrol": "tuần tra",
+      "deployment": "Triển khai",
+      "transit": "Quá cảnh",
+      "transport": "Chuyên chở",
+      "reconnaissance": "trinh sát",
+      "unknown": "Không xác định",
+      "fighter": "máy bay chiến đấu",
+      "bomber": "máy bay ném bom",
+      "tanker": "tàu chở dầu",
+      "awacs": "AWACS",
+      "helicopter": "Trực thăng",
+      "drone": "máy bay không người lái",
+      "special_ops": "Hoạt động đặc biệt",
+      "vip": "VIP",
+      "carrier": "Tàu sân bay",
+      "destroyer": "Kẻ hủy diệt",
+      "frigate": "tàu khu trục",
+      "submarine": "tàu ngầm",
+      "amphibious": "đổ bộ",
+      "auxiliary": "phụ trợ",
+      "research": "Nghiên cứu",
+      "icebreaker": "Tàu phá băng",
+      "special": "Đặc biệt",
+      "usaf": "Không quân Hoa Kỳ",
+      "usn": "Hải quân Mỹ",
+      "usmc": "Thủy quân lục chiến Hoa Kỳ",
+      "usa": "quân đội Mỹ",
+      "raf": "Không quân Hoàng gia",
+      "rn": "Hải quân Hoàng gia",
+      "faf": "Không quân Pháp",
+      "gaf": "Không quân Đức",
+      "plaaf": "Không quân PLA",
+      "plan": "Hải quân PLA",
+      "vks": "Hàng không vũ trụ Nga",
+      "iaf": "Không quân Israel",
+      "nato": "NATO",
+      "other": "Khác"
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
+    },
+    "aircraft": {
+      "altitude": "Độ cao",
+      "speed": "Tốc độ mặt đất",
+      "heading": "tiêu đề",
+      "position": "Chức vụ",
+      "ground": "Trên mặt đất",
+      "airborne": "Trên không"
+    },
+    "confidence": "CONFIDENCE",
+    "ucdpEvent": {
+      "title": "XUNG ĐỘT VŨ TRỤ",
+      "parties": "PARTIES",
+      "deaths": "TỬ VONG (EST TỐT NHẤT.)",
+      "range": "phạm vi",
+      "types": {
+        "state-based": "Dựa trên tiểu bang",
+        "non-state": "Phi nhà nước",
+        "one-sided": "một mặt"
+      }
     }
   },
   "signals": {
@@ -2175,6 +2637,55 @@
     "refresh": "Làm mới",
     "all": "Tất cả",
     "loadingGiving": "Đang tải dữ liệu từ thiện toàn cầu",
-    "rateLimitedMarket": "Dữ liệu thị trường tạm thời không khả dụng (bị giới hạn tốc độ) — đang thử lại"
+    "rateLimitedMarket": "Dữ liệu thị trường tạm thời không khả dụng (bị giới hạn tốc độ) — đang thử lại",
+    "beta": "BETA",
+    "vs": "vs",
+    "yes": "Đúng",
+    "no": "KHÔNG"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "Nhà hát chiến tranh Iran",
+      "strait_hormuz": "Khủng hoảng eo biển Hormuz",
+      "ukraine": "Chiến tranh Ukraina",
+      "gaza": "Xung đột Gaza",
+      "south_lebanon": "Biên giới Israel-Lebanon",
+      "yemen_redsea": "Khủng hoảng Biển Đỏ",
+      "sudan": "Nội chiến Sudan",
+      "myanmar": "Nội chiến Myanmar",
+      "korean_dmz": "Khu phi quân sự Triều Tiên",
+      "pak_afghan": "Xung đột biên giới Pakistan-Afghanistan"
+    },
+    "hotspots": {
+      "sahel": "Sahel",
+      "haiti": "Port-au-Prince",
+      "horn_africa": "Sừng châu Phi",
+      "dc": "DC",
+      "silicon_valley": "Thung lũng Silicon",
+      "wall_street": "Phố Wall",
+      "houston": "Houston",
+      "moscow": "Mátxcơva",
+      "beijing": "Bắc Kinh",
+      "kyiv": "Kiev",
+      "taipei": "Đài Bắc",
+      "tehran": "Tehran",
+      "telaviv": "Tel Aviv",
+      "pyongyang": "Bình Nhưỡng",
+      "london": "Luân Đôn",
+      "brussels": "Bruxelles",
+      "caracas": "Caracas",
+      "mexico": "Thành phố Mexico",
+      "nuuk": "Nuuk",
+      "riyadh": "Riyadh",
+      "cairo": "Cairo",
+      "baghdad": "Bát-đa",
+      "damascus": "Damacus",
+      "doha": "Doha",
+      "ankara": "Ankara",
+      "beirut": "Beirut",
+      "sanaa": "Sana'a",
+      "abudhabi": "Abu Dhabi",
+      "pak_afghan": "Biên giới Pakistan–Afghanistan"
+    }
   }
 }

@@ -37,7 +37,7 @@
       "displaced": "перемещённые",
       "climate": "Климатическая нагрузка",
       "conflictEvents": "конфликтные события",
-      "gpsJammingZones": "GPS Jamming Zones",
+      "gpsJammingZones": "Зоны помех GPS",
       "activeStrikes": "активные забастовки",
       "aviationDisruptions": "сбои в аэропортах"
     },
@@ -77,6 +77,63 @@
       "stockIndex": "Фондовый индекс: {{value}}",
       "recentHeadlines": "**Последние заголовки:**",
       "activeStrikes": "{{count}} активных забастовок обнаружено"
+    },
+    "overview": "Страновая разведка",
+    "close": "Закрывать",
+    "updated": "Обновлено",
+    "story": "История",
+    "export": "Экспорт",
+    "loadingNews": "Загрузка заголовков стран…",
+    "loadingMilitary": "Загрузка рейсов, судов и близлежащих баз…",
+    "loadingInfrastructure": "Вычисление близлежащей критически важной инфраструктуры…",
+    "loadingEconomic": "Загрузка доступных индикаторов…",
+    "shareLink": "Поделиться ссылкой",
+    "exportData": "Экспортировать данные",
+    "militaryActivity": "Военная деятельность",
+    "economicIndicators": "Экономические показатели",
+    "ownFlights": "Собственные рейсы",
+    "foreignFlights": "Зарубежные рейсы",
+    "navalVessels": "Военно-морские суда",
+    "foreignPresence": "Иностранное присутствие",
+    "nearestBases": "Ближайшие военные базы",
+    "noBasesNearby": "Нет близлежащих баз в радиусе 600 км.",
+    "noInfrastructure": "Критической инфраструктуры в радиусе 600 км не обнаружено.",
+    "noGeometry": "Геометрия для корреляции инфраструктуры отсутствует.",
+    "noSignals": "Никаких недавних сигналов высокой серьезности.",
+    "assessmentUnavailable": "Оценка недоступна.",
+    "noNews": "Нет недавнего освещения конкретной страны.",
+    "noIndicators": "Показатели по конкретной стране отсутствуют.",
+    "nearbyPorts": "Соседние порты",
+    "detected": "Обнаружено",
+    "notDetected": "Нет",
+    "ciiUnavailable": "Оценка CII недоступна для этой страны.",
+    "chips": {
+      "criticalNews": "Критические новости",
+      "protests": "Протесты",
+      "militaryAir": "Военный воздух",
+      "navalVessels": "Военно-морские суда",
+      "outages": "Отключения",
+      "aisDisruptions": "Сбои в работе АИС",
+      "satelliteFires": "Спутниковые пожары",
+      "temporalAnomalies": "Временные аномалии",
+      "cyberThreats": "Киберугрозы",
+      "earthquakes": "Землетрясения",
+      "displaced": "Перемещенный",
+      "climateStress": "Климатический стресс",
+      "conflictEvents": "Конфликтные события",
+      "activeStrikes": "Активные удары",
+      "doNotTravel": "Не путешествуйте",
+      "reconsiderTravel": "Пересмотрите путешествие",
+      "exerciseCaution": "Соблюдайте осторожность",
+      "advisory": "Консультативный",
+      "activeSirens": "Активные сирены",
+      "sirens24h": "Сирены / 24 часа",
+      "aviationDisruptions": "Авиационные сбои",
+      "gpsJammingZones": "Зоны помех GPS"
+    },
+    "indicators": {
+      "instabilityregime": "Нестабильность режима",
+      "displacementoutflow": "Вытесняющий отток"
     }
   },
   "header": {
@@ -143,7 +200,9 @@
     "panelCatCentralBanks": "Центробанки и экономика",
     "panelCatDeals": "Сделки и институционалы",
     "panelCatGulfMena": "Залив и БВСА",
-    "panelCatTradePolicy": "Торговая политика"
+    "panelCatTradePolicy": "Торговая политика",
+    "downloadApp": "Скачать приложение",
+    "selectRegion": "Выберите регион"
   },
   "panels": {
     "liveNews": "Новости в реальном времени",
@@ -211,14 +270,16 @@
     "geoHubs": "Геополитические хабы",
     "liveWebcams": "Веб-камеры",
     "securityAdvisories": "Предупреждения безопасности",
-    "orefSirens": "Israel Sirens",
+    "orefSirens": "Израиль Сиренс",
     "telegramIntel": "Разведка Telegram",
     "giving": "Глобальная благотворительность",
     "supplyChain": "Цепочка поставок",
     "gulfEconomies": "Экономика Залива",
     "gulfIndices": "Индексы Залива",
     "gulfCurrencies": "Валюты Залива",
-    "gulfOil": "Нефть Залива"
+    "gulfOil": "Нефть Залива",
+    "airlineIntel": "Разведка авиакомпании",
+    "worldClock": "Мировое время"
   },
   "commands": {
     "prefixes": {
@@ -250,7 +311,68 @@
       "brief": "Введите название страны для разведывательной сводки",
       "layers": "Введите \"military\" или \"finance\" для пресетов слоёв",
       "time": "Введите \"1h\", \"24h\" или \"7d\" для фильтрации по времени",
-      "settings": "Введите \"dark mode\", \"settings\" или \"fullscreen\""
+      "settings": "Введите \"dark mode\", \"settings\" или \"fullscreen\"",
+      "mapExample": "Иран",
+      "panelExample": "новости",
+      "briefExample": "краткий фарфор",
+      "layersExample": "военные слои",
+      "timeExample": "24 часа",
+      "settingsExample": "темный режим"
+    },
+    "keywords": {
+      "military": "военный",
+      "finance": "финансы",
+      "infrastructure": "инфраструктура",
+      "intelligence": "интеллект",
+      "news": "новости",
+      "dark": "темный",
+      "light": "свет",
+      "settings": "настройки",
+      "fullscreen": "полноэкранный",
+      "refresh": "обновить"
+    },
+    "labels": {
+      "layers": {
+        "military": "Показать военные слои",
+        "finance": "Показать финансовые слои",
+        "infra": "Показать уровни инфраструктуры",
+        "intel": "Показать уровни интеллекта",
+        "all": "Включить все слои",
+        "none": "Скрыть все слои",
+        "minimal": "Минимальные слои (конфликты + горячие точки)"
+      },
+      "layer": {
+        "ais": "Переключить отслеживание судов AIS",
+        "flights": "Переключить военные полеты",
+        "conflicts": "Переключить конфликтные зоны",
+        "hotspots": "Переключить точки доступа Intel",
+        "protests": "Переключить протесты и беспорядки",
+        "cables": "Переключить подводные кабели",
+        "pipelines": "Переключить конвейеры",
+        "nuclear": "Переключить ядерные объекты",
+        "bases": "Переключить военные базы",
+        "fires": "Переключить спутниковые пожары",
+        "weather": "Переключить наложение погоды",
+        "cyber": "Переключить киберугрозы",
+        "displacement": "Переключить потоки смещения",
+        "climate": "Переключить климатические аномалии",
+        "outages": "Переключить перебои в доступе в Интернет",
+        "tradeRoutes": "Переключить торговые маршруты"
+      },
+      "view": {
+        "dark": "Переключиться в темный режим",
+        "light": "Переключиться в светлый режим",
+        "fullscreen": "Переключить полноэкранный режим",
+        "settings": "Открыть настройки",
+        "refresh": "Обновить все данные"
+      },
+      "time": {
+        "1h": "Показать события за последний час",
+        "6h": "Показать события за последние 6 часов",
+        "24h": "Показать события за последние 24 часа",
+        "48h": "Показать события за последние 48 часов",
+        "7d": "Показать события за последние 7 дней"
+      }
     }
   },
   "modals": {
@@ -288,7 +410,9 @@
         "techevent": "Технологическое мероприятие",
         "techhq": "Штаб-квартира",
         "accelerator": "Акселератор"
-      }
+      },
+      "commands": "Команды",
+      "results": "Результаты"
     },
     "signal": {
       "title": "РАЗВЕДЫВАТЕЛЬНОЕ ОБНАРУЖЕНИЕ",
@@ -353,7 +477,7 @@
       "title": "Доступна настольная версия",
       "description": "Нативная производительность, безопасное локальное хранение ключей, офлайн-карты.",
       "macSilicon": "macOS (Apple Silicon)",
-      "macIntel": "macOS (Intel)",
+      "macIntel": "macOS (Интел)",
       "windows": "Windows (.exe)",
       "linux": "Linux (.AppImage)",
       "showAllPlatforms": "Все платформы",
@@ -393,8 +517,8 @@
         "ABUSEIPDB_API_KEY": "Дополнительный источник репутации вредоносных IP-адресов.",
         "FINNHUB_API_KEY": "Котировки акций и рыночные данные в реальном времени.",
         "NASA_FIRMS_API_KEY": "Система управления информацией о пожарах.",
-        "OLLAMA_API_URL": "e.g. http://127.0.0.1:11434 (Ollama) or http://127.0.0.1:1234/v1 (LM Studio) — OpenAI-compatible endpoint.",
-        "OLLAMA_MODEL": "e.g. llama3.1:8b — model tag to use for summarization."
+        "OLLAMA_API_URL": "например http://127.0.0.1:11434 (Ollama) или http://127.0.0.1:1234/v1 (LM Studio) — конечная точка, совместимая с OpenAI.",
+        "OLLAMA_MODEL": "например llama3.1:8b — тег модели, используемый для обобщения."
       },
       "skipSetup": "Пропустить настройку — одна лицензия Marsd открывает всё. Запишитесь в лист ожидания для раннего доступа."
     },
@@ -420,7 +544,7 @@
         "duration": "Длительность"
       },
       "worldMonitor": {
-        "tabLabel": "Marsd",
+        "tabLabel": "Марсд",
         "heroTitle": "Один ключ. Всё включено.",
         "heroDescription": "Одна лицензия Marsd заменяет все API-ключи и LLM-провайдеров, которые иначе пришлось бы настраивать самостоятельно. ИИ-сводки, разведка в реальном времени, рыночные данные, отслеживание конфликтов, обнаружение пожаров, спутниковые снимки — всё работает, всё под управлением, без настройки.",
         "apiKey": {
@@ -434,7 +558,7 @@
         "register": {
           "title": "Забронируйте место",
           "description": "Мы готовим запуск лицензий Marsd. Зарегистрируйтесь сейчас — первые участники получат приоритетный доступ и цены для основателей.",
-          "emailPlaceholder": "your@email.com",
+          "emailPlaceholder": "ваш@email.com",
           "submitBtn": "В лист ожидания",
           "submitting": "Отправка...",
           "success": "Вы в списке! Мы уведомим вас первыми.",
@@ -498,9 +622,20 @@
         "displaced": "перемещённые",
         "climate": "Климатическая нагрузка",
         "conflictEvents": "конфликтные события",
-        "gpsJammingZones": "GPS Jamming Zones",
+        "gpsJammingZones": "Зоны помех GPS",
         "activeStrikes": "активные забастовки",
-        "aviationDisruptions": "сбои в аэропортах"
+        "aviationDisruptions": "сбои в аэропортах",
+        "criticalNews": "Критические новости",
+        "aisDisruptions": "Сбои в работе АИС",
+        "satelliteFires": "Спутниковые пожары",
+        "temporalAnomalies": "Временные аномалии",
+        "cyberThreats": "Киберугрозы",
+        "activeSirens": "Активные сирены",
+        "sirens24h": "Сирены / 24 часа",
+        "advisoryDoNotTravel": "Не путешествуйте",
+        "advisoryReconsider": "Пересмотрите путешествие",
+        "advisoryExerciseCaution": "Соблюдайте осторожность",
+        "advisoryLabel": "Сообщение: {{term}}."
       },
       "timeAgo": {
         "m": "{{count}}м назад",
@@ -537,7 +672,16 @@
         "recentEarthquakes": "{{count}} недавних землетрясений",
         "stockIndex": "Фондовый индекс: {{value}}",
         "recentHeadlines": "**Последние заголовки:**",
-        "activeStrikes": "{{count}} активных забастовок обнаружено"
+        "activeStrikes": "{{count}} активных забастовок обнаружено",
+        "travelAdvisoryDoNotTravel": "⚠️ Рекомендации для туристов: не путешествовать (источник {{term}})",
+        "travelAdvisoryReconsider": "⚠️ Советы путешественникам: пересмотрите путешествие (источник {{term}})",
+        "criticalHeadlines": "🚨 Критические заголовки: {{term}}",
+        "cyberThreats": "🛡️ Индикаторы киберугроз: {{term}}.",
+        "aisDisruptions": "🚢 Сбои в работе морской АИС: {{term}}.",
+        "satelliteFires": "🔥 Спутниковое обнаружение пожаров: {{term}}",
+        "temporalAnomalies": "⏱️ Оповещения о временных аномалиях: {{term}}.",
+        "sirens24h": "🚨 Сирены за последние 24 часа: {{term}}",
+        "noAiService": "Служба AI недоступна. Настройте GROQ_API_KEY в настройках для получения полных брифов."
       }
     }
   },
@@ -553,14 +697,16 @@
     },
     "webcams": {
       "regions": {
-        "iran": "IRAN ATTACKS",
+        "iran": "ИРАН НАПАДАЕТ",
         "all": "ВСЕ",
         "mideast": "БЛИЖНИЙ ВОСТОК",
         "europe": "ЕВРОПА",
         "americas": "АМЕРИКА",
         "asia": "АЗИЯ"
       },
-      "expand": "Развернуть"
+      "expand": "Развернуть",
+      "paused": "Веб-камеры приостановлены",
+      "pausedIdle": "Веб-камеры приостановлены — наведите указатель мыши, чтобы возобновить работу."
     },
     "regulation": {
       "timeline": "Хронология",
@@ -579,19 +725,19 @@
       "active": "Действует",
       "proposed": "Предлагается",
       "updated": "Обновлено",
-      "dashboard": "AI Regulation Dashboard",
-      "actionsCount": "{{count}} actions",
-      "deadlinesCount": "{{count}} deadlines",
-      "days": "days",
-      "activeCount": "Active Regulations ({{count}})",
-      "proposedCount": "Proposed Regulations ({{count}})",
-      "moreProvisions": "+{{count}} more...",
-      "source": "Source",
+      "dashboard": "Панель регулирования искусственного интеллекта",
+      "actionsCount": "Действия {{term}}",
+      "deadlinesCount": "{{term}} сроки",
+      "days": "дни",
+      "activeCount": "Действующие правила ({{term}})",
+      "proposedCount": "Предлагаемые правила ({{term}})",
+      "moreProvisions": "+{{term}} еще...",
+      "source": "Источник",
       "stances": {
-        "strict": "Strict",
-        "moderate": "Moderate",
-        "permissive": "Permissive",
-        "undefined": "Undefined"
+        "strict": "Строгий",
+        "moderate": "Умеренный",
+        "permissive": "Разрешительный",
+        "undefined": "Неопределенный"
       }
     },
     "economic": {
@@ -607,16 +753,16 @@
       "noOilDataRetry": "Данные по нефти временно недоступны — повторная попытка",
       "vsPreviousWeek": "к предыдущей неделе",
       "in": "в",
-      "centralBanks": "Central Banks",
-      "noBisData": "BIS data temporarily unavailable - will retry",
-      "policyRate": "Policy Rate",
-      "exchangeRate": "Exchange Rate",
-      "creditToGdp": "Credit / GDP",
-      "realEer": "Real EER",
-      "change": "Change",
-      "cut": "cut",
-      "hike": "hike",
-      "hold": "hold",
+      "centralBanks": "Центральные банки",
+      "noBisData": "Данные BIS временно недоступны – повторим попытку.",
+      "policyRate": "Политическая ставка",
+      "exchangeRate": "Обменный курс",
+      "creditToGdp": "Кредит / ВВП",
+      "realEer": "Реальный EER",
+      "change": "Изменять",
+      "cut": "резать",
+      "hike": "поход",
+      "hold": "держать",
       "fredKeyMissing": "Требуется API-ключ FRED — добавьте в Настройках для включения экономических индикаторов"
     },
     "tradePolicy": {
@@ -685,14 +831,14 @@
       "live": "ПРЯМОЙ ЭФИР",
       "historicalPlayback": "Историческое воспроизведение",
       "close": "Закрыть",
-      "skipToStart": "Skip to start",
-      "previous": "Previous",
-      "next": "Next",
-      "skipToEnd": "Skip to end"
+      "skipToStart": "Пропустить, чтобы начать",
+      "previous": "Предыдущий",
+      "next": "Следующий",
+      "skipToEnd": "Перейти до конца"
     },
     "pizzint": {
       "title": "Индекс пиццерий Пентагона",
-      "defcon": "DEFCON {{level}}",
+      "defcon": "DEFCON {{term}}",
       "updated": "Обновлено {{timeAgo}}",
       "tensionsTitle": "Геополитическая напряжённость",
       "source": "Источник:",
@@ -780,7 +926,8 @@
       "shareStory": "Поделиться сюжетом",
       "printPdf": "Печать / PDF",
       "exportData": "Экспорт данных",
-      "sourceRef": "Источник [{{n}}]"
+      "sourceRef": "Источник [{{n}}]",
+      "shareLink": "Поделиться ссылкой"
     },
     "relatedAssets": {
       "pipeline": "Трубопровод",
@@ -792,7 +939,8 @@
     "community": {
       "joinDiscussion": "Присоединиться к обсуждению",
       "openDiscussion": "Открыть обсуждение",
-      "dontShowAgain": "Больше не показывать"
+      "dontShowAgain": "Больше не показывать",
+      "sectionLabel": "Сообщество"
     },
     "threatLabels": {
       "critical": "КРИТ",
@@ -821,7 +969,13 @@
         "elevated": "Повышенный",
         "monitoring": "Мониторинг",
         "base": "База",
-        "nuclear": "Ядерный"
+        "nuclear": "Ядерный",
+        "aircraft": "Самолет",
+        "ciiLow": "Низкий (0–30)",
+        "ciiNormal": "Нормальный (31–50)",
+        "ciiElevated": "Повышенный (51–65)",
+        "ciiHigh": "Высокий (66–80)",
+        "ciiCritical": "Критический (81–100)"
       },
       "layerGuide": "Справочник слоёв",
       "layersTitle": "Слои",
@@ -872,9 +1026,18 @@
         "commodityHubs": "Сырьевые хабы",
         "gulfInvestments": "Инвестиции стран Залива",
         "tradeRoutes": "Торговые маршруты",
-        "gpsJamming": "GPS JAMMING",
+        "gpsJamming": "GPS-ПУСКИ",
         "dayNight": "День/Ночь",
-        "iranAttacks": "Атаки Ирана"
+        "iranAttacks": "Атаки Ирана",
+        "militaryAircraftConfirmed": "Военный самолет",
+        "militaryAircraftUnknown": "Гражданские самолеты",
+        "navalActivity": "Военно-морская деятельность",
+        "ciiChoropleth": "Нестабильность CII",
+        "positiveEvents": "Позитивные события",
+        "kindness": "Акты доброты",
+        "happiness": "Мировое счастье",
+        "speciesRecovery": "Восстановление видов",
+        "renewableInstallations": "Чистая энергия"
       },
       "tooltip": {
         "earthquake": "Землетрясение",
@@ -901,7 +1064,34 @@
         "medium": "средний",
         "news": "Новости",
         "undisclosed": "Не раскрывается",
-        "stake": "доля"
+        "stake": "доля",
+        "basesCount": "Базы {{term}}",
+        "positiveEvent": "Позитивное событие",
+        "sourcesReporting": "источники сообщают",
+        "wildfire": "Лесной пожар",
+        "brightness": "Яркость",
+        "deaths": "Летальные исходы",
+        "displacement": "Смещение",
+        "refugees": "Беженцы",
+        "vsLabel": "против",
+        "happiness": "Счастье",
+        "noData": "Нет данных",
+        "cii": "CII",
+        "status": "Статус",
+        "renewable": "Возобновляемый",
+        "tradeRoute": "Торговый путь",
+        "unknown": "Неизвестный",
+        "tradeRouteStart": "Начало маршрута",
+        "tradeRouteEnd": "Конец маршрута",
+        "tradeRouteDistance": "Расстояние",
+        "tradeRouteCargo": "Тип груза",
+        "tradeRouteVolume": "Объем",
+        "tradeRouteStatus": "Статус",
+        "tradeRouteActive": "Активный",
+        "tradeRouteInactive": "Неактивный",
+        "tradeRouteLastUpdated": "Последнее обновление",
+        "tradeRouteSourcePort": "Исходный порт",
+        "tradeRouteDestinationPort": "Порт назначения"
       },
       "layerHelp": {
         "title": "Справочник слоёв карты",
@@ -979,7 +1169,8 @@
           "techCyberThreats": "Кибератаки и события безопасности",
           "techEvents": "Крупные технологические конференции и мероприятия",
           "techFires": "Активные пожары вблизи технологической инфраструктуры",
-          "geoBoundaries": "Демилитаризованные зоны, линии прекращения огня и спорные границы"
+          "geoBoundaries": "Демилитаризованные зоны, линии прекращения огня и спорные границы",
+          "ciiChoropleth": "Тепловая карта Индекса нестабильности страны — цвета стран по баллу CII (зеленый = стабильный, красный = критический)."
         },
         "notes": {
           "timeAffects": "Влияет на: Землетрясения, Погода, Протесты, Сбои"
@@ -994,17 +1185,17 @@
     "insights": {
       "noStories": "Пока нет экстренных или мультиисточниковых сюжетов",
       "infoTooltip": "<strong>ИИ-аналитика</strong><br>• <strong>Мировая сводка</strong>: ИИ-суммаризация (Groq/OpenRouter)<br>• <strong>Тональность</strong>: Анализ тона новостей<br>• <strong>Скорость</strong>: Быстро развивающиеся сюжеты<br>• <strong>Фокусные точки</strong>: Корреляция сущностей новостей с сигналами карты (военные, протесты, сбои)<br><em>Только для десктопа • На основе Llama 3.3 + Обнаружение фокусных точек</em>",
-      "step": "Step {{step}}/{{total}}",
-      "waitingForData": "Waiting for news data...",
-      "rankingStories": "Ranking important stories...",
-      "analyzingSentiment": "Analyzing sentiment...",
-      "generatingBrief": "Generating world brief...",
-      "settingsTitle": "Settings",
-      "sectionMap": "Map",
-      "sectionAi": "AI Analysis",
-      "mapFlashLabel": "Live Event Pulse",
-      "mapFlashDesc": "Flash locations on the map when breaking news arrives",
-      "aiFlowTitle": "Settings",
+      "step": "Шаг {{term}}/{{total}}",
+      "waitingForData": "Ждем новостей...",
+      "rankingStories": "Рейтинг важных историй...",
+      "analyzingSentiment": "Анализ настроений...",
+      "generatingBrief": "Создание краткого обзора мира...",
+      "settingsTitle": "Настройки",
+      "sectionMap": "Карта",
+      "sectionAi": "ИИ-анализ",
+      "mapFlashLabel": "Пульс событий в прямом эфире",
+      "mapFlashDesc": "Мгновенные местоположения на карте при поступлении экстренных новостей",
+      "aiFlowTitle": "Настройки",
       "aiFlowCloudLabel": "Облачный ИИ (Groq & OpenRouter)",
       "aiFlowCloudDesc": "Отправлять заголовки в облако для ИИ-суммирования (рекомендуется)",
       "aiFlowBrowserLabel": "Локальная модель браузера",
@@ -1018,7 +1209,7 @@
       "aiFlowStatusBrowserOnly": "Только модель браузера",
       "aiFlowStatusDisabled": "Нет включённых провайдеров ИИ",
       "insightsDisabledTitle": "Анализ ИИ отключён",
-      "insightsDisabledHint": "Enable providers via the settings gear in the map header",
+      "insightsDisabledHint": "Включите провайдеров с помощью шестеренки настроек в заголовке карты.",
       "sectionStreaming": "Трансляции",
       "streamQualityDesc": "Установить качество для всех прямых трансляций (низкое экономит трафик)",
       "streamQualityLabel": "Качество видео",
@@ -1029,7 +1220,38 @@
       "headlineMemoryLabel": "Память заголовков",
       "headlineMemoryDesc": "Запоминать просмотренные заголовки для выделения новых",
       "streamAlwaysOnLabel": "Не останавливать прямые трансляции",
-      "streamAlwaysOnDesc": "Предотвращает автопаузу Live Cams и Live News при бездействии. Рекомендуется для второго монитора / настенного дашборда. Отключите (Eco), чтобы экономить CPU/трафик."
+      "streamAlwaysOnDesc": "Предотвращает автопаузу Live Cams и Live News при бездействии. Рекомендуется для второго монитора / настенного дашборда. Отключите (Eco), чтобы экономить CPU/трафик.",
+      "globeRenderQualityLabel": "Качество рендеринга глобуса",
+      "globeRenderQualityDesc": "Управляет разрешением холста глобуса. Более высокие значения выглядят резче на дисплеях 4K, но могут расплавить графические процессоры.",
+      "globeRenderScaleOptions": {
+        "1": "Эко (1x)",
+        "2": "4К (2x)",
+        "3": "Безумие (3x)",
+        "auto": "Авто (устройство)",
+        "1_5": "Резкий (1,5x)"
+      },
+      "worldBriefTitle": "🌍МИРОВАЯ КОРОТКА",
+      "techBriefTitle": "🚀 ТЕХНИЧЕСКАЯ КРАТКАЯ",
+      "sectionBreaking": "СРОЧНО И ПОДТВЕРЖДЕНО",
+      "sectionFocalPoints": "🎯 ФОКУСНЫЕ ТОЧКИ",
+      "sectionConvergence": "📍ГЕОГРАФИЧЕСКАЯ КОНВЕРГЕНЦИЯ",
+      "sectionMlDetected": "🎯 ОБНАРУЖЕН ОД",
+      "statMultiSource": "Несколько источников",
+      "statFastMoving": "Быстро движущийся",
+      "statAlerts": "Оповещения",
+      "statClusters": "Кластеры",
+      "sentimentOverall": "Всего: {{term}}",
+      "toneNegative": "Отрицательный",
+      "tonePositive": "Позитивный",
+      "toneMixed": "Смешанный",
+      "focalPointStats": "Новости {{term}} • Сигналы {{total}}",
+      "convergenceStats": "Типы сигналов {{term}} • События {{total}}",
+      "multiPerspectiveAnalysis": "Многоперспективный анализ...",
+      "usingCachedBrief": "Использование кэшированного краткого описания...",
+      "loadingServerInsights": "Загрузка статистики по серверу...",
+      "generatingLocalizedBrief": "Создание локализованного брифа...",
+      "sourcesCountConfirmed": "✓ Исходники {{term}}",
+      "sourcesCount": "Источники {{term}}"
     },
     "cascade": {
       "noImpacts": "Воздействие на страны не обнаружено",
@@ -1077,28 +1299,28 @@
         "deEscalating": "Снижающийся",
         "stable": "Стабильный"
       },
-      "insufficientData": "Insufficient Data",
-      "unableToAssess": "Unable to assess risk level.",
-      "enableDataSources": "Enable data sources to begin monitoring.",
-      "requiredDataSources": "Required Data Sources",
-      "optionalSources": "Optional Sources",
-      "enableCoreFeeds": "Enable Core Feeds",
-      "waitingForData": "Waiting for data...",
-      "refresh": "Refresh",
-      "learningMode": "Learning Mode - {{minutes}}m until reliable",
-      "noData": "no data",
-      "enable": "Enable",
-      "convergenceMetric": "Convergence",
-      "ciiDeviation": "CII Deviation",
-      "infraEvents": "Infra Events",
-      "highAlerts": "High Alerts",
-      "topRisks": "Top Risks",
-      "recentAlerts": "Recent Alerts ({{count}})",
-      "updated": "Updated: {{time}}",
+      "insufficientData": "Недостаточно данных",
+      "unableToAssess": "Невозможно оценить уровень риска.",
+      "enableDataSources": "Включите источники данных, чтобы начать мониторинг.",
+      "requiredDataSources": "Требуемые источники данных",
+      "optionalSources": "Дополнительные источники",
+      "enableCoreFeeds": "Включить основные каналы",
+      "waitingForData": "Жду данных...",
+      "refresh": "Обновить",
+      "learningMode": "Режим обучения — {{term}}m, пока не станет надежным",
+      "noData": "нет данных",
+      "enable": "Давать возможность",
+      "convergenceMetric": "Конвергенция",
+      "ciiDeviation": "Отклонение CII",
+      "infraEvents": "Инфра-события",
+      "highAlerts": "Высокие оповещения",
+      "topRisks": "Основные риски",
+      "recentAlerts": "Недавние оповещения ({{term}})",
+      "updated": "Обновлено: {{term}}.",
       "time": {
-        "justNow": "just now",
-        "minutesAgo": "{{count}}m ago",
-        "hoursAgo": "{{count}}h ago"
+        "justNow": "прямо сейчас",
+        "minutesAgo": "{{term}}мин назад",
+        "hoursAgo": "{{term}}ч назад"
       }
     },
     "techEvents": {
@@ -1106,14 +1328,14 @@
       "noEvents": "Нет мероприятий для отображения",
       "showOnMap": "Показать на карте",
       "moreInfo": "Подробнее",
-      "retry": "Retry",
-      "upcoming": "Upcoming",
-      "conferences": "Conferences",
-      "earnings": "Earnings",
-      "all": "All",
-      "conferencesCount": "{{count}} conferences",
-      "onMap": "{{count}} on map",
-      "techmemeEvents": "Techmeme Events ↗",
+      "retry": "Повторить попытку",
+      "upcoming": "Предстоящие",
+      "conferences": "Конференции",
+      "earnings": "Заработок",
+      "all": "Все",
+      "conferencesCount": "Конференции {{term}}",
+      "onMap": "{{term}} на карте",
+      "techmemeEvents": "События Techmeme ↗",
       "today": "TODAY",
       "soon": "SOON"
     },
@@ -1122,14 +1344,14 @@
       "mobileSubscriptions": "Мобильные подписки",
       "rdSpending": "Расходы на НИОКР",
       "infoTooltip": "<strong>Глобальная технологическая готовность</strong><br>Составная оценка (0-100) на основе данных Всемирного банка:<br><br><strong>Отображаемые метрики:</strong><br>🌐 Интернет-пользователи (% населения)<br>📱 Мобильные подписки (на 100 человек)<br>🔬 Расходы на НИОКР (% ВВП)<br><br><strong>Веса:</strong> НИОКР (35%), Интернет (30%), Широкополосный доступ (20%), Мобильная связь (15%)<br><br><em>— = Нет актуальных данных</em><br><em>Источник: Открытые данные Всемирного банка (2019-2024)</em>",
-      "fetchingData": "Fetching World Bank Data",
-      "internetUsersIndicator": "Internet Users",
-      "mobileSubscriptionsIndicator": "Mobile Subscriptions",
-      "broadbandAccess": "Broadband Access",
-      "rdExpenditure": "R&D Expenditure",
-      "analyzingCountries": "Analyzing 200+ countries...",
-      "source": "Source: World Bank",
-      "updated": "Updated: {{date}}"
+      "fetchingData": "Получение данных Всемирного банка",
+      "internetUsersIndicator": "Интернет-пользователи",
+      "mobileSubscriptionsIndicator": "Мобильные подписки",
+      "broadbandAccess": "Широкополосный доступ",
+      "rdExpenditure": "Расходы на НИОКР",
+      "analyzingCountries": "Анализ более 200 стран...",
+      "source": "Источник: Всемирный банк.",
+      "updated": "Обновлено: {{term}}."
     },
     "populationExposure": {
       "noData": "Данные о подверженности недоступны",
@@ -1201,7 +1423,9 @@
       "summarize": "Суммировать эту панель",
       "generatingSummary": "Генерация сводки...",
       "sources": "{{count}} источников",
-      "relatedAssetsNear": "Связанные объекты вблизи {{location}}"
+      "relatedAssetsNear": "Связанные объекты вблизи {{location}}",
+      "summaryError": "Не удалось создать сводку",
+      "summaryFailed": "Сводка не удалась"
     },
     "etfFlows": {
       "unavailable": "Данные ETF временно недоступны",
@@ -1232,9 +1456,9 @@
         "flow": "Поток",
         "regime": "Режим",
         "btcTrend": "Тренд BTC",
-        "hashRate": "Hash Rate",
+        "hashRate": "Хешрейт",
         "fearGreed": "Страх &amp; Жадность",
-        "momentum": "Momentum"
+        "momentum": "Импульс"
       }
     },
     "export": {
@@ -1282,7 +1506,13 @@
     },
     "countryTimeline": {
       "now": "сейчас",
-      "noEventsIn7Days": "Нет событий за 7 дней"
+      "noEventsIn7Days": "Нет событий за 7 дней",
+      "lanes": {
+        "protest": "Протест",
+        "conflict": "Конфликт",
+        "natural": "Естественный",
+        "military": "Военный"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>Разведка GDELT</strong> Мониторинг мировых новостей в реальном времени:<ul><li>Курированные тематические категории (конфликты, кибер и др.)</li><li>Статьи на 100+ языках с переводом</li><li>Обновление каждые 15 минут</li></ul>Источник: GDELT Project (gdeltproject.org)"
@@ -1302,101 +1532,102 @@
     },
     "investments": {
       "infoTooltip": "База данных прямых иностранных инвестиций Саудовской Аравии и ОАЭ в мировую критическую инфраструктуру. Нажмите на строку для перехода к инвестиции на карте.",
-      "searchPlaceholder": "Search assets, countries, entities…",
-      "allCountries": "All Countries",
-      "saudiArabia": "Saudi Arabia",
+      "searchPlaceholder": "Поиск активов, стран, организаций…",
+      "allCountries": "Все страны",
+      "saudiArabia": "Саудовская Аравия",
       "uae": "UAE",
-      "allSectors": "All Sectors",
-      "allEntities": "All Entities",
-      "allStatuses": "All Statuses",
-      "operational": "Operational",
-      "underConstruction": "Under Construction",
-      "announced": "Announced",
-      "rumoured": "Rumoured",
-      "divested": "Divested",
-      "asset": "Asset",
-      "country": "Country",
-      "sector": "Sector",
-      "status": "Status",
-      "investment": "Investment",
-      "year": "Year",
-      "noMatch": "No investments match filters",
-      "undisclosed": "Undisclosed",
+      "allSectors": "Все сектора",
+      "allEntities": "Все сущности",
+      "allStatuses": "Все статусы",
+      "operational": "Оперативный",
+      "underConstruction": "В разработке",
+      "announced": "Объявлено",
+      "rumoured": "По слухам",
+      "divested": "Продан",
+      "asset": "Объект",
+      "country": "Страна",
+      "sector": "Сектор",
+      "status": "Статус",
+      "investment": "Инвестиции",
+      "year": "Год",
+      "noMatch": "Нет инвестиций, соответствующих фильтрам",
+      "undisclosed": "Нераскрыто",
       "sectors": {
-        "ports": "Ports",
-        "pipelines": "Pipelines",
-        "energy": "Energy",
-        "datacenters": "Data Centers",
-        "airports": "Airports",
-        "railways": "Railways",
-        "telecoms": "Telecoms",
-        "water": "Water",
-        "logistics": "Logistics",
-        "mining": "Mining",
-        "realEstate": "Real Estate",
-        "manufacturing": "Manufacturing"
+        "ports": "Порты",
+        "pipelines": "Трубопроводы",
+        "energy": "Энергия",
+        "datacenters": "Дата-центры",
+        "airports": "Аэропорты",
+        "railways": "железные дороги",
+        "telecoms": "Телекоммуникации",
+        "water": "Вода",
+        "logistics": "Логистика",
+        "mining": "Горное дело",
+        "realEstate": "Недвижимость",
+        "manufacturing": "Производство"
       }
     },
     "prediction": {
       "infoTooltip": "<strong>Рынки прогнозов</strong> Рынки прогнозов на реальные деньги:<ul><li>Цены отражают вероятностные оценки толпы</li><li>Больше объём = более надёжный сигнал</li><li>Фокус на геополитических и текущих событиях</li></ul>Источник: Polymarket (polymarket.com)"
     },
     "panel": {
-      "showMethodologyInfo": "Show methodology info",
-      "dragToResize": "Drag to resize (double-click to reset)",
-      "openSettings": "Open Settings"
+      "showMethodologyInfo": "Показать информацию о методологии",
+      "dragToResize": "Перетащите, чтобы изменить размер (дважды щелкните, чтобы сбросить)",
+      "openSettings": "Открыть настройки"
     },
     "languageSelector": {
-      "selectLanguage": "Select Language"
+      "selectLanguage": "Выберите язык",
+      "mapLabelsFallbackVi": "Надписи на картах в настоящее время снова переведены на английский язык для вьетнамского языка."
     },
     "serviceStatus": {
-      "checkingServices": "Checking services...",
-      "allOperational": "All services operational",
+      "checkingServices": "Проверка услуг...",
+      "allOperational": "Все службы в рабочем состоянии",
       "ok": "OK",
-      "degraded": "Degraded",
-      "outage": "Outage",
-      "backendUnavailable": "Desktop local backend unavailable. Falling back to cloud API.",
-      "desktopReadiness": "Desktop readiness",
-      "acceptanceChecks": "Acceptance checks: {{ready}}/{{total}} ready · key-backed features {{available}}/{{featureTotal}}",
-      "nonParityFallbacks": "Non-parity fallbacks ({{count}})",
+      "degraded": "Деградированный",
+      "outage": "Отключение",
+      "backendUnavailable": "Локальная серверная часть рабочего стола недоступна. Возврат к облачному API.",
+      "desktopReadiness": "Готовность к рабочему столу",
+      "acceptanceChecks": "Приемочные проверки: {{term}}/{{total}} готов · функции с поддержкой ключей {{available}}/{{featureTotal}}",
+      "nonParityFallbacks": "Резервные варианты без четности ({{term}})",
       "categories": {
-        "all": "All",
-        "cloud": "Cloud",
-        "dev": "Dev Tools",
-        "comm": "Comms",
+        "all": "Все",
+        "cloud": "Облако",
+        "dev": "Инструменты разработки",
+        "comm": "Связь",
         "ai": "AI",
         "saas": "SaaS"
       }
     },
     "verification": {
-      "title": "Information Verification Checklist",
-      "hint": "Based on Bellingcat's OSH Framework",
+      "title": "Контрольный список проверки информации",
+      "hint": "На основе концепции охраны труда Bellingcat.",
       "verdicts": {
         "verified": "VERIFIED",
-        "likely": "LIKELY AUTHENTIC",
+        "likely": "ВЕРОЯТНО ПОДЛИННЫЙ",
         "uncertain": "UNCERTAIN",
         "unreliable": "UNRELIABLE"
       },
-      "notesTitle": "Verification Notes",
-      "noNotes": "No notes added",
-      "addNotePlaceholder": "Add verification note...",
-      "add": "Add",
-      "resetChecklist": "Reset Checklist",
+      "notesTitle": "Примечания по проверке",
+      "noNotes": "Примечаний не добавлено",
+      "addNotePlaceholder": "Добавить примечание о подтверждении...",
+      "add": "Добавлять",
+      "resetChecklist": "Сбросить контрольный список",
       "checks": {
-        "recency": "Recent timestamp confirmed",
-        "geolocation": "Location verified",
-        "source": "Primary source identified",
-        "crossref": "Cross-referenced with other sources",
-        "noAi": "No AI generation artifacts",
-        "noRecrop": "Not recycled/old footage",
-        "metadata": "Metadata verified",
-        "context": "Context established"
+        "recency": "Последняя временная метка подтверждена",
+        "geolocation": "Местоположение подтверждено",
+        "source": "Первоисточник выявлен",
+        "crossref": "Перекрестные ссылки с другими источниками",
+        "noAi": "Никаких артефактов генерации ИИ",
+        "noRecrop": "Не переработанные/старые кадры",
+        "metadata": "Метаданные проверены",
+        "context": "Контекст установлен"
       }
     },
     "liveNews": {
-      "retry": "Retry",
-      "notLive": "{{name}} is not currently live",
+      "retry": "Повторить попытку",
+      "notLive": "{{term}} в настоящее время недоступен",
       "cannotEmbed": "{{name}} не может быть воспроизведён здесь — возможно, ограничено в вашем регионе (ошибка {{code}})",
-      "openOnYouTube": "Open on YouTube",
+      "openOnYouTube": "Открыть на YouTube",
       "manage": "Управление каналами",
       "addChannel": "Добавить канал",
       "remove": "Удалить",
@@ -1424,14 +1655,52 @@
       "channelNotFound": "YouTube-канал не найден",
       "invalidHandle": "Введите корректный YouTube-дескриптор (например, @ChannelName)",
       "signInToYouTube": "Войти в YouTube",
-      "verifying": "Проверка…"
+      "verifying": "Проверка…",
+      "noResults": "Не найдено каналов, соответствующих запросу \"{{term}}\"",
+      "hlsUrl": "URL-адрес потока HLS (необязательно)",
+      "invalidHlsUrl": "Введите действительный URL-адрес потока HLS (.m3u8).",
+      "togglePlayback": "Переключить воспроизведение",
+      "live": "Жить",
+      "paused": "Приостановлено",
+      "channels": {
+        "aljazeeramubasher": "AlJazeera Mubasher",
+        "al-hadath": "Al Hadath",
+        "france24_ar": "France24 Arabic",
+        "alarabiya": "AlArabiya",
+        "aljazeera-arabic": "AlJazeera Arabic",
+        "sky-news-arabia": "Sky News Arabia",
+        "dw-arabia": "DW Arabia",
+        "iran-intl": "Iran International",
+        "asharq-news": "Asharq News",
+        "alaraby": "Alaraby",
+        "aljazeera": "AlJazeera English",
+        "bbcarabic": "BBC Arabic",
+        "cgtn-arabic": "CGTN Arabic",
+        "sky": "Sky News",
+        "dw": "DW",
+        "bloomberg": "Bloomberg",
+        "euronews": "Euronews",
+        "cnbc": "CNBC",
+        "cnn": "CNN",
+        "france24": "France 24",
+        "bbc-news": "BBC News",
+        "france24-en": "France 24 English",
+        "yahoo": "Yahoo Finance",
+        "nasa": "Sen Space Live",
+        "fox-news": "Fox News",
+        "newsmax": "Newsmax",
+        "abc-news": "ABC News",
+        "cbs-news": "CBS News",
+        "nbc-news": "NBC News",
+        "cbc-news": "CBC News"
+      }
     },
     "securityAdvisories": {
       "loading": "Загрузка предупреждений...",
       "noMatching": "Нет предупреждений для этого фильтра",
       "critical": "Критический",
       "health": "Здоровье",
-      "sources": "US State Dept, AU DFAT, UK FCDO, NZ MFAT, CDC, ECDC, WHO, US Embassies",
+      "sources": "Государственный департамент США, AU DFAT, UK FCDO, NZ MFAT, CDC, ECDC, ВОЗ, посольства США",
       "refresh": "Обновить",
       "levels": {
         "doNotTravel": "Не путешествовать",
@@ -1449,15 +1718,15 @@
       "infoTooltip": "<strong>Предупреждения безопасности</strong><br>Рекомендации по поездкам и предупреждения от государственных ведомств."
     },
     "orefSirens": {
-      "checking": "Checking siren alerts...",
-      "noAlerts": "No active sirens — all clear",
-      "notConfigured": "Sirens service not configured",
-      "activeSirens": "{{count}} active siren(s)",
-      "area": "Area",
-      "time": "Time",
-      "justNow": "just now",
-      "historyCount": "{{count}} alerts in last 24h",
-      "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding.",
+      "checking": "Проверка сигналов сирены...",
+      "noAlerts": "Нет активных сирен — все чисто",
+      "notConfigured": "Служба сирен не настроена",
+      "activeSirens": "{{term}} активная сирена(ы)",
+      "area": "Область",
+      "time": "Время",
+      "justNow": "прямо сейчас",
+      "historyCount": "Оповещения {{term}} за последние 24 часа",
+      "infoTooltip": "<strong>Израильские сирены</strong><br>Оповещения о ракетах и ​​сиренах в реальном времени от Командования тыла Израиля.<br><br>Данные опрашиваются каждые 10 секунд. Мигающий красный индикатор означает, что звучат активные сирены.",
       "historySummary": "{{count}} оповещений за 24ч — {{waves}} волн",
       "loadingHistory": "Загрузка истории..."
     },
@@ -1479,7 +1748,7 @@
       "estDailyFlow": "Расч. дневной поток",
       "freshness": "Данные",
       "infoTooltip": "<strong>Глобальный индекс благотворительной активности</strong> Композитный индекс отслеживания частных пожертвований через краудфандинговые платформы и крипто-кошельки.<ul><li><strong>Платформы</strong>: Выборка кампаний GoFundMe, GlobalGiving, JustGiving</li><li><strong>Крипто</strong>: Ончейн-поступления в благотворительные кошельки (Endaoment, Giving Block)</li><li><strong>Институциональные</strong>: OECD ODA, CAF World Giving Index, гранты Candid</li></ul>Индекс показывает направление, а не точные суммы. Сочетает живую выборку с опубликованными годовыми отчётами.",
-      "oecdOda": "OECD ODA",
+      "oecdOda": "ОЭСР ОПР",
       "ofTotal": "% от общего",
       "platform": "Платформа",
       "share": "Доля",
@@ -1505,11 +1774,39 @@
       "noShipping": "Данные о ставках морских перевозок недоступны",
       "risk": "Риск",
       "shipping": "Судоходство",
-      "sources": "FRED / NGA / USGS",
+      "sources": "ФРЕД / НГА / Геологическая служба США",
       "spikeAlert": "Обнаружен всплеск — ставка значительно выше средней за 52 недели (еженедельно)",
       "topProducers": "Крупнейшие производители",
       "upstreamUnavailable": "Данные о цепочке поставок временно недоступны — показаны кэшированные данные",
-      "warnings": "предупреждений"
+      "warnings": "предупреждений",
+      "aisDisruptions": "Сбои в работе АИС"
+    },
+    "positiveNewsFeed": {
+      "noStories": "В этой категории пока нет историй"
+    },
+    "goodThingsDigest": {
+      "noStories": "Нет доступных историй",
+      "summarizing": "Подведение итогов…"
+    },
+    "progressCharts": {
+      "noData": "Нет данных о прогрессе"
+    },
+    "settings": {
+      "dataManagementLabel": "Управление данными",
+      "exportSettings": "Экспорт настроек",
+      "importSettings": "Импортировать настройки",
+      "exportSuccess": "Настройки успешно экспортированы",
+      "exportFailed": "Не удалось экспортировать настройки.",
+      "importSuccess": "Импортированные настройки {{term}}.",
+      "importFailed": "Не удалось импортировать настройки.",
+      "reloadNow": "Перезагрузить сейчас"
+    },
+    "map": {
+      "showMap": "Показать карту",
+      "hideMap": "Скрыть карту"
+    },
+    "globe": {
+      "loadingGlobe": "Загрузка глобуса…"
     }
   },
   "popups": {
@@ -1567,20 +1864,35 @@
         "marine": "Морская пехота",
         "space": "Космические силы",
         "other": "Другой"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
     },
     "protest": {
       "acledVerified": "ACLED (подтверждено)",
       "gdelt": "GDELT",
       "riots": "Беспорядки",
-      "highSeverity": "Высокая степень тяжести"
+      "highSeverity": "Высокая степень тяжести",
+      "types": {
+        "protest": "Протест",
+        "riot": "Бунт",
+        "civil_unrest": "Гражданские беспорядки",
+        "strike": "Ударять",
+        "demonstration": "Демонстрация"
+      }
     },
     "gpsJamming": {
       "title": "Помехи GPS/GNSS",
       "interference": "Помехи",
       "aircraftAffected": "Затронутые воздушные суда",
       "aircraftNormal": "Нормальные воздушные суда",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 Шестигранник",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "flight": {
       "groundStop": "НАЗЕМНАЯ ОСТАНОВКА",
@@ -1593,8 +1905,8 @@
       "avgDelay": "СРЕДНЯЯ ЗАДЕРЖКА",
       "cancelled": "ОТМЕНЕНО",
       "sources": {
-        "faa": "FAA ASWS",
-        "eurocontrol": "Eurocontrol",
+        "faa": "ФАУ АСВС",
+        "eurocontrol": "Евроконтроль",
         "computed": "Расчётные"
       },
       "regions": {
@@ -1618,7 +1930,12 @@
         "weapons": "ОРУЖЕЙНЫЙ КОМПЛЕКС",
         "research": "ИССЛЕДОВАТЕЛЬСКИЙ ЦЕНТР"
       },
-      "description": "Ядерный объект под наблюдением. Стратегическое значение для региональной безопасности и нераспространения."
+      "description": "Ядерный объект под наблюдением. Стратегическое значение для региональной безопасности и нераспространения.",
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
+      }
     },
     "economic": {
       "types": {
@@ -1719,6 +2036,11 @@
         "elevated": "ПОВЫШЕННЫЙ",
         "high": "ВЫСОКИЙ",
         "critical": "КРИТИЧЕСКИЙ"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "ДЕЭСКАЛАЦИЯ"
       }
     },
     "buttons": {
@@ -1872,7 +2194,28 @@
       "hexCode": "HEX-КОД",
       "squawk": "СКВОК",
       "attribution": "Источник: OpenSky Network",
-      "trackFlight": "Отследить на FlightAware"
+      "trackFlight": "Отследить на FlightAware",
+      "operators": {
+        "usaf": "ВВС США",
+        "usn": "ВМС США",
+        "usmc": "Морские пехотинцы США",
+        "usa": "Армия США",
+        "raf": "Королевские ВВС",
+        "rn": "Королевский флот",
+        "faf": "Французские ВВС",
+        "gaf": "Немецкие ВВС",
+        "plaaf": "ВВС НОАК",
+        "plan": "ВМФ НОАК",
+        "vks": "Российская аэрокосмическая отрасль",
+        "iaf": "Израильские ВВС",
+        "nato": "NATO"
+      },
+      "highInterest": "Рейс с высоким процентом",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "militaryVessel": {
       "aisDark": "AIS ВЫКЛЮЧЕН",
@@ -1882,12 +2225,39 @@
       "mmsi": "MMSI",
       "hull": "БОРТОВОЙ №",
       "region": "REGION",
-      "strikeGroup": "STRIKE GROUP",
+      "strikeGroup": "УДАРНАЯ ГРУППА",
       "deploymentStatus": "STATUS",
       "usniIntel": "USNI Intel",
-      "usniSource": "Source: USNI News Fleet Tracker",
-      "approximatePosition": "Position approximate — based on USNI weekly report, not real-time AIS.",
-      "darkDescription": "⚠ Судно ушло в тёмный режим — сигнал AIS потерян. Может указывать на секретные операции."
+      "usniSource": "Источник: USNI News Fleet Tracker.",
+      "approximatePosition": "Местоположение приблизительное — на основе еженедельного отчета USNI, а не AIS в реальном времени.",
+      "darkDescription": "⚠ Судно ушло в тёмный режим — сигнал AIS потерян. Может указывать на секретные операции.",
+      "types": {
+        "carrier": "Авианосец",
+        "destroyer": "Разрушитель",
+        "frigate": "Фрегат",
+        "submarine": "Подводная лодка",
+        "amphibious": "амфибия",
+        "patrol": "Патруль",
+        "auxiliary": "Вспомогательный",
+        "research": "Исследовать",
+        "icebreaker": "Ледокол",
+        "special": "Особенный"
+      },
+      "operators": {
+        "usn": "ВМС США",
+        "uscg": "Береговая охрана США",
+        "rn": "Королевский флот",
+        "fn": "Французский флот",
+        "plan": "ВМФ НОАК",
+        "ruf": "ВМФ России",
+        "jmsdf": "Японские морские SDF",
+        "rokn": "ВМФ РК"
+      },
+      "deploymentStatuses": {
+        "deployed": "Развернуто",
+        "underway": "В процессе",
+        "in-port": "В порту"
+      }
     },
     "militaryCluster": {
       "flightActivity": {
@@ -1912,7 +2282,10 @@
       "moreVessels": "+{{count}} ещё кораблей",
       "vesselsCount": "{{count}} КОРАБЛЕЙ",
       "vessels": "КОРАБЛИ",
-      "trackedVessels": "ОТСЛЕЖИВАЕМЫЕ КОРАБЛИ"
+      "trackedVessels": "ОТСЛЕЖИВАЕМЫЕ КОРАБЛИ",
+      "showLessVessels": "Показать меньше судов",
+      "csg": "Авианосная ударная группа",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "ЗАВЕРШЕНО",
@@ -1968,7 +2341,7 @@
       "egypt_gis": "Египет/ГРС",
       "energy_space": "Энергетика/Космос",
       "financial_hub": "Финансовый хаб",
-      "gchq_mi6": "GCHQ/MI6",
+      "gchq_mi6": "ЦПС/МИ6",
       "greenland_intel": "Разведка Гренландии",
       "haiti_crisis": "Кризис на Гаити",
       "irgc_activity": "Активность КСИР",
@@ -1993,6 +2366,96 @@
     },
     "iranEvent": {
       "relatedEvents": "Связанные события"
+    },
+    "values": {
+      "branches": {
+        "navy": "Военно-морской",
+        "air_force": "ВВС",
+        "army": "Армия",
+        "marines": "Морские пехотинцы",
+        "coast_guard": "Береговая охрана",
+        "special_forces": "Спецназ",
+        "space_force": "Космические силы",
+        "national_guard": "Национальная гвардия"
+      },
+      "categories": {
+        "air_force": "ВВС",
+        "naval": "военно-морской",
+        "nuclear": "Ядерный",
+        "space": "Космос",
+        "training": "Обучение",
+        "logistics": "Логистика",
+        "intelligence": "Интеллект"
+      },
+      "exercise": "Упражнение",
+      "patrol": "Патруль",
+      "deployment": "Развертывание",
+      "transit": "Транзит",
+      "transport": "Транспорт",
+      "reconnaissance": "Разведка",
+      "unknown": "Неизвестный",
+      "fighter": "боец",
+      "bomber": "Бомбардировщик",
+      "tanker": "Танкер",
+      "awacs": "AWACS",
+      "helicopter": "Вертолет",
+      "drone": "Дрон",
+      "special_ops": "Специальные операции",
+      "vip": "VIP",
+      "carrier": "Авианосец",
+      "destroyer": "Разрушитель",
+      "frigate": "Фрегат",
+      "submarine": "Подводная лодка",
+      "amphibious": "амфибия",
+      "auxiliary": "Вспомогательный",
+      "research": "Исследовать",
+      "icebreaker": "Ледокол",
+      "special": "Особенный",
+      "usaf": "ВВС США",
+      "usn": "ВМС США",
+      "usmc": "Морские пехотинцы США",
+      "usa": "Армия США",
+      "raf": "Королевские ВВС",
+      "rn": "Королевский флот",
+      "faf": "Французские ВВС",
+      "gaf": "Немецкие ВВС",
+      "plaaf": "ВВС НОАК",
+      "plan": "ВМФ НОАК",
+      "vks": "Российская аэрокосмическая отрасль",
+      "iaf": "Израильские ВВС",
+      "nato": "NATO",
+      "other": "Другой"
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
+    },
+    "aircraft": {
+      "altitude": "Высота",
+      "speed": "Скорость относительно земли",
+      "heading": "Заголовок",
+      "position": "Позиция",
+      "ground": "На земле",
+      "airborne": "Воздушно-десантный"
+    },
+    "confidence": "CONFIDENCE",
+    "ucdpEvent": {
+      "title": "ВООРУЖЕННЫЙ КОНФЛИКТ",
+      "parties": "PARTIES",
+      "deaths": "СМЕРТИ (ЛУЧШАЯ ОЦЕНКА)",
+      "range": "диапазон",
+      "types": {
+        "state-based": "Государственный",
+        "non-state": "Негосударственный",
+        "one-sided": "Односторонний"
+      }
     }
   },
   "signals": {
@@ -2170,10 +2633,59 @@
     "unavailable": "НЕДОСТУПНО",
     "close": "Закрыть",
     "currentVariant": "(текущий)",
-    "retry": "Retry",
-    "refresh": "Refresh",
+    "retry": "Повторить попытку",
+    "refresh": "Обновить",
     "all": "Все",
     "loadingGiving": "Загрузка данных о глобальной благотворительности",
-    "rateLimitedMarket": "Рыночные данные временно недоступны (ограничение запросов) — повторная попытка скоро"
+    "rateLimitedMarket": "Рыночные данные временно недоступны (ограничение запросов) — повторная попытка скоро",
+    "beta": "BETA",
+    "vs": "против",
+    "yes": "Да",
+    "no": "Нет"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "Иранский военный театр",
+      "strait_hormuz": "Кризис в Ормузском проливе",
+      "ukraine": "Украина Война",
+      "gaza": "Конфликт в Газе",
+      "south_lebanon": "Граница Израиля и Ливана",
+      "yemen_redsea": "Кризис Красного моря",
+      "sudan": "Гражданская война в Судане",
+      "myanmar": "Гражданская война в Мьянме",
+      "korean_dmz": "Корейская демилитаризованная зона",
+      "pak_afghan": "Пакистано-афганский пограничный конфликт"
+    },
+    "hotspots": {
+      "sahel": "Сахель",
+      "haiti": "Порт-о-Пренс",
+      "horn_africa": "Африканский Рог",
+      "dc": "DC",
+      "silicon_valley": "Кремниевая долина",
+      "wall_street": "Уолл-стрит",
+      "houston": "Хьюстон",
+      "moscow": "Москва",
+      "beijing": "Пекин",
+      "kyiv": "Киев",
+      "taipei": "Тайбэй",
+      "tehran": "Тегеран",
+      "telaviv": "Тель-Авив",
+      "pyongyang": "Пхеньян",
+      "london": "Лондон",
+      "brussels": "Брюссель",
+      "caracas": "Каракас",
+      "mexico": "Мехико",
+      "nuuk": "Нуук",
+      "riyadh": "Эр-Рияд",
+      "cairo": "Каир",
+      "baghdad": "Багдад",
+      "damascus": "Дамаск",
+      "doha": "Доха",
+      "ankara": "Анкара",
+      "beirut": "Бейрут",
+      "sanaa": "Сана",
+      "abudhabi": "Абу-Даби",
+      "pak_afghan": "Граница Пакистана и Афганистана"
+    }
   }
 }

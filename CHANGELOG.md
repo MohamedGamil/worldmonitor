@@ -25,6 +25,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Arabic trade-route translations** — all trade-route popup and tooltip fields are now fully translated into Arabic, including dynamic geolocation and status labels
 - **Translation completeness validation** — verified presence of all required trade-route keys in both `en.json` and `ar.json` locale files
+- **Translations for all languages** — all supported languages translations are now checked and verified
 
 ---
 

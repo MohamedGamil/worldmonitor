@@ -37,7 +37,7 @@
       "displaced": "ผู้พลัดถิ่น",
       "climate": "ความเครียดด้านภูมิอากาศ",
       "conflictEvents": "เหตุการณ์ความขัดแย้ง",
-      "gpsJammingZones": "GPS Jamming Zones",
+      "gpsJammingZones": "โซนติดขัด GPS",
       "activeStrikes": "การนัดหยุดงาน",
       "aviationDisruptions": "การหยุดชะงักสนามบิน"
     },
@@ -77,6 +77,63 @@
       "stockIndex": "ดัชนีหุ้น: {{value}}",
       "recentHeadlines": "**พาดหัวข่าวล่าสุด:**",
       "activeStrikes": "ตรวจพบการนัดหยุดงาน {{count}} รายการ"
+    },
+    "overview": "หน่วยสืบราชการลับของประเทศ",
+    "close": "ปิด",
+    "updated": "อัปเดตแล้ว",
+    "story": "เรื่องราว",
+    "export": "ส่งออก",
+    "loadingNews": "กำลังโหลดพาดหัวข่าวประเทศ...",
+    "loadingMilitary": "กำลังโหลดเที่ยวบิน เรือ และฐานใกล้เคียง...",
+    "loadingInfrastructure": "กำลังประมวลผลโครงสร้างพื้นฐานที่สำคัญในบริเวณใกล้เคียง...",
+    "loadingEconomic": "กำลังโหลดตัวบ่งชี้ที่ใช้ได้...",
+    "shareLink": "แชร์ลิงก์",
+    "exportData": "ส่งออกข้อมูล",
+    "militaryActivity": "กิจกรรมทางทหาร",
+    "economicIndicators": "เครื่องชี้เศรษฐกิจ",
+    "ownFlights": "เที่ยวบินของตัวเอง",
+    "foreignFlights": "เที่ยวบินต่างประเทศ",
+    "navalVessels": "กองทัพเรือ",
+    "foreignPresence": "การแสดงตนในต่างประเทศ",
+    "nearestBases": "ฐานทัพทหารที่ใกล้ที่สุด",
+    "noBasesNearby": "ไม่มีฐานใกล้เคียงภายในระยะ 600 กม.",
+    "noInfrastructure": "ไม่พบโครงสร้างพื้นฐานที่สำคัญภายในระยะ 600 กม.",
+    "noGeometry": "ไม่มีรูปทรงเรขาคณิตสำหรับความสัมพันธ์ของโครงสร้างพื้นฐาน",
+    "noSignals": "ไม่มีสัญญาณความรุนแรงสูงล่าสุด",
+    "assessmentUnavailable": "การประเมินไม่พร้อมใช้งาน",
+    "noNews": "ไม่มีความคุ้มครองเฉพาะประเทศล่าสุด",
+    "noIndicators": "ไม่มีตัวชี้วัดเฉพาะประเทศ",
+    "nearbyPorts": "ท่าเรือใกล้เคียง",
+    "detected": "ตรวจพบ",
+    "notDetected": "เลขที่",
+    "ciiUnavailable": "ไม่มีคะแนน CII สำหรับประเทศนี้",
+    "chips": {
+      "criticalNews": "ข่าวสำคัญ",
+      "protests": "การประท้วง",
+      "militaryAir": "ทหารอากาศ",
+      "navalVessels": "กองทัพเรือ",
+      "outages": "ขัดข้อง",
+      "aisDisruptions": "เอไอเอส ดิสรัปชั่น",
+      "satelliteFires": "เพลิงไหม้ดาวเทียม",
+      "temporalAnomalies": "ความผิดปกติชั่วคราว",
+      "cyberThreats": "ภัยคุกคามทางไซเบอร์",
+      "earthquakes": "แผ่นดินไหว",
+      "displaced": "พลัดถิ่น",
+      "climateStress": "ความเครียดจากสภาพอากาศ",
+      "conflictEvents": "เหตุการณ์ความขัดแย้ง",
+      "activeStrikes": "การนัดหยุดงานที่ใช้งานอยู่",
+      "doNotTravel": "ห้ามเดินทาง",
+      "reconsiderTravel": "พิจารณาการเดินทางอีกครั้ง",
+      "exerciseCaution": "ข้อควรระวังในการออกกำลังกาย",
+      "advisory": "ที่ปรึกษา",
+      "activeSirens": "ไซเรนที่ใช้งานอยู่",
+      "sirens24h": "ไซเรน / 24 ชม",
+      "aviationDisruptions": "การหยุดชะงักของการบิน",
+      "gpsJammingZones": "โซนติดขัด GPS"
+    },
+    "indicators": {
+      "instabilityregime": "ความไม่มั่นคงของระบบการปกครอง",
+      "displacementoutflow": "การกระจัดไหลออก"
     }
   },
   "header": {
@@ -109,21 +166,21 @@
     "sourceRegionEurope": "ยุโรป",
     "sourceRegionTopical": "เฉพาะเรื่อง",
     "sourceRegionIntel": "ข่าวกรอง",
-    "sourceRegionTechNews": "Tech News",
-    "sourceRegionAiMl": "AI & ML",
-    "sourceRegionStartupsVc": "Startups & VC",
-    "sourceRegionRegionalTech": "Regional Ecosystems",
-    "sourceRegionDeveloper": "Developer",
-    "sourceRegionCybersecurity": "Cybersecurity",
-    "sourceRegionTechPolicy": "Policy & Research",
-    "sourceRegionTechMedia": "Media & Podcasts",
-    "sourceRegionMarkets": "Markets & Analysis",
-    "sourceRegionFixedIncomeFx": "Fixed Income & FX",
-    "sourceRegionCommodities": "Commodities",
-    "sourceRegionCryptoDigital": "Crypto & Digital",
-    "sourceRegionCentralBanks": "Central Banks & Economy",
-    "sourceRegionDeals": "Deals & Corporate",
-    "sourceRegionFinRegulation": "Financial Regulation",
+    "sourceRegionTechNews": "ข่าวเทคโนโลยี",
+    "sourceRegionAiMl": "เอไอ แอนด์ เอ็มแอล",
+    "sourceRegionStartupsVc": "สตาร์ทอัพและวีซี",
+    "sourceRegionRegionalTech": "ระบบนิเวศระดับภูมิภาค",
+    "sourceRegionDeveloper": "นักพัฒนา",
+    "sourceRegionCybersecurity": "ความปลอดภัยทางไซเบอร์",
+    "sourceRegionTechPolicy": "นโยบายและการวิจัย",
+    "sourceRegionTechMedia": "สื่อและพอดแคสต์",
+    "sourceRegionMarkets": "ตลาดและการวิเคราะห์",
+    "sourceRegionFixedIncomeFx": "ตราสารหนี้และ FX",
+    "sourceRegionCommodities": "สินค้าโภคภัณฑ์",
+    "sourceRegionCryptoDigital": "การเข้ารหัสลับและดิจิทัล",
+    "sourceRegionCentralBanks": "ธนาคารกลางและเศรษฐกิจ",
+    "sourceRegionDeals": "ข้อเสนอและองค์กร",
+    "sourceRegionFinRegulation": "กฎระเบียบทางการเงิน",
     "sourceRegionGulfMena": "อ่าวเปอร์เซีย & MENA",
     "filterPanels": "กรองแผงควบคุม...",
     "resetLayout": "รีเซ็ตเลย์เอาต์",
@@ -143,7 +200,9 @@
     "panelCatCentralBanks": "ธนาคารกลาง & เศรษฐกิจ",
     "panelCatDeals": "ดีล & สถาบัน",
     "panelCatGulfMena": "อ่าวเปอร์เซีย & MENA",
-    "panelCatTradePolicy": "นโยบายการค้า"
+    "panelCatTradePolicy": "นโยบายการค้า",
+    "downloadApp": "ดาวน์โหลดแอป",
+    "selectRegion": "เลือกภูมิภาค"
   },
   "panels": {
     "liveNews": "ข่าวสด",
@@ -177,7 +236,7 @@
     "tech": "เทคโนโลยี",
     "crypto": "คริปโต",
     "heatmap": "แผนที่ความร้อนรายเซกเตอร์",
-    "ai": "AI/ML",
+    "ai": "เอไอ/มล",
     "layoffs": "ตัวติดตามการเลิกจ้าง",
     "monitors": "จอมอนิเตอร์ของฉัน",
     "satelliteFires": "ไฟ",
@@ -211,14 +270,16 @@
     "geoHubs": "ศูนย์กลางภูมิรัฐศาสตร์",
     "liveWebcams": "เว็บแคมสด",
     "securityAdvisories": "คำเตือนด้านความปลอดภัย",
-    "orefSirens": "Israel Sirens",
+    "orefSirens": "อิสราเอล ไซเรนส์",
     "telegramIntel": "ข่าวกรอง Telegram",
     "giving": "การบริจาคทั่วโลก",
     "supplyChain": "ห่วงโซ่อุปทาน",
     "gulfEconomies": "เศรษฐกิจอ่าว",
     "gulfIndices": "ดัชนีอ่าว",
     "gulfCurrencies": "สกุลเงินอ่าว",
-    "gulfOil": "น้ำมันอ่าว"
+    "gulfOil": "น้ำมันอ่าว",
+    "airlineIntel": "หน่วยสืบราชการลับของสายการบิน",
+    "worldClock": "นาฬิกาโลก"
   },
   "commands": {
     "prefixes": {
@@ -250,7 +311,68 @@
       "brief": "พิมพ์ชื่อประเทศเพื่อดูรายงานข่าวกรอง",
       "layers": "พิมพ์ \"military\" หรือ \"finance\" สำหรับชุดเลเยอร์สำเร็จรูป",
       "time": "พิมพ์ \"1h\", \"24h\" หรือ \"7d\" เพื่อกรองตามเวลา",
-      "settings": "พิมพ์ \"dark mode\", \"settings\" หรือ \"fullscreen\""
+      "settings": "พิมพ์ \"dark mode\", \"settings\" หรือ \"fullscreen\"",
+      "mapExample": "อิหร่าน",
+      "panelExample": "ข่าว",
+      "briefExample": "จีนสั้นๆ",
+      "layersExample": "ชั้นทหาร",
+      "timeExample": "24 ชม",
+      "settingsExample": "โหมดมืด"
+    },
+    "keywords": {
+      "military": "ทหาร",
+      "finance": "การเงิน",
+      "infrastructure": "โครงสร้างพื้นฐาน",
+      "intelligence": "ปัญญา",
+      "news": "ข่าว",
+      "dark": "มืด",
+      "light": "แสงสว่าง",
+      "settings": "การตั้งค่า",
+      "fullscreen": "เต็มจอ",
+      "refresh": "รีเฟรช"
+    },
+    "labels": {
+      "layers": {
+        "military": "แสดงชั้นทหาร",
+        "finance": "แสดงเลเยอร์ทางการเงิน",
+        "infra": "แสดงเลเยอร์โครงสร้างพื้นฐาน",
+        "intel": "แสดงชั้นสติปัญญา",
+        "all": "เปิดใช้งานทุกเลเยอร์",
+        "none": "ซ่อนทุกชั้น",
+        "minimal": "เลเยอร์ขั้นต่ำ (ข้อขัดแย้ง + ฮอตสปอต)"
+      },
+      "layer": {
+        "ais": "สลับการติดตามเรือ AIS",
+        "flights": "สลับเที่ยวบินทหาร",
+        "conflicts": "สลับโซนความขัดแย้ง",
+        "hotspots": "สลับฮอตสปอต Intel",
+        "protests": "สลับการประท้วงและความไม่สงบ",
+        "cables": "สลับสายเคเบิลใต้ทะเล",
+        "pipelines": "สลับไปป์ไลน์",
+        "nuclear": "สลับสิ่งอำนวยความสะดวกนิวเคลียร์",
+        "bases": "สลับฐานทัพทหาร",
+        "fires": "สลับการยิงดาวเทียม",
+        "weather": "สลับการซ้อนทับสภาพอากาศ",
+        "cyber": "สลับภัยคุกคามทางไซเบอร์",
+        "displacement": "สลับโฟลว์การแทนที่",
+        "climate": "สลับความผิดปกติของสภาพอากาศ",
+        "outages": "สลับการหยุดทำงานของอินเทอร์เน็ต",
+        "tradeRoutes": "สลับเส้นทางการค้า"
+      },
+      "view": {
+        "dark": "สลับไปที่โหมดมืด",
+        "light": "สลับไปที่โหมดแสง",
+        "fullscreen": "สลับโหมดเต็มหน้าจอ",
+        "settings": "เปิดการตั้งค่า",
+        "refresh": "รีเฟรชข้อมูลทั้งหมด"
+      },
+      "time": {
+        "1h": "แสดงกิจกรรมจากชั่วโมงที่แล้ว",
+        "6h": "แสดงกิจกรรมจาก 6 ชั่วโมงที่ผ่านมา",
+        "24h": "แสดงกิจกรรมจาก 24 ชั่วโมงที่ผ่านมา",
+        "48h": "แสดงกิจกรรมจาก 48 ชั่วโมงที่ผ่านมา",
+        "7d": "แสดงกิจกรรมจาก 7 วันที่ผ่านมา"
+      }
     }
   },
   "modals": {
@@ -288,7 +410,9 @@
         "techevent": "งานเทคโนโลยี",
         "techhq": "สำนักงานใหญ่เทคโนโลยี",
         "accelerator": "แอคเซเลอเรเตอร์"
-      }
+      },
+      "commands": "คำสั่ง",
+      "results": "ผลลัพธ์"
     },
     "signal": {
       "title": "ผลการตรวจสอบข่าวกรอง",
@@ -352,10 +476,10 @@
     "downloadBanner": {
       "title": "มีแอปเดสก์ท็อป",
       "description": "ประสิทธิภาพระดับเนทีฟ, การจัดเก็บคีย์ในเครื่องที่ปลอดภัย, ไทล์แผนที่ออฟไลน์",
-      "macSilicon": "macOS (Apple Silicon)",
-      "macIntel": "macOS (Intel)",
-      "windows": "Windows (.exe)",
-      "linux": "Linux (.AppImage)",
+      "macSilicon": "macOS (แอปเปิลซิลิคอน)",
+      "macIntel": "macOS (อินเทล)",
+      "windows": "วินโดวส์ (.exe)",
+      "linux": "ลินุกซ์ (.AppImage)",
       "showAllPlatforms": "แสดงทุกแพลตฟอร์ม",
       "showLess": "แสดงน้อยลง",
       "dismiss": "ปิด"
@@ -443,7 +567,7 @@
           "success": "คุณอยู่ในรายชื่อแล้ว! เราจะแจ้งคุณเป็นคนแรก",
           "title": "จองที่ของคุณ"
         },
-        "tabLabel": "Marsd"
+        "tabLabel": "มาร์ส"
       }
     },
     "countryIntel": {
@@ -498,9 +622,20 @@
         "displaced": "ผู้พลัดถิ่น",
         "climate": "ความเครียดด้านภูมิอากาศ",
         "conflictEvents": "เหตุการณ์ความขัดแย้ง",
-        "gpsJammingZones": "GPS Jamming Zones",
+        "gpsJammingZones": "โซนติดขัด GPS",
         "activeStrikes": "การนัดหยุดงาน",
-        "aviationDisruptions": "การหยุดชะงักสนามบิน"
+        "aviationDisruptions": "การหยุดชะงักสนามบิน",
+        "criticalNews": "ข่าวสำคัญ",
+        "aisDisruptions": "เอไอเอส ดิสรัปชั่น",
+        "satelliteFires": "เพลิงไหม้ดาวเทียม",
+        "temporalAnomalies": "ความผิดปกติชั่วคราว",
+        "cyberThreats": "ภัยคุกคามทางไซเบอร์",
+        "activeSirens": "ไซเรนที่ใช้งานอยู่",
+        "sirens24h": "ไซเรน / 24 ชม",
+        "advisoryDoNotTravel": "ห้ามเดินทาง",
+        "advisoryReconsider": "พิจารณาการเดินทางอีกครั้ง",
+        "advisoryExerciseCaution": "ข้อควรระวังในการออกกำลังกาย",
+        "advisoryLabel": "คำแนะนำ: {{mineral}}"
       },
       "timeAgo": {
         "m": "{{count}}น. ที่แล้ว",
@@ -537,21 +672,32 @@
         "recentEarthquakes": "แผ่นดินไหวล่าสุด {{count}} ครั้ง",
         "stockIndex": "ดัชนีหุ้น: {{value}}",
         "recentHeadlines": "**พาดหัวข่าวล่าสุด:**",
-        "activeStrikes": "ตรวจพบการนัดหยุดงาน {{count}} รายการ"
+        "activeStrikes": "ตรวจพบการนัดหยุดงาน {{count}} รายการ",
+        "travelAdvisoryDoNotTravel": "⚠️ คำแนะนำการเดินทาง: ห้ามเดินทาง (ที่มา {{mineral}})",
+        "travelAdvisoryReconsider": "⚠️ คำแนะนำการเดินทาง: พิจารณาการเดินทางอีกครั้ง (ที่มา {{mineral}})",
+        "criticalHeadlines": "🚨 หัวข้อข่าวสำคัญในขอบเขต: {{mineral}}",
+        "cyberThreats": "🛡️ ตัวชี้วัดภัยคุกคามทางไซเบอร์: {{mineral}}",
+        "aisDisruptions": "🚢 การหยุดชะงักของการเดินเรือ AIS: {{mineral}}",
+        "satelliteFires": "🔥 การตรวจจับเพลิงไหม้ด้วยดาวเทียม: {{mineral}}",
+        "temporalAnomalies": "⏱️ การแจ้งเตือนความผิดปกติชั่วคราว: {{mineral}}",
+        "sirens24h": "🚨 เสียงไซเรนใน 24 ชั่วโมงที่ผ่านมา: {{mineral}}",
+        "noAiService": "ไม่มีบริการ AI กำหนดค่า GROQ_API_KEY ในการตั้งค่าเพื่อดูสรุปทั้งหมด"
       }
     }
   },
   "components": {
     "webcams": {
       "regions": {
-        "iran": "IRAN ATTACKS",
+        "iran": "การโจมตีของอิหร่าน",
         "all": "ทั้งหมด",
         "mideast": "ตะวันออกกลาง",
         "europe": "ยุโรป",
         "americas": "อเมริกา",
         "asia": "เอเชีย"
       },
-      "expand": "ขยาย"
+      "expand": "ขยาย",
+      "paused": "เว็บแคมหยุดชั่วคราว",
+      "pausedIdle": "เว็บแคมหยุดชั่วคราว — เลื่อนเมาส์เพื่อดำเนินการต่อ"
     },
     "monitor": {
       "placeholder": "คำสำคัญ (คั่นด้วยจุลภาค)",
@@ -607,16 +753,16 @@
       "noOilDataRetry": "ข้อมูลน้ำมันไม่พร้อมใช้งานชั่วคราว - จะลองใหม่อัตโนมัติ",
       "vsPreviousWeek": "เทียบกับสัปดาห์ก่อน",
       "in": "ใน",
-      "centralBanks": "Central Banks",
-      "noBisData": "BIS data temporarily unavailable - will retry",
-      "policyRate": "Policy Rate",
-      "exchangeRate": "Exchange Rate",
-      "creditToGdp": "Credit / GDP",
-      "realEer": "Real EER",
-      "change": "Change",
-      "cut": "cut",
-      "hike": "hike",
-      "hold": "hold",
+      "centralBanks": "ธนาคารกลาง",
+      "noBisData": "ข้อมูล BIS ไม่พร้อมใช้งานชั่วคราว - จะลองอีกครั้ง",
+      "policyRate": "อัตรานโยบาย",
+      "exchangeRate": "อัตราแลกเปลี่ยน",
+      "creditToGdp": "สินเชื่อ/จีดีพี",
+      "realEer": "อีอีอาร์จริงๆ",
+      "change": "เปลี่ยน",
+      "cut": "ตัด",
+      "hike": "ธุดงค์",
+      "hold": "ถือ",
       "fredKeyMissing": "ต้องการคีย์ API ของ FRED — เพิ่มในการตั้งค่าเพื่อเปิดใช้ตัวชี้วัดทางเศรษฐกิจ"
     },
     "tradePolicy": {
@@ -685,14 +831,14 @@
       "live": "สด",
       "historicalPlayback": "เล่นย้อนหลัง",
       "close": "ปิด",
-      "skipToStart": "Skip to start",
-      "previous": "Previous",
-      "next": "Next",
-      "skipToEnd": "Skip to end"
+      "skipToStart": "ข้ามไปเริ่มต้น",
+      "previous": "ก่อนหน้า",
+      "next": "ต่อไป",
+      "skipToEnd": "ข้ามไปยังจุดสิ้นสุด"
     },
     "pizzint": {
       "title": "ดัชนีพิซซ่าเพนตากอน",
-      "defcon": "DEFCON {{level}}",
+      "defcon": "DEFCON {{mineral}}",
       "updated": "อัปเดต {{timeAgo}}",
       "tensionsTitle": "ความตึงเครียดภูมิรัฐศาสตร์",
       "source": "แหล่งที่มา:",
@@ -780,7 +926,8 @@
       "shareStory": "แชร์เรื่องราว",
       "printPdf": "พิมพ์ / PDF",
       "exportData": "ส่งออกข้อมูล",
-      "sourceRef": "แหล่งที่มา [{{n}}]"
+      "sourceRef": "แหล่งที่มา [{{n}}]",
+      "shareLink": "แชร์ลิงก์"
     },
     "relatedAssets": {
       "pipeline": "ท่อส่ง",
@@ -792,7 +939,8 @@
     "community": {
       "joinDiscussion": "เข้าร่วมการสนทนา",
       "openDiscussion": "เปิดการสนทนา",
-      "dontShowAgain": "ไม่แสดงอีก"
+      "dontShowAgain": "ไม่แสดงอีก",
+      "sectionLabel": "ชุมชน"
     },
     "threatLabels": {
       "critical": "วิกฤต",
@@ -821,7 +969,13 @@
         "elevated": "ยกระดับ",
         "monitoring": "เฝ้าระวัง",
         "base": "ฐานทัพ",
-        "nuclear": "นิวเคลียร์"
+        "nuclear": "นิวเคลียร์",
+        "aircraft": "อากาศยาน",
+        "ciiLow": "ต่ำ (0–30)",
+        "ciiNormal": "ปกติ (31–50)",
+        "ciiElevated": "สูง (51–65)",
+        "ciiHigh": "สูง (66–80)",
+        "ciiCritical": "คริติคอล (81–100)"
       },
       "layerGuide": "คู่มือเลเยอร์",
       "layersTitle": "เลเยอร์",
@@ -872,9 +1026,18 @@
         "commodityHubs": "ศูนย์กลางสินค้าโภคภัณฑ์",
         "gulfInvestments": "การลงทุน GCC",
         "tradeRoutes": "เส้นทางการค้า",
-        "gpsJamming": "GPS JAMMING",
+        "gpsJamming": "GPS ติดขัด",
         "dayNight": "กลางวัน/กลางคืน",
-        "iranAttacks": "การโจมตีอิหร่าน"
+        "iranAttacks": "การโจมตีอิหร่าน",
+        "militaryAircraftConfirmed": "เครื่องบินทหาร",
+        "militaryAircraftUnknown": "เครื่องบินพลเรือน",
+        "navalActivity": "กิจกรรมทางเรือ",
+        "ciiChoropleth": "ความไม่แน่นอนของ CII",
+        "positiveEvents": "เหตุการณ์เชิงบวก",
+        "kindness": "การกระทำอันมีเมตตา",
+        "happiness": "ความสุขของโลก",
+        "speciesRecovery": "การกู้คืนสายพันธุ์",
+        "renewableInstallations": "พลังงานสะอาด"
       },
       "tooltip": {
         "earthquake": "แผ่นดินไหว",
@@ -901,7 +1064,34 @@
         "medium": "ปานกลาง",
         "news": "ข่าว",
         "undisclosed": "ไม่เปิดเผย",
-        "stake": "สัดส่วน"
+        "stake": "สัดส่วน",
+        "basesCount": "ฐาน {{mineral}}",
+        "positiveEvent": "เหตุการณ์เชิงบวก",
+        "sourcesReporting": "แหล่งรายงาน",
+        "wildfire": "ไฟป่า",
+        "brightness": "ความสว่าง",
+        "deaths": "ผู้เสียชีวิต",
+        "displacement": "การกระจัด",
+        "refugees": "ผู้ลี้ภัย",
+        "vsLabel": "เทียบกับ",
+        "happiness": "ความสุข",
+        "noData": "ไม่มีข้อมูล",
+        "cii": "CII",
+        "status": "สถานะ",
+        "renewable": "ทดแทนได้",
+        "tradeRoute": "เส้นทางการค้า",
+        "unknown": "ไม่ทราบ",
+        "tradeRouteStart": "เส้นทางเริ่มต้น",
+        "tradeRouteEnd": "สิ้นสุดเส้นทาง",
+        "tradeRouteDistance": "ระยะทาง",
+        "tradeRouteCargo": "ประเภทสินค้า",
+        "tradeRouteVolume": "ปริมาณ",
+        "tradeRouteStatus": "สถานะ",
+        "tradeRouteActive": "คล่องแคล่ว",
+        "tradeRouteInactive": "ไม่ได้ใช้งาน",
+        "tradeRouteLastUpdated": "อัปเดตล่าสุด",
+        "tradeRouteSourcePort": "พอร์ตต้นทาง",
+        "tradeRouteDestinationPort": "พอร์ตปลายทาง"
       },
       "layerHelp": {
         "title": "คู่มือเลเยอร์แผนที่",
@@ -979,7 +1169,8 @@
           "techCyberThreats": "การโจมตีทางไซเบอร์และเหตุการณ์ด้านความปลอดภัย",
           "techEvents": "การประชุมและงานเทคโนโลยีสำคัญ",
           "techFires": "ไฟป่าที่กำลังลุกไหม้ใกล้โครงสร้างพื้นฐานเทคโนโลยี",
-          "geoBoundaries": "เขตปลอดทหาร แนวหยุดยิง และพรมแดนที่เป็นข้อพิพาท"
+          "geoBoundaries": "เขตปลอดทหาร แนวหยุดยิง และพรมแดนที่เป็นข้อพิพาท",
+          "ciiChoropleth": "แผนที่ความร้อนดัชนีความไม่มีเสถียรภาพของประเทศ — กำหนดสีประเทศตามคะแนน CII (เขียว=เสถียร, แดง=วิกฤต)"
         },
         "notes": {
           "timeAffects": "ส่งผลต่อ: แผ่นดินไหว, สภาพอากาศ, การประท้วง, การหยุดชะงัก"
@@ -999,13 +1190,13 @@
       "analyzingSentiment": "กำลังวิเคราะห์ความรู้สึก...",
       "generatingBrief": "กำลังสร้างสรุปสถานการณ์โลก...",
       "infoTooltip": "<strong>การวิเคราะห์ด้วย AI</strong><br>• <strong>สรุปโลก</strong>: สรุปจาก AI (Groq/OpenRouter)<br>• <strong>ความรู้สึก</strong>: การวิเคราะห์น้ำเสียงข่าว<br>• <strong>ความเร็ว</strong>: เรื่องราวที่เคลื่อนไหวเร็ว<br>• <strong>จุดโฟกัส</strong>: เชื่อมโยงเอนทิตีข่าวกับสัญญาณแผนที่ (ทหาร, การประท้วง, การหยุดชะงัก)<br><em>เดสก์ท็อปเท่านั้น • ขับเคลื่อนด้วย Llama 3.3 + การตรวจจับจุดโฟกัส</em>",
-      "settingsTitle": "Settings",
-      "sectionMap": "Map",
-      "sectionAi": "AI Analysis",
-      "mapFlashLabel": "Live Event Pulse",
-      "mapFlashDesc": "Flash locations on the map when breaking news arrives",
-      "aiFlowTitle": "Settings",
-      "aiFlowCloudLabel": "Cloud AI (Groq & OpenRouter)",
+      "settingsTitle": "การตั้งค่า",
+      "sectionMap": "แผนที่",
+      "sectionAi": "การวิเคราะห์เอไอ",
+      "mapFlashLabel": "ชีพจรเหตุการณ์สด",
+      "mapFlashDesc": "ตำแหน่งแฟลชบนแผนที่เมื่อมีข่าวด่วนมาถึง",
+      "aiFlowTitle": "การตั้งค่า",
+      "aiFlowCloudLabel": "คลาวด์ AI (Groq และ OpenRouter)",
       "aiFlowCloudDesc": "ส่งพาดหัวข่าวไปยังคลาวด์เพื่อสรุปด้วย AI (แนะนำ)",
       "aiFlowBrowserLabel": "โมเดลท้องถิ่นในเบราว์เซอร์",
       "aiFlowBrowserDesc": "เรียกใช้ AI ในเบราว์เซอร์ของคุณ",
@@ -1018,7 +1209,7 @@
       "aiFlowStatusBrowserOnly": "โมเดลเบราว์เซอร์เท่านั้น",
       "aiFlowStatusDisabled": "ไม่มีผู้ให้บริการ AI ที่เปิดใช้งาน",
       "insightsDisabledTitle": "การวิเคราะห์ AI ถูกปิดใช้งาน",
-      "insightsDisabledHint": "Enable providers via the settings gear in the map header",
+      "insightsDisabledHint": "เปิดใช้งานผู้ให้บริการผ่านอุปกรณ์การตั้งค่าในส่วนหัวของแผนที่",
       "sectionStreaming": "การสตรีม",
       "streamQualityDesc": "ตั้งค่าคุณภาพสำหรับสตรีมสดทั้งหมด (ต่ำกว่าประหยัดแบนด์วิดท์)",
       "streamQualityLabel": "คุณภาพวิดีโอ",
@@ -1029,7 +1220,38 @@
       "headlineMemoryLabel": "หน่วยความจำพาดหัว",
       "headlineMemoryDesc": "จดจำพาดหัวที่เคยดูเพื่อเน้นข่าวใหม่",
       "streamAlwaysOnLabel": "ให้สตรีมสดทำงานต่อ",
-      "streamAlwaysOnDesc": "ป้องกันไม่ให้ Live Cams และ Live News หยุดอัตโนมัติเมื่อคุณไม่ได้ใช้งาน เหมาะสำหรับจอที่สอง / บอร์ดแสดงผลบนผนัง ปิด (Eco) เพื่อประหยัด CPU/แบนด์วิดท์"
+      "streamAlwaysOnDesc": "ป้องกันไม่ให้ Live Cams และ Live News หยุดอัตโนมัติเมื่อคุณไม่ได้ใช้งาน เหมาะสำหรับจอที่สอง / บอร์ดแสดงผลบนผนัง ปิด (Eco) เพื่อประหยัด CPU/แบนด์วิดท์",
+      "globeRenderQualityLabel": "คุณภาพการเรนเดอร์ลูกโลก",
+      "globeRenderQualityDesc": "ควบคุมความละเอียดของผืนผ้าใบลูกโลก ค่าที่สูงกว่าจะดูคมชัดกว่าบนจอแสดงผล 4K แต่สามารถละลาย GPU ได้",
+      "globeRenderScaleOptions": {
+        "1": "อีโค (1x)",
+        "2": "4K (2x)",
+        "3": "บ้า (3x)",
+        "auto": "อัตโนมัติ (อุปกรณ์)",
+        "1_5": "ชาร์ป (1.5x)"
+      },
+      "worldBriefTitle": "🌍 สรุปโลก",
+      "techBriefTitle": "🚀 ข้อมูลสรุปทางเทคนิค",
+      "sectionBreaking": "ทำลายและยืนยันแล้ว",
+      "sectionFocalPoints": "🎯 จุดโฟกัส",
+      "sectionConvergence": "📍 การบรรจบกันทางภูมิศาสตร์",
+      "sectionMlDetected": "🎯 ตรวจพบ ML",
+      "statMultiSource": "หลายแหล่ง",
+      "statFastMoving": "เคลื่อนไหวเร็ว",
+      "statAlerts": "การแจ้งเตือน",
+      "statClusters": "คลัสเตอร์",
+      "sentimentOverall": "โดยรวม: {{mineral}}",
+      "toneNegative": "เชิงลบ",
+      "tonePositive": "เชิงบวก",
+      "toneMixed": "ผสม",
+      "focalPointStats": "ข่าว {{mineral}} • สัญญาณ {{status}}",
+      "convergenceStats": "ประเภทสัญญาณ {{mineral}} • เหตุการณ์ {{status}}",
+      "multiPerspectiveAnalysis": "การวิเคราะห์หลายมุมมอง...",
+      "usingCachedBrief": "กำลังใช้สรุปแคช...",
+      "loadingServerInsights": "กำลังโหลดข้อมูลเชิงลึกของเซิร์ฟเวอร์...",
+      "generatingLocalizedBrief": "กำลังสร้างบทสรุปที่แปลเป็นภาษาท้องถิ่น...",
+      "sourcesCountConfirmed": "✓ แหล่งที่มา {{mineral}}",
+      "sourcesCount": "แหล่งที่มา {{mineral}}"
     },
     "cascade": {
       "noImpacts": "ไม่พบผลกระทบต่อประเทศ",
@@ -1201,7 +1423,9 @@
       "summarize": "สรุปแผงนี้",
       "generatingSummary": "กำลังสร้างสรุป...",
       "sources": "{{count}} แหล่งที่มา",
-      "relatedAssetsNear": "สินทรัพย์ที่เกี่ยวข้องใกล้ {{location}}"
+      "relatedAssetsNear": "สินทรัพย์ที่เกี่ยวข้องใกล้ {{location}}",
+      "summaryError": "ไม่สามารถสร้างข้อมูลสรุปได้",
+      "summaryFailed": "สรุปล้มเหลว"
     },
     "export": {
       "exportData": "ส่งออกข้อมูล"
@@ -1248,7 +1472,13 @@
     },
     "countryTimeline": {
       "now": "ตอนนี้",
-      "noEventsIn7Days": "ไม่มีเหตุการณ์ใน 7 วัน"
+      "noEventsIn7Days": "ไม่มีเหตุการณ์ใน 7 วัน",
+      "lanes": {
+        "protest": "ประท้วง",
+        "conflict": "ขัดแย้ง",
+        "natural": "เป็นธรรมชาติ",
+        "military": "ทหาร"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>ข่าวกรอง GDELT</strong> การเฝ้าระวังข่าวทั่วโลกเรียลไทม์:<ul><li>หมวดหมู่หัวข้อที่คัดสรร (ความขัดแย้ง, ไซเบอร์ ฯลฯ)</li><li>บทความจาก 100+ ภาษาที่แปลแล้ว</li><li>อัปเดตทุก 15 นาที</li></ul>แหล่งที่มา: GDELT Project (gdeltproject.org)"
@@ -1335,9 +1565,9 @@
         "flow": "กระแส",
         "regime": "สภาพตลาด",
         "btcTrend": "แนวโน้ม BTC",
-        "hashRate": "Hash Rate",
+        "hashRate": "อัตราแฮช",
         "fearGreed": "ความกลัวและความโลภ",
-        "momentum": "Momentum"
+        "momentum": "โมเมนตัม"
       }
     },
     "panel": {
@@ -1346,7 +1576,8 @@
       "openSettings": "เปิดการตั้งค่า"
     },
     "languageSelector": {
-      "selectLanguage": "เลือกภาษา"
+      "selectLanguage": "เลือกภาษา",
+      "mapLabelsFallbackVi": "ขณะนี้ป้ายแผนที่เปลี่ยนกลับไปเป็นภาษาอังกฤษสำหรับภาษาเวียดนาม"
     },
     "serviceStatus": {
       "checkingServices": "กำลังตรวจสอบบริการ...",
@@ -1424,14 +1655,52 @@
       "channelNotFound": "ไม่พบช่อง YouTube",
       "invalidHandle": "ป้อนแฮนเดิล YouTube ที่ถูกต้อง (เช่น @ชื่อช่อง)",
       "signInToYouTube": "ลงชื่อเข้าใช้ YouTube",
-      "verifying": "กำลังตรวจสอบ…"
+      "verifying": "กำลังตรวจสอบ…",
+      "noResults": "ไม่พบช่องที่ตรงกับ \"{{mineral}}\"",
+      "hlsUrl": "URL สตรีม HLS (ไม่บังคับ)",
+      "invalidHlsUrl": "ป้อน URL สตรีม HLS ที่ถูกต้อง (.m3u8)",
+      "togglePlayback": "สลับการเล่น",
+      "live": "สด",
+      "paused": "หยุดชั่วคราว",
+      "channels": {
+        "aljazeeramubasher": "AlJazeera Mubasher",
+        "al-hadath": "Al Hadath",
+        "france24_ar": "France24 Arabic",
+        "alarabiya": "AlArabiya",
+        "aljazeera-arabic": "AlJazeera Arabic",
+        "sky-news-arabia": "Sky News Arabia",
+        "dw-arabia": "DW Arabia",
+        "iran-intl": "Iran International",
+        "asharq-news": "Asharq News",
+        "alaraby": "Alaraby",
+        "aljazeera": "AlJazeera English",
+        "bbcarabic": "BBC Arabic",
+        "cgtn-arabic": "CGTN Arabic",
+        "sky": "Sky News",
+        "dw": "DW",
+        "bloomberg": "Bloomberg",
+        "euronews": "Euronews",
+        "cnbc": "CNBC",
+        "cnn": "CNN",
+        "france24": "France 24",
+        "bbc-news": "BBC News",
+        "france24-en": "France 24 English",
+        "yahoo": "Yahoo Finance",
+        "nasa": "Sen Space Live",
+        "fox-news": "Fox News",
+        "newsmax": "Newsmax",
+        "abc-news": "ABC News",
+        "cbs-news": "CBS News",
+        "nbc-news": "NBC News",
+        "cbc-news": "CBC News"
+      }
     },
     "securityAdvisories": {
       "loading": "กำลังโหลดคำเตือนการเดินทาง...",
       "noMatching": "ไม่พบคำเตือนสำหรับตัวกรองนี้",
       "critical": "วิกฤต",
       "health": "สุขภาพ",
-      "sources": "US State Dept, AU DFAT, UK FCDO, NZ MFAT, CDC, ECDC, WHO, US Embassies",
+      "sources": "แผนกรัฐของสหรัฐอเมริกา, AU DFAT, UK FCDO, NZ MFAT, CDC, ECDC, WHO, สถานทูตสหรัฐฯ",
       "refresh": "รีเฟรช",
       "levels": {
         "doNotTravel": "ห้ามเดินทาง",
@@ -1449,15 +1718,15 @@
       "infoTooltip": "<strong>คำเตือนด้านความปลอดภัย</strong><br>คำเตือนการเดินทางและความปลอดภัยจากหน่วยงานรัฐบาล."
     },
     "orefSirens": {
-      "checking": "Checking siren alerts...",
-      "noAlerts": "No active sirens — all clear",
-      "notConfigured": "Sirens service not configured",
-      "activeSirens": "{{count}} active siren(s)",
-      "area": "Area",
-      "time": "Time",
-      "justNow": "just now",
-      "historyCount": "{{count}} alerts in last 24h",
-      "infoTooltip": "<strong>Israel Sirens</strong><br>Real-time rocket and missile siren alerts from Israel Home Front Command.<br><br>Data is polled every 10 seconds. A pulsing red indicator means active sirens are sounding.",
+      "checking": "กำลังตรวจสอบสัญญาณไซเรน...",
+      "noAlerts": "ไม่มีเสียงไซเรนที่ทำงานอยู่ — ทุกอย่างชัดเจน",
+      "notConfigured": "ไม่ได้กำหนดค่าบริการไซเรน",
+      "activeSirens": "{{mineral}} ไซเรนแบบแอคทีฟ",
+      "area": "พื้นที่",
+      "time": "เวลา",
+      "justNow": "แค่ตอนนี้",
+      "historyCount": "{{mineral}} แจ้งเตือนใน 24 ชั่วโมงที่ผ่านมา",
+      "infoTooltip": "<strong>ไซเรนของอิสราเอล</strong><br>เสียงไซเรนจรวดและขีปนาวุธแบบเรียลไทม์จากกองบัญชาการหน้าแรกของอิสราเอล<br><br>ข้อมูลจะถูกสำรวจทุกๆ 10 วินาที สัญญาณไฟสีแดงกะพริบแสดงว่ากำลังส่งเสียงไซเรนที่ทำงานอยู่",
       "historySummary": "{{count}} การแจ้งเตือนใน 24 ชม. — {{waves}} ระลอก",
       "loadingHistory": "กำลังโหลดประวัติ..."
     },
@@ -1479,7 +1748,7 @@
       "estDailyFlow": "กระแสรายวันโดยประมาณ",
       "freshness": "ข้อมูล",
       "infoTooltip": "<strong>ดัชนีกิจกรรมการบริจาคทั่วโลก</strong> ดัชนีรวมที่ติดตามการบริจาคส่วนบุคคลผ่านแพลตฟอร์มระดมทุนและกระเป๋าเงินคริปโต<ul><li><strong>แพลตฟอร์ม</strong>: GoFundMe, GlobalGiving, JustGiving สุ่มตัวอย่างแคมเปญ</li><li><strong>คริปโต</strong>: เงินเข้ากระเป๋าการกุศลบนเชน (Endaoment, Giving Block)</li><li><strong>สถาบัน</strong>: OECD ODA, CAF World Giving Index, ทุน Candid</li></ul>ดัชนีเป็นตัวชี้ทิศทาง (ไม่ใช่จำนวนเงินที่แน่นอน) รวมการสุ่มตัวอย่างแบบเรียลไทม์กับรายงานประจำปีที่เผยแพร่",
-      "oecdOda": "OECD ODA",
+      "oecdOda": "โออีซีดี โอดีเอ",
       "ofTotal": "% ของทั้งหมด",
       "platform": "แพลตฟอร์ม",
       "share": "สัดส่วน",
@@ -1505,11 +1774,39 @@
       "noShipping": "ข้อมูลอัตราค่าขนส่งไม่พร้อมใช้งาน",
       "risk": "ความเสี่ยง",
       "shipping": "การขนส่ง",
-      "sources": "FRED / NGA / USGS",
+      "sources": "เฟรด / พังงา / USGS",
       "spikeAlert": "ตรวจพบการพุ่งสูง — อัตราสูงกว่าค่าเฉลี่ย 52 สัปดาห์อย่างมีนัยสำคัญ (รายสัปดาห์)",
       "topProducers": "ผู้ผลิตรายใหญ่",
       "upstreamUnavailable": "ข้อมูลห่วงโซ่อุปทานไม่พร้อมใช้งานชั่วคราว — แสดงข้อมูลจากแคช",
-      "warnings": "คำเตือน"
+      "warnings": "คำเตือน",
+      "aisDisruptions": "การหยุดชะงักของ AIS"
+    },
+    "positiveNewsFeed": {
+      "noStories": "ยังไม่มีเรื่องราวในหมวดหมู่นี้"
+    },
+    "goodThingsDigest": {
+      "noStories": "ไม่มีเรื่องราวที่มีอยู่",
+      "summarizing": "กำลังสรุป..."
+    },
+    "progressCharts": {
+      "noData": "ไม่มีข้อมูลความคืบหน้า"
+    },
+    "settings": {
+      "dataManagementLabel": "การจัดการข้อมูล",
+      "exportSettings": "การตั้งค่าการส่งออก",
+      "importSettings": "นำเข้าการตั้งค่า",
+      "exportSuccess": "ส่งออกการตั้งค่าเรียบร้อยแล้ว",
+      "exportFailed": "ส่งออกการตั้งค่าไม่สำเร็จ",
+      "importSuccess": "นำเข้าการตั้งค่า {{mineral}}",
+      "importFailed": "ไม่สามารถนำเข้าการตั้งค่า",
+      "reloadNow": "โหลดใหม่ตอนนี้"
+    },
+    "map": {
+      "showMap": "แสดงแผนที่",
+      "hideMap": "ซ่อนแผนที่"
+    },
+    "globe": {
+      "loadingGlobe": "กำลังโหลดลูกโลก..."
     }
   },
   "popups": {
@@ -1567,20 +1864,35 @@
         "marine": "นาวิกโยธิน",
         "space": "กองกำลังอวกาศ",
         "other": "อื่นๆ"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
     },
     "protest": {
       "acledVerified": "ACLED (ยืนยันแล้ว)",
       "gdelt": "GDELT",
       "riots": "จลาจล",
-      "highSeverity": "ความรุนแรงสูง"
+      "highSeverity": "ความรุนแรงสูง",
+      "types": {
+        "protest": "ประท้วง",
+        "riot": "จลาจล",
+        "civil_unrest": "ความไม่สงบของพลเมือง",
+        "strike": "โจมตี",
+        "demonstration": "สาธิต"
+      }
     },
     "gpsJamming": {
       "title": "การรบกวน GPS/GNSS",
       "interference": "การรบกวน",
       "aircraftAffected": "เครื่องบินที่ได้รับผลกระทบ",
       "aircraftNormal": "เครื่องบินปกติ",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 ฐานสิบหก",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "flight": {
       "groundStop": "หยุดภาคพื้น",
@@ -1593,8 +1905,8 @@
       "avgDelay": "ดีเลย์เฉลี่ย",
       "cancelled": "ยกเลิก",
       "sources": {
-        "faa": "FAA ASWS",
-        "eurocontrol": "Eurocontrol",
+        "faa": "เอฟเอเอ สสส",
+        "eurocontrol": "ยูโรคอนโทรล",
         "computed": "คำนวณ"
       },
       "regions": {
@@ -1618,7 +1930,12 @@
         "weapons": "ศูนย์อาวุธ",
         "research": "วิจัย"
       },
-      "description": "สิ่งอำนวยความสะดวกนิวเคลียร์ภายใต้การเฝ้าระวัง มีความสำคัญเชิงยุทธศาสตร์ต่อความมั่นคงในภูมิภาคและความกังวลด้านการไม่แพร่กระจาย"
+      "description": "สิ่งอำนวยความสะดวกนิวเคลียร์ภายใต้การเฝ้าระวัง มีความสำคัญเชิงยุทธศาสตร์ต่อความมั่นคงในภูมิภาคและความกังวลด้านการไม่แพร่กระจาย",
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
+      }
     },
     "economic": {
       "types": {
@@ -1643,7 +1960,7 @@
         "operating": "ดำเนินการอยู่",
         "construction": "อยู่ระหว่างก่อสร้าง"
       },
-      "description": "Major {{type}} pipeline infrastructure. {{status}}"
+      "description": "โครงสร้างพื้นฐานไปป์ไลน์ {{mineral}} ที่สำคัญ {{status}}"
     },
     "pipelineStatusDesc": {
       "operating": "ดำเนินการอยู่และขนส่งทรัพยากร",
@@ -1679,7 +1996,7 @@
     },
     "strategic": "เชิงยุทธศาสตร์",
     "verified": "ยืนยันแล้ว",
-    "sampledList": "Showing a sampled list of {{count}} events.",
+    "sampledList": "กำลังแสดงรายการตัวอย่างของเหตุการณ์ {{mineral}}",
     "reason": "สาเหตุ",
     "threat": "ภัยคุกคาม",
     "aka": "หรือที่รู้จักในชื่อ",
@@ -1719,6 +2036,11 @@
         "elevated": "ยกระดับ",
         "high": "สูง",
         "critical": "วิกฤต"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "การลดขนาด"
       }
     },
     "buttons": {
@@ -1738,7 +2060,7 @@
     "time": "เวลา",
     "area": "พื้นที่",
     "expires": "หมดอายุ",
-    "aisGapSpike": "AIS GAP SPIKE",
+    "aisGapSpike": "เอไอเอส แก๊ป สไปค์",
     "chokepointCongestion": "ความแออัดที่จุดคอขวด",
     "darkening": "สูญเสียสัญญาณ",
     "density": "ความหนาแน่น",
@@ -1754,10 +2076,10 @@
     "viewUSGS": "ดูบน USGS",
     "expired": "หมดอายุ",
     "timeAgo": {
-      "s": "{{count}}s ago",
-      "m": "{{count}}m ago",
-      "h": "{{count}}h ago",
-      "d": "{{count}}d ago"
+      "s": "{{mineral}}s ที่แล้ว",
+      "m": "{{mineral}}m ที่แล้ว",
+      "h": "{{mineral}}h ที่แล้ว",
+      "d": "{{mineral}}d ที่แล้ว"
     },
     "cableAdvisory": {
       "reported": "รายงานแล้ว",
@@ -1789,13 +2111,13 @@
       "attribution": "ข้อมูล: Epoch AI GPU Clusters",
       "chips": "ชิป",
       "cluster": {
-        "title": "{{count}} Data Centers",
+        "title": "ศูนย์ข้อมูล {{mineral}}",
         "totalChips": "ชิปทั้งหมด",
         "totalPower": "กำลังไฟฟ้าทั้งหมด",
         "operational": "ดำเนินการอยู่",
         "planned": "วางแผนแล้ว",
-        "moreDataCenters": "+ {{count}} more data centers",
-        "sampledSites": "Showing a sampled list of {{count}} sites."
+        "moreDataCenters": "+ {{mineral}} ศูนย์ข้อมูลเพิ่มขึ้น",
+        "sampledSites": "กำลังแสดงรายการตัวอย่างของไซต์ {{mineral}}"
       }
     },
     "startupHub": {
@@ -1834,22 +2156,22 @@
       "days": {
         "today": "วันนี้",
         "tomorrow": "พรุ่งนี้",
-        "inDays": "IN {{count}} DAYS"
+        "inDays": "ใน {{mineral}} วัน"
       },
       "date": "วันที่",
       "moreInformation": "ข้อมูลเพิ่มเติม"
     },
     "techHQCluster": {
-      "companiesCount": "{{count}} COMPANIES",
-      "bigTechCount": "{{count}} Big Tech",
-      "unicornsCount": "{{count}} Unicorns",
-      "publicCount": "{{count}} Public",
-      "sampled": "Showing a sampled list of {{count}} companies."
+      "companiesCount": "บริษัท {{mineral}}",
+      "bigTechCount": "{{mineral}} บิ๊กเทค",
+      "unicornsCount": "{{mineral}} ยูนิคอร์น",
+      "publicCount": "{{mineral}} สาธารณะ",
+      "sampled": "กำลังแสดงรายการตัวอย่างของบริษัท {{mineral}}"
     },
     "techEventCluster": {
-      "eventsCount": "{{count}} EVENTS",
-      "upcomingWithin2Weeks": "{{count}} upcoming within 2 weeks",
-      "sampled": "Showing a sampled list of {{count}} events."
+      "eventsCount": "กิจกรรม {{mineral}}",
+      "upcomingWithin2Weeks": "{{mineral}} จะมาภายใน 2 สัปดาห์",
+      "sampled": "กำลังแสดงรายการตัวอย่างของเหตุการณ์ {{mineral}}"
     },
     "militaryFlight": {
       "types": {
@@ -1857,7 +2179,7 @@
         "bomber": "เครื่องบินทิ้งระเบิด",
         "transport": "ขนส่ง",
         "tanker": "เครื่องบินเติมเชื้อเพลิง",
-        "awacs": "AWACS/AEW",
+        "awacs": "อวัคส์/เอดับบลิว",
         "reconnaissance": "ลาดตระเวน",
         "helicopter": "เฮลิคอปเตอร์",
         "drone": "อากาศยานไร้คนขับ",
@@ -1872,7 +2194,28 @@
       "hexCode": "รหัส HEX",
       "squawk": "รหัส SQUAWK",
       "attribution": "แหล่งที่มา: OpenSky Network",
-      "trackFlight": "ติดตามบน FlightAware"
+      "trackFlight": "ติดตามบน FlightAware",
+      "operators": {
+        "usaf": "กองทัพอากาศสหรัฐ",
+        "usn": "กองทัพเรือสหรัฐฯ",
+        "usmc": "นาวิกโยธินสหรัฐฯ",
+        "usa": "กองทัพสหรัฐฯ",
+        "raf": "กองทัพอากาศ",
+        "rn": "กองทัพเรือ",
+        "faf": "กองทัพอากาศฝรั่งเศส",
+        "gaf": "กองทัพอากาศเยอรมัน",
+        "plaaf": "กองทัพอากาศ",
+        "plan": "กองทัพเรือ",
+        "vks": "การบินและอวกาศของรัสเซีย",
+        "iaf": "กองทัพอากาศอิสราเอล",
+        "nato": "NATO"
+      },
+      "highInterest": "เที่ยวบินดอกเบี้ยสูง",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "militaryVessel": {
       "aisDark": "AIS มืด",
@@ -1887,7 +2230,34 @@
       "usniIntel": "ข่าวกรอง USNI",
       "usniSource": "แหล่งที่มา: USNI News Fleet Tracker",
       "approximatePosition": "ตำแหน่งโดยประมาณ — อ้างอิงจากรายงานรายสัปดาห์ของ USNI ไม่ใช่ AIS แบบเรียลไทม์",
-      "darkDescription": "⚠ เรือสูญเสียสัญญาณ - สัญญาณ AIS หายไป อาจบ่งชี้ปฏิบัติการลับ"
+      "darkDescription": "⚠ เรือสูญเสียสัญญาณ - สัญญาณ AIS หายไป อาจบ่งชี้ปฏิบัติการลับ",
+      "types": {
+        "carrier": "เรือบรรทุกเครื่องบิน",
+        "destroyer": "พิฆาต",
+        "frigate": "เรือรบ",
+        "submarine": "เรือดำน้ำ",
+        "amphibious": "สะเทินน้ำสะเทินบก",
+        "patrol": "ตระเวน",
+        "auxiliary": "ตัวช่วย",
+        "research": "วิจัย",
+        "icebreaker": "เรือตัดน้ำแข็ง",
+        "special": "พิเศษ"
+      },
+      "operators": {
+        "usn": "กองทัพเรือสหรัฐฯ",
+        "uscg": "หน่วยยามฝั่งสหรัฐ",
+        "rn": "กองทัพเรือ",
+        "fn": "กองทัพเรือฝรั่งเศส",
+        "plan": "กองทัพเรือ",
+        "ruf": "กองทัพเรือรัสเซีย",
+        "jmsdf": "SDF ทางทะเลของญี่ปุ่น",
+        "rokn": "กองทัพเรือ ROK"
+      },
+      "deploymentStatuses": {
+        "deployed": "ปรับใช้แล้ว",
+        "underway": "กำลังดำเนินการ",
+        "in-port": "ในพอร์ต"
+      }
     },
     "militaryCluster": {
       "flightActivity": {
@@ -1896,8 +2266,8 @@
         "transport": "ปฏิบัติการขนส่ง",
         "unknown": "กิจกรรมทางทหาร"
       },
-      "moreAircraft": "+{{count}} more aircraft",
-      "aircraftCount": "{{count}} AIRCRAFT",
+      "moreAircraft": "เครื่องบินเพิ่มขึ้นอีก +{{mineral}}",
+      "aircraftCount": "{{mineral}} เครื่องบิน",
       "aircraft": "อากาศยาน",
       "activity": "กิจกรรม",
       "primary": "หลัก",
@@ -1909,16 +2279,19 @@
         "transit": "การเคลื่อนย้ายกองเรือ",
         "unknown": "กิจกรรมทางเรือ"
       },
-      "moreVessels": "+{{count}} more vessels",
-      "vesselsCount": "{{count}} VESSELS",
+      "moreVessels": "+{{mineral}} ลำมากขึ้น",
+      "vesselsCount": "{{mineral}} เรือ",
       "vessels": "เรือ",
-      "trackedVessels": "เรือที่ติดตาม"
+      "trackedVessels": "เรือที่ติดตาม",
+      "showLessVessels": "แสดงเรือน้อยลง",
+      "csg": "กลุ่มผู้ให้บริการโจมตี",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "ปิด",
       "active": "ใช้งานอยู่",
       "reported": "รายงานแล้ว",
-      "viewOnSource": "View on {{source}}",
+      "viewOnSource": "ดูบน {{mineral}}",
       "attribution": "ข้อมูล: NASA EONET"
     },
     "port": {
@@ -1947,7 +2320,7 @@
         "development": "พัฒนา",
         "exploration": "สำรวจ"
       },
-      "projectSubtitle": "{{mineral}} PROJECT"
+      "projectSubtitle": "โครงการ {{mineral}}"
     },
     "stockExchange": {
       "marketCap": "มูลค่าตลาด"
@@ -1993,6 +2366,96 @@
     },
     "iranEvent": {
       "relatedEvents": "เหตุการณ์ที่เกี่ยวข้อง"
+    },
+    "values": {
+      "branches": {
+        "navy": "กองทัพเรือ",
+        "air_force": "กองทัพอากาศ",
+        "army": "กองทัพบก",
+        "marines": "นาวิกโยธิน",
+        "coast_guard": "หน่วยยามฝั่ง",
+        "special_forces": "กองกำลังพิเศษ",
+        "space_force": "กองทัพอวกาศ",
+        "national_guard": "ดินแดนแห่งชาติ"
+      },
+      "categories": {
+        "air_force": "กองทัพอากาศ",
+        "naval": "กองทัพเรือ",
+        "nuclear": "นิวเคลียร์",
+        "space": "ช่องว่าง",
+        "training": "การฝึกอบรม",
+        "logistics": "โลจิสติกส์",
+        "intelligence": "ปัญญา"
+      },
+      "exercise": "ออกกำลังกาย",
+      "patrol": "ตระเวน",
+      "deployment": "การปรับใช้",
+      "transit": "การขนส่งสาธารณะ",
+      "transport": "ขนส่ง",
+      "reconnaissance": "การลาดตระเวน",
+      "unknown": "ไม่ทราบ",
+      "fighter": "นักสู้",
+      "bomber": "เครื่องบินทิ้งระเบิด",
+      "tanker": "เรือบรรทุกน้ำมัน",
+      "awacs": "AWACS",
+      "helicopter": "เฮลิคอปเตอร์",
+      "drone": "โดรน",
+      "special_ops": "ปฏิบัติการพิเศษ",
+      "vip": "VIP",
+      "carrier": "เรือบรรทุกเครื่องบิน",
+      "destroyer": "พิฆาต",
+      "frigate": "เรือรบ",
+      "submarine": "เรือดำน้ำ",
+      "amphibious": "สะเทินน้ำสะเทินบก",
+      "auxiliary": "ตัวช่วย",
+      "research": "วิจัย",
+      "icebreaker": "เรือตัดน้ำแข็ง",
+      "special": "พิเศษ",
+      "usaf": "กองทัพอากาศสหรัฐ",
+      "usn": "กองทัพเรือสหรัฐฯ",
+      "usmc": "นาวิกโยธินสหรัฐฯ",
+      "usa": "กองทัพสหรัฐฯ",
+      "raf": "กองทัพอากาศ",
+      "rn": "กองทัพเรือ",
+      "faf": "กองทัพอากาศฝรั่งเศส",
+      "gaf": "กองทัพอากาศเยอรมัน",
+      "plaaf": "กองทัพอากาศ",
+      "plan": "กองทัพเรือ",
+      "vks": "การบินและอวกาศของรัสเซีย",
+      "iaf": "กองทัพอากาศอิสราเอล",
+      "nato": "NATO",
+      "other": "อื่น"
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
+    },
+    "aircraft": {
+      "altitude": "ระดับความสูง",
+      "speed": "ความเร็วภาคพื้นดิน",
+      "heading": "หัวเรื่อง",
+      "position": "ตำแหน่ง",
+      "ground": "บนพื้นดิน",
+      "airborne": "ทางอากาศ"
+    },
+    "confidence": "CONFIDENCE",
+    "ucdpEvent": {
+      "title": "ความขัดแย้งทางอาวุธ",
+      "parties": "PARTIES",
+      "deaths": "ความตาย (ดีที่สุด)",
+      "range": "พิสัย",
+      "types": {
+        "state-based": "ตามรัฐ",
+        "non-state": "ไม่ใช่ของรัฐ",
+        "one-sided": "ด้านเดียว"
+      }
     }
   },
   "signals": {
@@ -2174,6 +2637,55 @@
     "refresh": "รีเฟรช",
     "all": "ทั้งหมด",
     "loadingGiving": "กำลังโหลดข้อมูลการบริจาคทั่วโลก",
-    "rateLimitedMarket": "ข้อมูลตลาดไม่พร้อมใช้งานชั่วคราว (ถูกจำกัดอัตรา) — กำลังลองใหม่ในไม่ช้า"
+    "rateLimitedMarket": "ข้อมูลตลาดไม่พร้อมใช้งานชั่วคราว (ถูกจำกัดอัตรา) — กำลังลองใหม่ในไม่ช้า",
+    "beta": "BETA",
+    "vs": "เทียบกับ",
+    "yes": "ใช่",
+    "no": "เลขที่"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "โรงละครสงครามอิหร่าน",
+      "strait_hormuz": "ช่องแคบฮอร์มุซวิกฤติ",
+      "ukraine": "สงครามยูเครน",
+      "gaza": "ความขัดแย้งในฉนวนกาซา",
+      "south_lebanon": "ชายแดนอิสราเอล-เลบานอน",
+      "yemen_redsea": "วิกฤตทะเลแดง",
+      "sudan": "สงครามกลางเมืองซูดาน",
+      "myanmar": "สงครามกลางเมืองเมียนมาร์",
+      "korean_dmz": "เขตปลอดทหารเกาหลี",
+      "pak_afghan": "ความขัดแย้งชายแดนปากีสถาน-อัฟกานิสถาน"
+    },
+    "hotspots": {
+      "sahel": "ยึดถือ",
+      "haiti": "ปอร์โตแปรงซ์",
+      "horn_africa": "แตรแห่งแอฟริกา",
+      "dc": "DC",
+      "silicon_valley": "ซิลิคอนแวลลีย์",
+      "wall_street": "วอลล์สตรีท",
+      "houston": "ฮูสตัน",
+      "moscow": "มอสโก",
+      "beijing": "ปักกิ่ง",
+      "kyiv": "เคียฟ",
+      "taipei": "ไทเป",
+      "tehran": "เตหะราน",
+      "telaviv": "เทลอาวีฟ",
+      "pyongyang": "เปียงยาง",
+      "london": "ลอนดอน",
+      "brussels": "บรัสเซลส์",
+      "caracas": "คารากัส",
+      "mexico": "เม็กซิโกซิตี้",
+      "nuuk": "นุ๊ก",
+      "riyadh": "ริยาด",
+      "cairo": "ไคโร",
+      "baghdad": "แบกแดด",
+      "damascus": "ดามัสกัส",
+      "doha": "โดฮา",
+      "ankara": "อังการา",
+      "beirut": "เบรุต",
+      "sanaa": "ซานา",
+      "abudhabi": "อาบูดาบี",
+      "pak_afghan": "ชายแดนปากีสถาน–อัฟกานิสถาน"
+    }
   }
 }

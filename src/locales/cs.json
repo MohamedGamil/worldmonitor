@@ -77,6 +77,63 @@
       "stockIndex": "Akciový index: {{value}}",
       "recentHeadlines": "**Nedávné titulky:**",
       "activeStrikes": "Detekováno aktivních útoků/stávek: {{count}}"
+    },
+    "overview": "Země Inteligence",
+    "close": "Blízko",
+    "updated": "Aktualizováno",
+    "story": "Příběh",
+    "export": "Vývozní",
+    "loadingNews": "Načítání titulků zemí…",
+    "loadingMilitary": "Načítání letů, plavidel a blízkých základen…",
+    "loadingInfrastructure": "Výpočet blízké kritické infrastruktury…",
+    "loadingEconomic": "Načítání dostupných indikátorů…",
+    "shareLink": "Sdílejte odkaz",
+    "exportData": "Export dat",
+    "militaryActivity": "Vojenská činnost",
+    "economicIndicators": "Ekonomické ukazatele",
+    "ownFlights": "Vlastní lety",
+    "foreignFlights": "Zahraniční lety",
+    "navalVessels": "Námořní plavidla",
+    "foreignPresence": "Zahraniční přítomnost",
+    "nearestBases": "Nejbližší vojenské základny",
+    "noBasesNearby": "Žádné blízké základny do 600 km.",
+    "noInfrastructure": "V okruhu 600 km nebyla nalezena žádná kritická infrastruktura.",
+    "noGeometry": "Pro korelaci infrastruktury není k dispozici žádná geometrie.",
+    "noSignals": "Žádné nedávné vysoce závažné signály.",
+    "assessmentUnavailable": "Hodnocení není k dispozici.",
+    "noNews": "Žádné nedávné pokrytí pro konkrétní země.",
+    "noIndicators": "Nejsou k dispozici žádné specifické ukazatele pro jednotlivé země.",
+    "nearbyPorts": "Blízké přístavy",
+    "detected": "Zjištěno",
+    "notDetected": "Žádný",
+    "ciiUnavailable": "Skóre CII není pro tuto zemi k dispozici.",
+    "chips": {
+      "criticalNews": "Kritické zprávy",
+      "protests": "Protesty",
+      "militaryAir": "Vojenský vzduch",
+      "navalVessels": "Námořní plavidla",
+      "outages": "Výpadky",
+      "aisDisruptions": "Poruchy AIS",
+      "satelliteFires": "Požáry satelitů",
+      "temporalAnomalies": "Časové anomálie",
+      "cyberThreats": "Kybernetické hrozby",
+      "earthquakes": "Zemětřesení",
+      "displaced": "Přemístěno",
+      "climateStress": "Klimatický stres",
+      "conflictEvents": "Konfliktní události",
+      "activeStrikes": "Aktivní údery",
+      "doNotTravel": "Necestovat",
+      "reconsiderTravel": "Přehodnoťte cestování",
+      "exerciseCaution": "Cvičení Pozor",
+      "advisory": "Poradní",
+      "activeSirens": "Aktivní sirény",
+      "sirens24h": "Sirény / 24h",
+      "aviationDisruptions": "Letecké poruchy",
+      "gpsJammingZones": "Zóny rušení GPS"
+    },
+    "indicators": {
+      "instabilityregime": "Nestabilita režimu",
+      "displacementoutflow": "Odtok výtlaku"
     }
   },
   "header": {
@@ -143,7 +200,9 @@
     "panelCatCentralBanks": "Centrální banky a ekonomika",
     "panelCatDeals": "Transakce a instituce",
     "panelCatGulfMena": "Záliv a MENA",
-    "panelCatTradePolicy": "Obchodní politika"
+    "panelCatTradePolicy": "Obchodní politika",
+    "downloadApp": "Stáhněte si aplikaci",
+    "selectRegion": "Vyberte Region"
   },
   "panels": {
     "liveNews": "Živé zprávy",
@@ -218,7 +277,9 @@
     "gulfEconomies": "Ekonomiky Perského zálivu",
     "gulfIndices": "Indexy Perského zálivu",
     "gulfCurrencies": "Měny Perského zálivu",
-    "gulfOil": "Ropa Perského zálivu"
+    "gulfOil": "Ropa Perského zálivu",
+    "airlineIntel": "Airline Intelligence",
+    "worldClock": "Světové hodiny"
   },
   "commands": {
     "prefixes": {
@@ -250,7 +311,68 @@
       "brief": "Zadejte název země pro zpravodajský přehled",
       "layers": "Zadejte \"military\" nebo \"finance\" pro přednastavení vrstev",
       "time": "Zadejte \"1h\", \"24h\" nebo \"7d\" pro filtrování podle času",
-      "settings": "Zadejte \"dark mode\", \"settings\" nebo \"fullscreen\""
+      "settings": "Zadejte \"dark mode\", \"settings\" nebo \"fullscreen\"",
+      "mapExample": "Írán",
+      "panelExample": "zprávy",
+      "briefExample": "krátká čína",
+      "layersExample": "vojenské vrstvy",
+      "timeExample": "24h",
+      "settingsExample": "tmavý režim"
+    },
+    "keywords": {
+      "military": "válečný",
+      "finance": "finance",
+      "infrastructure": "infrastruktura",
+      "intelligence": "inteligence",
+      "news": "zprávy",
+      "dark": "tmavé",
+      "light": "světlo",
+      "settings": "nastavení",
+      "fullscreen": "celá obrazovka",
+      "refresh": "osvěžit"
+    },
+    "labels": {
+      "layers": {
+        "military": "Zobrazit vojenské vrstvy",
+        "finance": "Zobrazit vrstvy financí",
+        "infra": "Zobrazit vrstvy infrastruktury",
+        "intel": "Zobrazit vrstvy inteligence",
+        "all": "Povolit všechny vrstvy",
+        "none": "Skryjte všechny vrstvy",
+        "minimal": "Minimální vrstvy (konflikty + aktivní body)"
+      },
+      "layer": {
+        "ais": "Přepnout sledování plavidel AIS",
+        "flights": "Přepnout vojenské lety",
+        "conflicts": "Přepnout konfliktní zóny",
+        "hotspots": "Přepnout hotspoty Intel",
+        "protests": "Přepnout protesty a nepokoje",
+        "cables": "Přepnout podmořské kabely",
+        "pipelines": "Přepnout potrubí",
+        "nuclear": "Přepnout jaderná zařízení",
+        "bases": "Přepnout vojenské základny",
+        "fires": "Přepnout satelitní požáry",
+        "weather": "Přepnout překryvnou vrstvu počasí",
+        "cyber": "Přepínání kybernetických hrozeb",
+        "displacement": "Přepnout toky posunu",
+        "climate": "Přepnout klimatické anomálie",
+        "outages": "Přepnout výpadky internetu",
+        "tradeRoutes": "Přepnout obchodní cesty"
+      },
+      "view": {
+        "dark": "Přepněte do tmavého režimu",
+        "light": "Přepněte do světelného režimu",
+        "fullscreen": "Přepnout na celou obrazovku",
+        "settings": "Otevřete nastavení",
+        "refresh": "Obnovte všechna data"
+      },
+      "time": {
+        "1h": "Zobrazit události za poslední hodinu",
+        "6h": "Zobrazit události za posledních 6 hodin",
+        "24h": "Zobrazit události za posledních 24 hodin",
+        "48h": "Zobrazit události za posledních 48 hodin",
+        "7d": "Zobrazit události za posledních 7 dní"
+      }
     }
   },
   "modals": {
@@ -284,11 +406,13 @@
         "irradiator": "Ozařovač",
         "techcompany": "Tech společnost",
         "ailab": "AI laboratoř",
-        "startup": "Startup",
+        "startup": "Spuštění",
         "techevent": "Tech událost",
         "techhq": "Tech centrála",
         "accelerator": "Akcelerátor"
-      }
+      },
+      "commands": "Příkazy",
+      "results": "Výsledky"
     },
     "signal": {
       "title": "ZPRAVODAJSKÉ ZJIŠTĚNÍ",
@@ -500,7 +624,18 @@
         "conflictEvents": "konflikty",
         "activeStrikes": "aktivní stávky/útoky",
         "aviationDisruptions": "narušení letišť",
-        "gpsJammingZones": "zóny rušení GPS"
+        "gpsJammingZones": "zóny rušení GPS",
+        "criticalNews": "Kritické zprávy",
+        "aisDisruptions": "Poruchy AIS",
+        "satelliteFires": "Požáry satelitů",
+        "temporalAnomalies": "Časové anomálie",
+        "cyberThreats": "Kybernetické hrozby",
+        "activeSirens": "Aktivní sirény",
+        "sirens24h": "Sirény / 24h",
+        "advisoryDoNotTravel": "Necestovat",
+        "advisoryReconsider": "Přehodnoťte cestování",
+        "advisoryExerciseCaution": "Cvičení Pozor",
+        "advisoryLabel": "Poradenství: {{term}}"
       },
       "timeAgo": {
         "m": "před {{count}} min",
@@ -537,7 +672,16 @@
         "internetOutages": "Výpadky internetu: {{count}}",
         "recentEarthquakes": "Nedávná zemětřesení: {{count}}",
         "stockIndex": "Akciový index: {{value}}",
-        "recentHeadlines": "**Nedávné titulky:**"
+        "recentHeadlines": "**Nedávné titulky:**",
+        "travelAdvisoryDoNotTravel": "⚠️ Cestovní upozornění: Necestujte (zdroj {{term}})",
+        "travelAdvisoryReconsider": "⚠️ Cestovní upozornění: Přehodnoťte cestování (zdroj {{term}})",
+        "criticalHeadlines": "🚨 Kritické titulky v rozsahu: {{term}}",
+        "cyberThreats": "🛡️ Indikátory kybernetických hrozeb: {{term}}",
+        "aisDisruptions": "🚢 Narušení námořního AIS: {{term}}",
+        "satelliteFires": "🔥 Satelitní detekce požáru: {{term}}",
+        "temporalAnomalies": "⏱️ Upozornění na časové anomálie: {{term}}",
+        "sirens24h": "🚨 Sirény za posledních 24 hodin: {{term}}",
+        "noAiService": "Žádná služba AI není k dispozici. Nakonfigurujte GROQ_API_KEY v Nastavení pro úplné informace."
       }
     }
   },
@@ -551,7 +695,9 @@
         "americas": "AMERIKA",
         "asia": "ASIE"
       },
-      "expand": "Rozbalit"
+      "expand": "Rozbalit",
+      "paused": "Webové kamery pozastaveny",
+      "pausedIdle": "Webové kamery pozastaveny – pohybem myši obnovte"
     },
     "monitor": {
       "placeholder": "Klíčová slova (oddělená čárkou)",
@@ -633,7 +779,8 @@
       "mineral": "Minerál",
       "topProducers": "Největší producenti",
       "risk": "Riziko",
-      "sources": "FRED / NGA / USGS"
+      "sources": "FRED / NGA / USGS",
+      "aisDisruptions": "Přerušení AIS"
     },
     "tradePolicy": {
       "restrictions": "Omezení",
@@ -682,7 +829,7 @@
       "pegHealth": "Zdraví vazby (Peg)",
       "supplyVolume": "Nabídka a objem",
       "unavailable": "Data o stablecoinech jsou dočasně nedostupná",
-      "token": "Token",
+      "token": "Žeton",
       "mcap": "Trž. kap.",
       "vol24h": "Obj. 24h",
       "chg24h": "Změna 24h"
@@ -701,14 +848,14 @@
       "live": "ŽIVĚ",
       "historicalPlayback": "Historické přehrávání",
       "close": "Zavřít",
-      "skipToStart": "Skip to start",
-      "previous": "Previous",
-      "next": "Next",
-      "skipToEnd": "Skip to end"
+      "skipToStart": "Přeskočit na začátek",
+      "previous": "Předchozí",
+      "next": "Další",
+      "skipToEnd": "Přejít na konec"
     },
     "pizzint": {
       "title": "Pentagon Pizza Index",
-      "defcon": "DEFCON {{level}}",
+      "defcon": "DEFCON {{term}}",
       "updated": "Aktualizováno před {{timeAgo}}",
       "tensionsTitle": "Geopolitické napětí",
       "source": "Zdroj:",
@@ -796,7 +943,8 @@
       "shareStory": "Sdílet příběh",
       "printPdf": "Tisk / PDF",
       "exportData": "Exportovat data",
-      "sourceRef": "Zdroj [{{n}}]"
+      "sourceRef": "Zdroj [{{n}}]",
+      "shareLink": "Sdílejte odkaz"
     },
     "relatedAssets": {
       "pipeline": "Potrubí",
@@ -808,7 +956,8 @@
     "community": {
       "joinDiscussion": "Připojit se k diskusi",
       "openDiscussion": "Otevřít diskusi",
-      "dontShowAgain": "Příště nezobrazovat"
+      "dontShowAgain": "Příště nezobrazovat",
+      "sectionLabel": "Společenství"
     },
     "threatLabels": {
       "critical": "KRIT",
@@ -837,7 +986,13 @@
         "elevated": "Zvýšená",
         "monitoring": "Monitorování",
         "base": "Základna",
-        "nuclear": "Jaderné zařízení"
+        "nuclear": "Jaderné zařízení",
+        "aircraft": "Letadlo",
+        "ciiLow": "Nízká (0–30)",
+        "ciiNormal": "Normální (31–50)",
+        "ciiElevated": "Zvýšená (51–65)",
+        "ciiHigh": "Vysoká (66–80)",
+        "ciiCritical": "kritické (81–100)"
       },
       "layerGuide": "Průvodce vrstvami",
       "layersTitle": "Vrstvy",
@@ -890,7 +1045,16 @@
         "tradeRoutes": "Obchodní cesty",
         "iranAttacks": "Útoky Íránu",
         "gpsJamming": "RUŠENÍ GPS",
-        "dayNight": "Den/Noc"
+        "dayNight": "Den/Noc",
+        "militaryAircraftConfirmed": "Vojenská letadla",
+        "militaryAircraftUnknown": "Civilní letadla",
+        "navalActivity": "Námořní činnost",
+        "ciiChoropleth": "Nestabilita CII",
+        "positiveEvents": "Pozitivní události",
+        "kindness": "Skutky laskavosti",
+        "happiness": "Světové štěstí",
+        "speciesRecovery": "Obnova druhů",
+        "renewableInstallations": "Čistá energie"
       },
       "tooltip": {
         "earthquake": "Zemětřesení",
@@ -917,7 +1081,34 @@
         "medium": "střední",
         "news": "Zprávy",
         "undisclosed": "Nezveřejněno",
-        "stake": "podíl"
+        "stake": "podíl",
+        "basesCount": "Základny {{term}}",
+        "positiveEvent": "Pozitivní událost",
+        "sourcesReporting": "hlášení zdrojů",
+        "wildfire": "Blesk",
+        "brightness": "Jas",
+        "deaths": "Úmrtí",
+        "displacement": "Přemístění",
+        "refugees": "Uprchlíci",
+        "vsLabel": "vs",
+        "happiness": "Štěstí",
+        "noData": "Žádná data",
+        "cii": "CII",
+        "status": "Postavení",
+        "renewable": "Obnovitelné",
+        "tradeRoute": "Obchodní cesta",
+        "unknown": "Neznámý",
+        "tradeRouteStart": "Začátek trasy",
+        "tradeRouteEnd": "Konec trasy",
+        "tradeRouteDistance": "Vzdálenost",
+        "tradeRouteCargo": "Typ nákladu",
+        "tradeRouteVolume": "Objem",
+        "tradeRouteStatus": "Postavení",
+        "tradeRouteActive": "Aktivní",
+        "tradeRouteInactive": "Neaktivní",
+        "tradeRouteLastUpdated": "Naposledy aktualizováno",
+        "tradeRouteSourcePort": "Zdrojový port",
+        "tradeRouteDestinationPort": "Cílový přístav"
       },
       "layerHelp": {
         "title": "Průvodce mapovými vrstvami",
@@ -995,7 +1186,8 @@
           "financeGulfInvestments": "Investice státních fondů GCC a PZI",
           "tradeRoutes": "Hlavní světové námořní trasy spojující přístavy přes strategická úzká hrdla",
           "dayNight": "Sluneční terminátor v reálném čase ukazující denní a noční zóny",
-          "geoBoundaries": "Demilitarizované zóny, linie příměří a sporné hranice"
+          "geoBoundaries": "Demilitarizované zóny, linie příměří a sporné hranice",
+          "ciiChoropleth": "Tepelná mapa indexu nestability země — obarví země podle skóre CII (zelená=stabilní, červená=kritická)"
         },
         "notes": {
           "timeAffects": "Ovlivňuje: Zemětřesení, Počasí, Protesty, Výpadky"
@@ -1024,7 +1216,7 @@
       "mapFlashLabel": "Puls živých událostí",
       "mapFlashDesc": "Probliknutí lokalit na mapě při příchodu bleskových zpráv",
       "aiFlowTitle": "Nastavení",
-      "aiFlowCloudLabel": "Cloud AI (Groq & OpenRouter)",
+      "aiFlowCloudLabel": "Cloud AI (Groq a OpenRouter)",
       "aiFlowCloudDesc": "Odesílat titulky do cloudu pro sumarizaci AI (doporučeno)",
       "aiFlowBrowserLabel": "Lokální model v prohlížeči",
       "aiFlowBrowserDesc": "Spustit AI lokálně ve vašem prohlížeči",
@@ -1045,7 +1237,38 @@
       "headlineMemoryLabel": "Paměť titulků",
       "headlineMemoryDesc": "Zapamatovat si zobrazené titulky pro zvýraznění nových",
       "streamAlwaysOnLabel": "Ponechat živé streamy spuštěné",
-      "streamAlwaysOnDesc": "Zabrání automatickému pozastavení Live Cams a Live News při nečinnosti. Doporučeno pro druhý monitor / nástěnný dashboard. Vypněte (Eco) pro úsporu CPU a přenosu dat."
+      "streamAlwaysOnDesc": "Zabrání automatickému pozastavení Live Cams a Live News při nečinnosti. Doporučeno pro druhý monitor / nástěnný dashboard. Vypněte (Eco) pro úsporu CPU a přenosu dat.",
+      "globeRenderQualityLabel": "Kvalita vykreslení zeměkoule",
+      "globeRenderQualityDesc": "Řídí rozlišení plátna zeměkoule. Vyšší hodnoty vypadají na 4K displejích ostřeji, ale mohou roztavit GPU.",
+      "globeRenderScaleOptions": {
+        "1": "Eco (1x)",
+        "2": "4K (2x)",
+        "3": "Šílený (3x)",
+        "auto": "Auto (zařízení)",
+        "1_5": "Ostrý (1,5x)"
+      },
+      "worldBriefTitle": "🌍 SVĚTOVÁ KRÁTKA",
+      "techBriefTitle": "🚀 TECHNICKÝ PŘEHLED",
+      "sectionBreaking": "ZRUŠENO A POTVRZENO",
+      "sectionFocalPoints": "🎯 FOKÁLNÍ BODY",
+      "sectionConvergence": "📍 GEOGRAFICKÉ KONVERGENCE",
+      "sectionMlDetected": "🎯 ZJIŠTĚNO ML",
+      "statMultiSource": "Vícezdrojové",
+      "statFastMoving": "Rychle se pohybující",
+      "statAlerts": "Upozornění",
+      "statClusters": "Shluky",
+      "sentimentOverall": "Celkově: {{term}}",
+      "toneNegative": "Negativní",
+      "tonePositive": "Pozitivní",
+      "toneMixed": "Smíšený",
+      "focalPointStats": "Novinky {{term}} • Signály {{events}}",
+      "convergenceStats": "Typy signálu {{term}} • Události {{events}}",
+      "multiPerspectiveAnalysis": "Multiperspektivní analýza...",
+      "usingCachedBrief": "Použití stručných informací uložených v mezipaměti...",
+      "loadingServerInsights": "Načítání statistik serveru...",
+      "generatingLocalizedBrief": "Generování lokalizovaného briefu...",
+      "sourcesCountConfirmed": "✓ Zdroje {{term}}",
+      "sourcesCount": "Zdroje {{term}}"
     },
     "cascade": {
       "noImpacts": "Nezjištěny žádné dopady na země",
@@ -1191,7 +1414,7 @@
     },
     "satelliteFires": {
       "noData": "Data o požárech nejsou k dispozici",
-      "region": "Region",
+      "region": "Kraj",
       "fires": "Požáry",
       "high": "Vysoké",
       "total": "Celkem",
@@ -1238,7 +1461,7 @@
       "wallets": "Peněženky",
       "ofTotal": "% z celku",
       "topReceivers": "Největší příjemci",
-      "oecdOda": "OECD ODA",
+      "oecdOda": "ODA OECD",
       "cafIndex": "Index CAF",
       "candidGrants": "Granty Candid",
       "dataLag": "Zpoždění dat",
@@ -1280,7 +1503,9 @@
       "summarize": "Shrnout tento panel",
       "generatingSummary": "Generuji souhrn...",
       "sources": "Zdrojů: {{count}}",
-      "relatedAssetsNear": "Související aktiva blízko {{location}}"
+      "relatedAssetsNear": "Související aktiva blízko {{location}}",
+      "summaryError": "Souhrn se nepodařilo vygenerovat",
+      "summaryFailed": "Shrnutí se nezdařilo"
     },
     "export": {
       "exportData": "Exportovat data"
@@ -1333,7 +1558,13 @@
     },
     "countryTimeline": {
       "now": "nyní",
-      "noEventsIn7Days": "Žádné události za 7 dní"
+      "noEventsIn7Days": "Žádné události za 7 dní",
+      "lanes": {
+        "protest": "Protest",
+        "conflict": "Konflikt",
+        "natural": "Přírodní",
+        "military": "Válečný"
+      }
     },
     "gdeltIntel": {
       "infoTooltip": "<strong>GDELT Zpravodajství</strong> Globální sledování zpráv v reálném čase:<ul><li>Vybrané tematické kategorie (konflikty, kybernetika atd.)</li><li>Články ze 100+ jazyků přeloženy</li><li>Aktualizace každých 15 minut</li></ul>Zdroj: Projekt GDELT (gdeltproject.org)"
@@ -1431,7 +1662,8 @@
       "openSettings": "Otevřít Nastavení"
     },
     "languageSelector": {
-      "selectLanguage": "Vybrat jazyk"
+      "selectLanguage": "Vybrat jazyk",
+      "mapLabelsFallbackVi": "Popisky na mapách jsou v současné době pro vietnamštinu v angličtině."
     },
     "serviceStatus": {
       "checkingServices": "Kontrola služeb...",
@@ -1445,7 +1677,7 @@
       "nonParityFallbacks": "Fallbackendy bez parity ({{count}})",
       "categories": {
         "all": "Vše",
-        "cloud": "Cloud",
+        "cloud": "Mrak",
         "dev": "Nástroje Dev",
         "comm": "Komunikace",
         "ai": "AI",
@@ -1509,11 +1741,72 @@
       "regionOceania": "Oceánie",
       "invalidHandle": "Zadejte platný úchyt YouTube (např. @NazevKanalu)",
       "channelNotFound": "Kanál YouTube nenalezen",
-      "verifying": "Ověřování…"
+      "verifying": "Ověřování…",
+      "noResults": "Nebyly nalezeny žádné kanály odpovídající „{{term}}“",
+      "hlsUrl": "URL streamu HLS (volitelné)",
+      "invalidHlsUrl": "Zadejte platnou adresu URL streamu HLS (.m3u8)",
+      "togglePlayback": "Přepnout přehrávání",
+      "live": "Žít",
+      "paused": "Pozastaveno",
+      "channels": {
+        "aljazeeramubasher": "AlJazeera Mubasher",
+        "al-hadath": "Al Hadath",
+        "france24_ar": "France24 Arabic",
+        "alarabiya": "AlArabiya",
+        "aljazeera-arabic": "AlJazeera Arabic",
+        "sky-news-arabia": "Sky News Arabia",
+        "dw-arabia": "DW Arabia",
+        "iran-intl": "Iran International",
+        "asharq-news": "Asharq News",
+        "alaraby": "Alaraby",
+        "aljazeera": "AlJazeera English",
+        "bbcarabic": "BBC Arabic",
+        "cgtn-arabic": "CGTN Arabic",
+        "sky": "Sky News",
+        "dw": "DW",
+        "bloomberg": "Bloomberg",
+        "euronews": "Euronews",
+        "cnbc": "CNBC",
+        "cnn": "CNN",
+        "france24": "France 24",
+        "bbc-news": "BBC News",
+        "france24-en": "France 24 English",
+        "yahoo": "Yahoo Finance",
+        "nasa": "Sen Space Live",
+        "fox-news": "Fox News",
+        "newsmax": "Newsmax",
+        "abc-news": "ABC News",
+        "cbs-news": "CBS News",
+        "nbc-news": "NBC News",
+        "cbc-news": "CBC News"
+      }
     },
     "map": {
       "showMap": "Zobrazit mapu",
       "hideMap": "Skrýt mapu"
+    },
+    "positiveNewsFeed": {
+      "noStories": "V této kategorii zatím nejsou žádné příběhy"
+    },
+    "goodThingsDigest": {
+      "noStories": "Nejsou k dispozici žádné příběhy",
+      "summarizing": "Shrnutí…"
+    },
+    "progressCharts": {
+      "noData": "Nejsou k dispozici žádné údaje o průběhu"
+    },
+    "settings": {
+      "dataManagementLabel": "Správa dat",
+      "exportSettings": "Nastavení exportu",
+      "importSettings": "Nastavení importu",
+      "exportSuccess": "Nastavení byla úspěšně exportována",
+      "exportFailed": "Export nastavení se nezdařil",
+      "importSuccess": "Importovaná nastavení {{term}}",
+      "importFailed": "Import nastavení se nezdařil",
+      "reloadNow": "Znovu načíst"
+    },
+    "globe": {
+      "loadingGlobe": "Načítání zeměkoule…"
     }
   },
   "popups": {
@@ -1571,20 +1864,35 @@
         "marine": "Mariňáci",
         "space": "Kosmické",
         "other": "Jiné"
-      }
+      },
+      "branch": "BRANCH",
+      "country": "COUNTRY",
+      "categories": "CATEGORIES"
     },
     "protest": {
       "acledVerified": "ACLED (ověřeno)",
       "gdelt": "GDELT",
       "riots": "Výtržnosti",
-      "highSeverity": "Vysoká závažnost"
+      "highSeverity": "Vysoká závažnost",
+      "types": {
+        "protest": "Protest",
+        "riot": "Vzpoura",
+        "civil_unrest": "Občanské nepokoje",
+        "strike": "Stávka",
+        "demonstration": "Demonstrace"
+      }
     },
     "gpsJamming": {
       "title": "Interference GPS/GNSS",
-      "interference": "Interference",
+      "interference": "Rušení",
       "aircraftAffected": "Zasažená letadla",
       "aircraftNormal": "Letadla v normálu",
-      "h3Hex": "H3 Hex"
+      "h3Hex": "H3 Hex",
+      "levels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "flight": {
       "groundStop": "ZASTAVENÍ PROVOZU (GROUND STOP)",
@@ -1622,7 +1930,12 @@
         "weapons": "ZBRAŇOVÝ KOMPLEX",
         "research": "VÝZKUM"
       },
-      "description": "Jaderné zařízení pod dohledem. Strategický význam pro regionální bezpečnost a obavy z šíření."
+      "description": "Jaderné zařízení pod dohledem. Strategický význam pro regionální bezpečnost a obavy z šíření.",
+      "statuses": {
+        "active": "ACTIVE",
+        "contested": "CONTESTED",
+        "decommissioned": "DECOMMISSIONED"
+      }
     },
     "economic": {
       "types": {
@@ -1723,6 +2036,11 @@
         "elevated": "ZVÝŠENÁ",
         "high": "VYSOKÁ",
         "critical": "KRITICKÁ"
+      },
+      "trends": {
+        "escalating": "ESCALATING",
+        "stable": "STABLE",
+        "deEscalating": "DEESKALAČNÍ"
       }
     },
     "buttons": {
@@ -1817,7 +2135,7 @@
     },
     "techHQ": {
       "types": {
-        "faang": "BIG TECH",
+        "faang": "VELKÁ TECH",
         "unicorn": "JEDNOROŽEC",
         "public": "VEŘEJNÉ",
         "tech": "TECH"
@@ -1867,7 +2185,7 @@
         "drone": "UAV/Dron",
         "patrol": "Hlídkové",
         "specialOps": "Speciální operace",
-        "vip": "VIP Transport"
+        "vip": "VIP doprava"
       },
       "altitude": "VÝŠKA",
       "ground": "Na zemi",
@@ -1876,7 +2194,28 @@
       "hexCode": "HEX KÓD",
       "squawk": "SQUAWK",
       "attribution": "Zdroj: Síť OpenSky",
-      "trackFlight": "Sledovat na FlightAware"
+      "trackFlight": "Sledovat na FlightAware",
+      "operators": {
+        "usaf": "US Air Force",
+        "usn": "US Navy",
+        "usmc": "US Marines",
+        "usa": "americká armáda",
+        "raf": "Královské letectvo",
+        "rn": "Královské námořnictvo",
+        "faf": "francouzské letectvo",
+        "gaf": "Německé letectvo",
+        "plaaf": "Letectvo PLA",
+        "plan": "Námořnictvo CHKO",
+        "vks": "Ruský letectví",
+        "iaf": "Izraelské letectvo",
+        "nato": "NATO"
+      },
+      "highInterest": "Let s vysokým úrokem",
+      "confidenceLevels": {
+        "high": "HIGH",
+        "medium": "MEDIUM",
+        "low": "LOW"
+      }
     },
     "militaryVessel": {
       "aisDark": "AIS VYP",
@@ -1891,7 +2230,34 @@
       "usniIntel": "Zpravodajství USNI",
       "usniSource": "Zdroj: USNI News Fleet Tracker",
       "approximatePosition": "Pozice je přibližná — na základě týdenní zprávy USNI, nikoli živého AIS.",
-      "darkDescription": "⚠ Plavidlo přešlo do temného režimu - signál AIS ztracen. Může to znamenat citlivé operace."
+      "darkDescription": "⚠ Plavidlo přešlo do temného režimu - signál AIS ztracen. Může to znamenat citlivé operace.",
+      "types": {
+        "carrier": "Letadlová loď",
+        "destroyer": "Torpédoborec",
+        "frigate": "Fregata",
+        "submarine": "Ponorka",
+        "amphibious": "Obojživelný",
+        "patrol": "Hlídka",
+        "auxiliary": "Pomocný",
+        "research": "Výzkum",
+        "icebreaker": "Ledoborec",
+        "special": "Speciální"
+      },
+      "operators": {
+        "usn": "US Navy",
+        "uscg": "Pobřežní stráž USA",
+        "rn": "Královské námořnictvo",
+        "fn": "francouzské námořnictvo",
+        "plan": "Námořnictvo CHKO",
+        "ruf": "ruské námořnictvo",
+        "jmsdf": "Japonsko námořní SDF",
+        "rokn": "Námořnictvo ROK"
+      },
+      "deploymentStatuses": {
+        "deployed": "Nasazeno",
+        "underway": "Probíhá",
+        "in-port": "V přístavu"
+      }
     },
     "militaryCluster": {
       "flightActivity": {
@@ -1916,14 +2282,17 @@
       "moreVessels": "+{{count}} dalších plavidel",
       "vesselsCount": "{{count}} PLAVIDEL",
       "vessels": "PLAVIDLA",
-      "trackedVessels": "SLEDOVANÁ PLAVIDLA"
+      "trackedVessels": "SLEDOVANÁ PLAVIDLA",
+      "showLessVessels": "Zobrazit méně plavidel",
+      "csg": "Úderná skupina nosičů",
+      "csgBadge": "CSG"
     },
     "naturalEvent": {
       "closed": "ZAVŘENO",
       "active": "AKTIVNÍ",
       "reported": "OHLÁŠENO",
       "viewOnSource": "Zobrazit na {{source}}",
-      "attribution": "Data: NASA EONET"
+      "attribution": "Údaje: NASA EONET"
     },
     "port": {
       "types": {
@@ -1997,6 +2366,96 @@
       "uae_ecsr": "SAE/ECSR",
       "venezuela_crisis": "Krize ve Venezuele",
       "yemen_houthis": "Jemen/Húsíové"
+    },
+    "values": {
+      "branches": {
+        "navy": "námořnictvo",
+        "air_force": "Letectvo",
+        "army": "Armáda",
+        "marines": "Marines",
+        "coast_guard": "Pobřežní hlídka",
+        "special_forces": "speciální jednotky",
+        "space_force": "Vesmírná síla",
+        "national_guard": "Národní garda"
+      },
+      "categories": {
+        "air_force": "Letectvo",
+        "naval": "Námořní",
+        "nuclear": "Nukleární",
+        "space": "Plocha",
+        "training": "Výcvik",
+        "logistics": "Logistika",
+        "intelligence": "Inteligence"
+      },
+      "exercise": "Cvičení",
+      "patrol": "Hlídka",
+      "deployment": "Nasazení",
+      "transit": "Tranzit",
+      "transport": "Doprava",
+      "reconnaissance": "Průzkum",
+      "unknown": "Neznámý",
+      "fighter": "Bojovník",
+      "bomber": "Bombardér",
+      "tanker": "Tanker",
+      "awacs": "AWACS",
+      "helicopter": "Helikoptéra",
+      "drone": "Trubec",
+      "special_ops": "Special Ops",
+      "vip": "VIP",
+      "carrier": "Letadlová loď",
+      "destroyer": "Torpédoborec",
+      "frigate": "Fregata",
+      "submarine": "Ponorka",
+      "amphibious": "Obojživelný",
+      "auxiliary": "Pomocný",
+      "research": "Výzkum",
+      "icebreaker": "Ledoborec",
+      "special": "Speciální",
+      "usaf": "US Air Force",
+      "usn": "US Navy",
+      "usmc": "US Marines",
+      "usa": "americká armáda",
+      "raf": "Královské letectvo",
+      "rn": "Královské námořnictvo",
+      "faf": "francouzské letectvo",
+      "gaf": "Německé letectvo",
+      "plaaf": "Letectvo PLA",
+      "plan": "Námořnictvo CHKO",
+      "vks": "Ruský letectví",
+      "iaf": "Izraelské letectvo",
+      "nato": "NATO",
+      "other": "Ostatní"
+    },
+    "severities": {
+      "extreme": "EXTREME",
+      "severe": "SEVERE",
+      "moderate": "MODERATE",
+      "minor": "MINOR",
+      "critical": "CRITICAL",
+      "high": "HIGH",
+      "medium": "MEDIUM",
+      "low": "LOW",
+      "unknown": "UNKNOWN"
+    },
+    "aircraft": {
+      "altitude": "Nadmořská výška",
+      "speed": "Pozemní rychlost",
+      "heading": "Záhlaví",
+      "position": "Pozice",
+      "ground": "Na zemi",
+      "airborne": "Ve vzduchu"
+    },
+    "confidence": "CONFIDENCE",
+    "ucdpEvent": {
+      "title": "OZBROJENÝ KONFLIKT",
+      "parties": "PARTIES",
+      "deaths": "SMRT (NEJLEPŠÍ EST.)",
+      "range": "rozsah",
+      "types": {
+        "state-based": "Státní",
+        "non-state": "Nestátní",
+        "one-sided": "Jednostranné"
+      }
     }
   },
   "signals": {
@@ -2178,6 +2637,55 @@
     "currentVariant": "(současná)",
     "retry": "Zkusit znovu",
     "refresh": "Obnovit",
-    "all": "Vše"
+    "all": "Vše",
+    "beta": "BETA",
+    "vs": "vs",
+    "yes": "Ano",
+    "no": "Žádný"
+  },
+  "geo": {
+    "conflictZones": {
+      "iran": "Íránské válečné divadlo",
+      "strait_hormuz": "Krize Hormuzského průlivu",
+      "ukraine": "Ukrajinská válka",
+      "gaza": "Konflikt v Gaze",
+      "south_lebanon": "Izraelsko-libanonská hranice",
+      "yemen_redsea": "Krize Rudého moře",
+      "sudan": "Súdánská občanská válka",
+      "myanmar": "Myanmarská občanská válka",
+      "korean_dmz": "Korejská demilitarizovaná zóna",
+      "pak_afghan": "hraniční konflikt mezi Pákistánem a Afghánistánem"
+    },
+    "hotspots": {
+      "sahel": "Sahel",
+      "haiti": "Port-au-Prince",
+      "horn_africa": "Africký roh",
+      "dc": "DC",
+      "silicon_valley": "Silicon Valley",
+      "wall_street": "Wall Street",
+      "houston": "Houston",
+      "moscow": "Moskva",
+      "beijing": "Peking",
+      "kyiv": "Kyjev",
+      "taipei": "Tchaj-pej",
+      "tehran": "Teherán",
+      "telaviv": "Tel Aviv",
+      "pyongyang": "Pchjongčchang",
+      "london": "Londýn",
+      "brussels": "Brusel",
+      "caracas": "Caracas",
+      "mexico": "Mexico City",
+      "nuuk": "Nuuk",
+      "riyadh": "Rijád",
+      "cairo": "Káhira",
+      "baghdad": "Bagdád",
+      "damascus": "Damašek",
+      "doha": "Dauhá",
+      "ankara": "Ankara",
+      "beirut": "Beirut",
+      "sanaa": "Sana'a",
+      "abudhabi": "Abu Dhabi",
+      "pak_afghan": "hranice mezi Pákistánem a Afghánistánem"
+    }
   }
 }
