@@ -9,6 +9,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.1.8] - 2026-03-20
+
+### Added
+
+- **Full trade-route popup localization** — all trade-route popups and tooltips now use translation keys for every field, with complete English and Arabic coverage
+- **Geolocation label localization** — trade-route endpoint geolocations in popups now resolve to localized names using `getLocalizedGeoName()`
+- **Distance calculation in trade-route popups** — distance between route endpoints is now dynamically calculated and displayed using the haversine formula
+
+### Fixed
+
+- **Consistent i18n for map popups** — updated some of the remaining hardcoded English strings in map popups and tooltips have been replaced with translation keys, ensuring more localization coverage
+
+### Internationalization
+
+- **Arabic trade-route translations** — all trade-route popup and tooltip fields are now fully translated into Arabic, including dynamic geolocation and status labels
+- **Translation completeness validation** — verified presence of all required trade-route keys in both `en.json` and `ar.json` locale files
+
+---
+
 ## [0.1.7] - 2026-03-19
 
 ### Added
