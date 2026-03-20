@@ -196,7 +196,7 @@ export function getLocalizedCountryName(codeOrName: string): string {
   // Special override: always return custom Arabic names for Israel and Palestine
   if (lang === 'ar') {
     const israelIdentifiers = new Set(['IL', 'ISR', 'ISRAEL', 'ISRAELI', 'STATE OF ISRAEL']);
-    if (israelIdentifiers.has(code)) return 'ارض الاحتلال (اسرائيل)';
+    if (israelIdentifiers.has(code)) return 'الارض المحتلة (اسرائيل)';
 
     const palestineIdentifiers = new Set(['PS', 'PSE', 'PALESTINE', 'PALESTINIAN', 'STATE OF PALESTINE', 'PALESTINIAN TERRITORIES', 'WEST BANK', 'GAZA']);
     if (palestineIdentifiers.has(code)) return 'فلسطين';
