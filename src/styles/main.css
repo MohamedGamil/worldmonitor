@@ -2023,7 +2023,7 @@ body.panel-resize-active iframe {
 .live-channels-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
@@ -3386,7 +3386,7 @@ body.live-news-fullscreen-active .country-deep-dive {
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 99999;
 }
 
 .signal-modal-overlay.active {
@@ -9914,7 +9914,7 @@ a.prediction-link:hover {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  z-index: 99999;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
