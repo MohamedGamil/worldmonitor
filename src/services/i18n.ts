@@ -106,9 +106,10 @@ export async function initI18n(): Promise<void> {
 
 // Helper to translate
 export function t(key: string, options?: Record<string, unknown>): string {
-  const translated = i18next.t(key, options);
+  const defaultValue = String(options?.defaultValue || key);
+  const translated = i18next.t(key, { ...options, defaultValue });
 
-  if (translated.toLowerCase() === key.toLowerCase()) {
+  if (!translated || translated === defaultValue) {
     const splitStr = key.split('.');
 
     return (splitStr.length > 1)
