@@ -1,6 +1,7 @@
 import type { NewsItem } from '@/types';
 import type { OrefAlert } from '@/services/oref-alerts';
 import { getSourceTier } from '@/config/feeds';
+import { getCurrentLanguage } from '@/services/i18n';
 
 export interface BreakingAlert {
   id: string;
@@ -117,6 +118,36 @@ export function updateAlertSettings(partial: Partial<AlertSettings>): void {
   } catch { }
 }
 
+// ─── Headline translation ─────────────────────────────────────────────────
+// Per-session in-memory cache — avoids a round-trip to /api/translate when
+// the same headline appears in multiple batches (e.g. digest + per-feed fallback).
+
+const _translateCache = new Map<string, string>();
+
+async function translateHeadline(title: string, lang: string): Promise<string> {
+  if (lang === 'en') return title;
+  const cacheKey = `${lang}:${title}`;
+  const cached = _translateCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: title, targetLang: lang }),
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (res.ok) {
+      const json = await res.json() as { translatedText?: string };
+      const translated = json.translatedText?.trim();
+      if (translated) {
+        _translateCache.set(cacheKey, translated);
+        return translated;
+      }
+    }
+  } catch { /* translation unavailable — fall back to original */ }
+  return title;
+}
+
 // ─── Gate checks ───────────────────────────────────────────────────────────
 
 function isRecent(pubDate: Date): boolean {
@@ -155,7 +186,7 @@ function dispatchAlert(alert: BreakingAlert): void {
   document.dispatchEvent(new CustomEvent('wm:breaking-news', { detail: alert }));
 }
 
-export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
+export async function checkBatchForBreakingAlerts(items: NewsItem[]): Promise<void> {
   const settings = getAlertSettings();
   if (!settings.enabled) return;
 
@@ -201,10 +232,17 @@ export function checkBatchForBreakingAlerts(items: NewsItem[]): void {
     }
   }
 
-  if (best && !isGlobalCooldown(best.threatLevel)) dispatchAlert(best);
+  if (best && !isGlobalCooldown(best.threatLevel)) {
+    const lang = getCurrentLanguage();
+    if (lang !== 'en') {
+      const translated = await translateHeadline(best.headline, lang);
+      best = { ...best, headline: translated };
+    }
+    dispatchAlert(best);
+  }
 }
 
-export function dispatchOrefBreakingAlert(alerts: OrefAlert[]): void {
+export async function dispatchOrefBreakingAlert(alerts: OrefAlert[]): Promise<void> {
   const settings = getAlertSettings();
   if (!settings.enabled || !alerts.length) return;
 
@@ -222,9 +260,12 @@ export function dispatchOrefBreakingAlert(alerts: OrefAlert[]): void {
 
   if (isDuplicate(dedupeKey)) return;
 
+  const lang = getCurrentLanguage();
+  const finalHeadline = lang !== 'en' ? await translateHeadline(headline, lang) : headline;
+
   dispatchAlert({
     id: dedupeKey,
-    headline,
+    headline: finalHeadline,
     source: 'OREF Pikud HaOref',
     threatLevel: 'critical',
     timestamp: new Date(),
@@ -249,6 +290,7 @@ export function destroyBreakingNewsAlerts(): void {
     storageListener = null;
   }
   dedupeMap.clear();
+  _translateCache.clear();
   cachedSettings = null;
   lastGlobalAlertMs = 0;
   lastGlobalAlertLevel = null;

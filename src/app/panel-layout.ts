@@ -50,6 +50,7 @@ import { t, LANGUAGES, getCurrentLanguage } from '@/services/i18n';
 import { getCurrentTheme } from '@/utils';
 import { trackCriticalBannerAction } from '@/services/analytics';
 import { APP_LOGO_URL } from '@/config/ui';
+import { checkBatchForBreakingAlerts } from '@/services/breaking-news-alerts';
 
 export interface PanelLayoutCallbacks {
   openCountryStory: (code: string, name: string) => void;
@@ -249,6 +250,7 @@ export class PanelLayoutManager implements AppModule {
             <div class="download-dropdown" id="downloadDropdown"></div>
           </div>`}
           <button class="search-btn" id="searchBtn"><kbd>⌘K</kbd> ${t('header.search')}</button>
+          ${import.meta.env.DEV ? `<button class="copy-link-btn" id="devTriggerBreakingBtn" title="DEV: trigger a synthetic breaking alert from first feed item">DEV Breaking Test</button>` : ''}
           ${this.ctx.isDesktopApp ? '' : `<button class="copy-link-btn" id="copyLinkBtn">${t('header.copyLink')}</button>`}
           <button class="theme-toggle-btn" id="headerThemeToggle" title="${t('header.toggleTheme')}">
             ${getCurrentTheme() === 'dark'
@@ -353,10 +355,56 @@ export class PanelLayoutManager implements AppModule {
     // <div class="map-bottom-grid" id="mapBottomGrid"></div>
 
     this.createPanels();
+    this.bindDevBreakingTestButton();
 
     if (this.ctx.isMobile) {
       this.setupMobileMapToggle();
     }
+  }
+
+  private bindDevBreakingTestButton(): void {
+    if (!import.meta.env.DEV) return;
+    const btn = document.getElementById('devTriggerBreakingBtn') as HTMLButtonElement | null;
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      void this.triggerDevBreakingAlert();
+    });
+  }
+
+  private getFirstNewsItemForDevTest(): import('@/types').NewsItem | null {
+    if (this.ctx.allNews.length > 0) return this.ctx.allNews[0] ?? null;
+
+    for (const items of Object.values(this.ctx.newsByCategory)) {
+      if (items.length > 0) return items[0] ?? null;
+    }
+
+    return null;
+  }
+
+  private async triggerDevBreakingAlert(): Promise<void> {
+    const base = this.getFirstNewsItemForDevTest();
+    if (!base) {
+      console.warn('[DEV] Cannot trigger breaking test: no news item loaded yet.');
+      return;
+    }
+
+    const ts = new Date();
+    const seconds = String(ts.getSeconds()).padStart(2, '0');
+    const synthetic: import('@/types').NewsItem = {
+      ...base,
+      title: `${base.title} [DEV ${seconds}]`,
+      pubDate: ts,
+      isAlert: true,
+      threat: {
+        level: 'critical',
+        category: base.threat?.category ?? 'general',
+        confidence: 0.99,
+        source: 'llm',
+      },
+    };
+
+    await checkBatchForBreakingAlerts([synthetic]);
   }
 
   private setupMobileMapToggle(): void {
