@@ -371,6 +371,7 @@ interface GlobeControlsLike {
 export class GlobeMap {
   private static readonly MAX_GLOBE_ZOOM_LEVEL = 4;
   private static readonly MIN_ALTITUDE_FOR_MAX_ZOOM = 0.5;
+  private static readonly TRADE_ROUTE_ARC_ANIMATE_MS = 5000;
 
   private container: HTMLElement;
   private globe: GlobeInstance | null = null;
@@ -850,17 +851,19 @@ export class GlobeMap {
       .arcEndLat((d: TradeRouteSegment) => d.targetPosition[1])
       .arcEndLng((d: TradeRouteSegment) => d.targetPosition[0])
       .arcColor((d: TradeRouteSegment) => {
-        if (d.status === 'disrupted') return ['rgba(255,32,32,0.1)', 'rgba(255,32,32,0.8)', 'rgba(255,32,32,0.1)'];
-        if (d.status === 'high_risk') return ['rgba(255,180,0,0.1)', 'rgba(255,180,0,0.7)', 'rgba(255,180,0,0.1)'];
-        if (d.category === 'energy') return ['rgba(255,140,0,0.05)', 'rgba(255,140,0,0.6)', 'rgba(255,140,0,0.05)'];
-        if (d.category === 'container') return ['rgba(68,136,255,0.05)', 'rgba(68,136,255,0.6)', 'rgba(68,136,255,0.05)'];
-        return ['rgba(68,204,136,0.05)', 'rgba(68,204,136,0.6)', 'rgba(68,204,136,0.05)'];
+        // Keep edge alpha high enough to stay visible over bright terrain/water textures.
+        if (d.status === 'disrupted') return ['rgba(255, 62, 62, 0.52)', 'rgba(255, 18, 18, 0.98)', 'rgba(255, 62, 62, 0.52)'];
+        if (d.status === 'high_risk') return ['rgba(255, 206, 72, 0.5)', 'rgba(255, 166, 0, 0.96)', 'rgba(255, 206, 72, 0.5)'];
+        if (d.category === 'energy') return ['rgba(255, 190, 94, 0.48)', 'rgba(255, 122, 0, 0.95)', 'rgba(255, 190, 94, 0.48)'];
+        if (d.category === 'container') return ['rgba(121, 194, 255, 0.5)', 'rgba(32, 116, 255, 0.96)', 'rgba(121, 194, 255, 0.5)'];
+        return ['rgba(122, 240, 179, 0.48)', 'rgba(24, 187, 112, 0.94)', 'rgba(122, 240, 179, 0.48)'];
       })
       .arcAltitudeAutoScale(0.3)
-      .arcStroke(0.5)
-      .arcDashLength(0.9)
-      .arcDashGap(4)
-      .arcDashAnimateTime(5000)
+      .arcStroke(0.62)
+      .arcDashLength(0.45)
+      .arcDashGap(1.2)
+      .arcDashInitialGap(() => Math.random())
+      .arcDashAnimateTime(GlobeMap.TRADE_ROUTE_ARC_ANIMATE_MS)
       .arcLabel((d: TradeRouteSegment) => `${d.routeName} · ${d.volumeDesc}`);
 
     // Path accessors — set once
@@ -2953,11 +2956,16 @@ export class GlobeMap {
     const prevPulse = this._pulseEnabled;
     this._pulseEnabled = !profile.disablePulseAnimations;
 
+    // Trade route arcs should remain continuously animated.
+    // Performance profile can still reduce path (pipeline/trade) dash animation.
+    (this.globe as any)
+      .arcDashLength(0.45)
+      .arcDashGap(1.2)
+      .arcDashAnimateTime(GlobeMap.TRADE_ROUTE_ARC_ANIMATE_MS);
+
     if (profile.disableDashAnimations) {
-      (this.globe as any).arcDashAnimateTime(0);
       (this.globe as any).pathDashAnimateTime(0);
     } else {
-      (this.globe as any).arcDashAnimateTime(5000);
       (this.globe as any).pathDashAnimateTime((d: GlobePath) => (d.pathType === 'cable' || d.pathType === 'boundary') ? 0 : 5000);
     }
 
