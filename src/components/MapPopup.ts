@@ -12,6 +12,7 @@ import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { svgIcon } from '@/utils/icons';
 import { isMobileDevice, getCSSColor } from '@/utils';
 import { t, tv, getLocalizedGeoName } from '@/services/i18n';
+import { haversineKm } from '@/utils/distance';
 import { fetchHotspotContext, formatArticleDate, extractDomain, type GdeltArticle } from '@/services/gdelt-intel';
 import { getNaturalEventIcon } from '@/services/eonet';
 import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot-escalation';
@@ -650,58 +651,51 @@ export class MapPopup {
   }
 
   private renderTradeRoutePopup(route: TradeRouteSegment): string {
-    const localized = (key: string, fallback: string): string => {
-      const value = t(key);
-      return value === key ? fallback : value;
-    };
-    const statusLabel = tv(
-      route.status,
-      'popups.tradeRoute.statuses',
-      route.status === 'disrupted' ? 'Disrupted' : route.status === 'high_risk' ? 'High Risk' : 'Active',
-    );
+    const statusLabel = t(`components.deckgl.tooltip.tradeRoute${route.status === 'active' ? 'Active' : 'Inactive'}`);
     const badgeClass = route.status === 'disrupted'
       ? 'high'
       : route.status === 'high_risk'
         ? 'elevated'
         : 'low';
-    const categoryLabel = tv(
-      route.category,
-      'popups.tradeRoute.categories',
-      route.category ? route.category.charAt(0).toUpperCase() + route.category.slice(1) : 'General',
-    );
     const [srcLon, srcLat] = route.sourcePosition;
     const [dstLon, dstLat] = route.targetPosition;
     const srcCountry = getCountryAtCoordinates(srcLat, srcLon)?.name;
     const dstCountry = getCountryAtCoordinates(dstLat, dstLon)?.name;
-    const srcGeo = srcCountry ? getLocalizedGeoName(srcCountry) : localized('popups.unknown', 'Unknown');
-    const dstGeo = dstCountry ? getLocalizedGeoName(dstCountry) : localized('popups.unknown', 'Unknown');
-    const popupTitle = route.routeName || localized('popups.tradeRoute.title', 'Trade Route');
-    const popupSubtitle = route.volumeDesc || localized('popups.tradeRoute.subtitle', 'Global maritime corridor');
-
+    const srcGeo = srcCountry ? getLocalizedGeoName(srcCountry) : t('popups.unknown');
+    const dstGeo = dstCountry ? getLocalizedGeoName(dstCountry) : t('popups.unknown');
+    const popupTitle = route.routeName || t('components.deckgl.tooltip.tradeRoute');
+    const popupSubtitle = route.volumeDesc || t('components.deckgl.tooltip.tradeRouteVolume');
+    // Calculate distance using haversineKm
+    const distance = haversineKm(srcLat, srcLon, dstLat, dstLon);
     return `
       <div class="popup-header waterway">
         <span class="popup-title">${svgIcon('network', '#66b3ff', 14)} ${escapeHtml(popupTitle.toUpperCase())}</span>
         <span class="popup-badge ${badgeClass}">${escapeHtml(statusLabel)}</span>
-        <button class="popup-close" aria-label="${escapeHtml(localized('common.close', 'Close'))}">×</button>
+        <button class="popup-close" aria-label="${escapeHtml(t('common.close'))}">×</button>
       </div>
       <div class="popup-body">
         <div class="popup-subtitle">${escapeHtml(popupSubtitle)}</div>
         <div class="popup-stats">
           <div class="popup-stat">
-            <span class="stat-label">${escapeHtml(localized('popups.category', 'Category'))}</span>
-            <span class="stat-value">${escapeHtml(categoryLabel)}</span>
-          </div>
-          <div class="popup-stat">
-            <span class="stat-label">${escapeHtml(localized('popups.status', 'Status'))}</span>
-            <span class="stat-value">${escapeHtml(statusLabel)}</span>
-          </div>
-          <div class="popup-stat">
-            <span class="stat-label">${escapeHtml(localized('popups.from', 'From'))}</span>
+            <span class="stat-label">${escapeHtml(t('components.deckgl.tooltip.tradeRouteSourcePort'))}</span>
             <span class="stat-value">${srcLat.toFixed(2)}°, ${srcLon.toFixed(2)}° · ${escapeHtml(srcGeo)}</span>
           </div>
           <div class="popup-stat">
-            <span class="stat-label">${escapeHtml(localized('popups.to', 'To'))}</span>
+            <span class="stat-label">${escapeHtml(t('components.deckgl.tooltip.tradeRouteDestinationPort'))}</span>
             <span class="stat-value">${dstLat.toFixed(2)}°, ${dstLon.toFixed(2)}° · ${escapeHtml(dstGeo)}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(t('components.deckgl.tooltip.tradeRouteDistance'))}</span>
+            <span class="stat-value">${distance ? distance.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' km' : '-'}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(t('components.deckgl.tooltip.tradeRouteVolume'))}</span>
+            <span class="stat-value">${escapeHtml(route.volumeDesc || '-')}
+            </span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(t('components.deckgl.tooltip.tradeRouteStatus'))}</span>
+            <span class="stat-value">${escapeHtml(route.status ? t(`components.deckgl.tooltip.tradeRoute${route.status.charAt(0).toUpperCase() + route.status.slice(1)}`) : '-')}</span>
           </div>
         </div>
       </div>

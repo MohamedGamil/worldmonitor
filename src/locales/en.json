@@ -1107,6 +1107,7 @@
         "status": "Status",
         "renewable": "Renewable",
         "tradeRoute": "Trade Route",
+        "unknown": "Unknown",
         "tradeRouteStart": "Route Start",
         "tradeRouteEnd": "Route End",
         "tradeRouteDistance": "Distance",
