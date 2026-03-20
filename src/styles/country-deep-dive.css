@@ -4,7 +4,7 @@
   right: -460px;
   width: 430px;
   height: 100vh;
-  z-index: 5000;
+  z-index: 99991;
   border-left: 1px solid var(--border);
   background: var(--panel-bg);
   box-shadow: -8px 0 32px color-mix(in srgb, var(--overlay-heavy) 65%, transparent);
