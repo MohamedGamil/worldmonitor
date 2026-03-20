@@ -193,6 +193,15 @@ export function getLocalizedCountryName(codeOrName: string): string {
   // Clean up input
   let code = codeOrName.trim().toUpperCase();
 
+  // Special override: always return custom Arabic names for Israel and Palestine
+  if (lang === 'ar') {
+    const israelIdentifiers = new Set(['IL', 'ISR', 'ISRAEL', 'ISRAELI', 'STATE OF ISRAEL']);
+    if (israelIdentifiers.has(code)) return 'ارض الاحتلال (اسرائيل)';
+
+    const palestineIdentifiers = new Set(['PS', 'PSE', 'PALESTINE', 'PALESTINIAN', 'STATE OF PALESTINE', 'PALESTINIAN TERRITORIES', 'WEST BANK', 'GAZA']);
+    if (palestineIdentifiers.has(code)) return 'فلسطين';
+  }
+
   // If we receive a 3-letter code and know its 2-letter equivalent, we can convert.
   // Standard Intl.DisplayNames expects region subtags (ISO-3166-1 alpha-2).
   // E.g., USA -> US, GBR -> GB. Here is a tiny map for common ones we use:
