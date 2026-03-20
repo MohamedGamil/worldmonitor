@@ -27,7 +27,8 @@ import { getLayersForVariant, resolveLayerLabel, type MapVariant } from '@/confi
 import type { TradeRouteSegment } from '@/config/trade-routes';
 import type { GlobeStaticReadyMessage } from '@/workers/globe-data.worker';
 const SHOW_NAVAL_DEV_OVERLAY = import.meta.env.DEV;
-import { getCountryBbox, getCountriesGeoJson } from '@/services/country-geometry';
+import { getCountryAtCoordinates, getCountryBbox, getCountriesGeoJson } from '@/services/country-geometry';
+import { constrainUnderseaCablesToWater } from '@/utils/undersea-cables';
 import { escapeHtml } from '@/utils/sanitize';
 import { getNaturalEventIcon } from '@/services/eonet';
 import type { NaturalEventCategory } from '@/types';
@@ -333,6 +334,7 @@ interface GlobePath {
   pathType: 'cable' | 'oil' | 'gas' | 'products' | 'boundary';
   status: string;
 }
+
 interface GlobePolygon {
   coords: number[][][];
   name: string;
@@ -459,6 +461,7 @@ export class GlobeMap {
   }));
   private tradeRouteSegments: TradeRouteSegment[] = [];
   private globePaths: GlobePath[] = [];
+  private rawGlobePaths: GlobePath[] = [];
   private cableFaultIds = new Set<string>();
   private cableDegradedIds = new Set<string>();
   private ciiScoresMap: Map<string, { score: number; level: string }> = new Map();
@@ -515,7 +518,9 @@ export class GlobeMap {
         this.waterwayMarkers = e.data.waterwayMarkers;
         this.mineralMarkers = e.data.mineralMarkers;
         this.tradeRouteSegments = e.data.tradeRouteSegments;
-        this.globePaths = e.data.globePaths;
+        this.rawGlobePaths = e.data.globePaths;
+        this.globePaths = [...this.rawGlobePaths];
+        if (this.countriesGeoData) this.applyWaterAwareCablePaths();
         this.workerStaticReady = true;
         // Only flush if globe is already initialized;
         // otherwise initGlobe() will flush after it finishes.
@@ -865,16 +870,16 @@ export class GlobeMap {
       .pathPointLng((p: [number, number]) => p[0])
       .pathColor((d: GlobePath) => {
         if (d.pathType === 'cable') {
-          if (this.cableFaultIds.has(d.id)) return '#ff3030';
-          if (this.cableDegradedIds.has(d.id)) return '#ff8800';
-          return 'rgba(0,200,255,0.65)';
+          if (this.cableFaultIds.has(d.id)) return 'rgba(255, 32, 92, 0.96)';
+          if (this.cableDegradedIds.has(d.id)) return 'rgba(255, 152, 32, 0.95)';
+          return 'rgba(0, 232, 255, 0.95)';
         }
         if (d.pathType === 'boundary') return 'rgba(255,215,0,0.75)';
-        if (d.pathType === 'oil') return 'rgba(255,140,0,0.6)';
-        if (d.pathType === 'gas') return 'rgba(80,220,120,0.6)';
-        return 'rgba(180,160,255,0.6)';
+        if (d.pathType === 'oil') return 'rgba(255, 106, 0, 0.92)';
+        if (d.pathType === 'gas') return 'rgba(0, 230, 118, 0.92)';
+        return 'rgba(190, 122, 255, 0.92)';
       })
-      .pathStroke((d: GlobePath) => d.pathType === 'cable' ? 0.3 : d.pathType === 'boundary' ? 0.9 : 0.6)
+      .pathStroke((d: GlobePath) => d.pathType === 'cable' ? 0.55 : d.pathType === 'boundary' ? 0.9 : 0.75)
       .pathDashLength((d: GlobePath) => d.pathType === 'cable' ? 1 : d.pathType === 'boundary' ? 0.4 : 0.6)
       .pathDashGap((d: GlobePath) => d.pathType === 'cable' ? 0 : d.pathType === 'boundary' ? 0.2 : 0.25)
       .pathDashAnimateTime((d: GlobePath) => (d.pathType === 'cable' || d.pathType === 'boundary') ? 0 : 5000)
@@ -976,6 +981,8 @@ export class GlobeMap {
     getCountriesGeoJson().then(geojson => {
       if (geojson && !this.destroyed) {
         this.countriesGeoData = geojson;
+        this.applyWaterAwareCablePaths();
+        this.flushPaths();
         this.reversedRingCache.clear();
         this.flushPolygons();
       }
@@ -1849,6 +1856,31 @@ export class GlobeMap {
       return showPipelines; // oil, gas, products
     });
     (this.globe as any).pathsData(paths);
+  }
+
+  private applyWaterAwareCablePaths(): void {
+    if (!this.rawGlobePaths.length || !this.countriesGeoData) return;
+
+    const cablePaths = this.rawGlobePaths
+      .filter((path) => path.pathType === 'cable')
+      .map((path) => ({ id: path.id, name: path.name, points: path.points }));
+
+    const constrainedCablePaths = constrainUnderseaCablesToWater(
+      cablePaths,
+      (lat, lon) => Boolean(getCountryAtCoordinates(lat, lon)),
+    );
+
+    const nonCablePaths = this.rawGlobePaths.filter((path) => path.pathType !== 'cable');
+    this.globePaths = [
+      ...nonCablePaths,
+      ...constrainedCablePaths.map((path) => ({
+        id: path.id,
+        name: path.name,
+        points: path.points,
+        pathType: 'cable' as const,
+        status: 'ok',
+      })),
+    ];
   }
 
   private static readonly CII_GLOBE_COLORS: Record<string, string> = {

@@ -18,6 +18,7 @@ import { PIPELINES } from '@/config/pipelines';
 import { GAMMA_IRRADIATORS } from '@/config/irradiators';
 import { AI_DATA_CENTERS } from '@/config/ai-datacenters';
 import { resolveTradeRouteSegments, type TradeRouteSegment } from '@/config/trade-routes';
+import { expandUnderseaCablePaths } from '@/utils/undersea-cables';
 import type { MilitaryBase, GammaIrradiator, Spaceport, EconomicCenter, StrategicWaterway, CriticalMineralProject, AIDataCenter, UnderseaCable, Pipeline } from '@/types';
 
 // ─── Marker interfaces (mirror GlobeMap's private interfaces) ───────────────
@@ -214,7 +215,7 @@ function prepareStaticData(): GlobeStaticReadyMessage {
     const tradeRouteSegments = resolveTradeRouteSegments();
 
     const globePaths: GlobePath[] = [
-        ...(UNDERSEA_CABLES as UnderseaCable[]).map(c => ({
+        ...expandUnderseaCablePaths(UNDERSEA_CABLES as UnderseaCable[]).map(c => ({
             id: c.id,
             name: c.name,
             points: c.points,

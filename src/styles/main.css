@@ -6301,6 +6301,9 @@ a.prediction-link:hover {
   color: var(--red);
   letter-spacing: 1px;
   flex: 1;
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .popup-header.hotspot .popup-title {

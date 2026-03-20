@@ -31,6 +31,7 @@ import type {
   SeededVessel,
   NavalCluster,
   NaturalEvent,
+  UnderseaCable,
   UcdpGeoEvent,
   MapProtestCluster,
   MapTechHQCluster,
@@ -93,6 +94,7 @@ import type { GulfInvestment } from '@/types';
 import { resolveTradeRouteSegments, TRADE_ROUTES as TRADE_ROUTES_LIST, type TradeRouteSegment } from '@/config/trade-routes';
 import { getLayersForVariant, resolveLayerLabel, type MapVariant } from '@/config/map-layer-definitions';
 import { haversineKm } from '@/utils/distance';
+import { expandUnderseaCablePaths, constrainUnderseaCablesToWater } from '@/utils/undersea-cables';
 import { MapPopup, type PopupType, type EnrichedAircraftPopupData } from './MapPopup';
 import {
   updateHotspotEscalation,
@@ -108,7 +110,7 @@ import type { KindnessPoint } from '@/services/kindness-data';
 import type { HappinessData } from '@/services/happiness-data';
 import type { RenewableInstallation } from '@/services/renewable-installations';
 import type { SpeciesRecovery } from '@/services/conservation-data';
-import { getCountriesGeoJson, getCountryAtCoordinates, getCountryBbox } from '@/services/country-geometry';
+import { getCountriesGeoJson, getCountryAtCoordinates, getCountryBbox, preloadCountryGeometry } from '@/services/country-geometry';
 import type { FeatureCollection, Geometry } from 'geojson';
 
 export type TimeRange = '1h' | '6h' | '24h' | '48h' | '7d' | 'all';
@@ -351,6 +353,7 @@ export class DeckGLMap {
   private gpsJammingHexes: GpsJamHex[] = [];
   private climateAnomalies: ClimateAnomaly[] = [];
   private tradeRouteSegments: TradeRouteSegment[] = resolveTradeRouteSegments();
+  private renderableUnderseaCables: UnderseaCable[] = expandUnderseaCablePaths(UNDERSEA_CABLES);
   private positiveEvents: PositiveGeoEvent[] = [];
   private kindnessPoints: KindnessPoint[] = [];
 
@@ -524,6 +527,21 @@ export class DeckGLMap {
     this.createTimeSlider();
     this.createLayerToggles();
     this.createLegend();
+
+    preloadCountryGeometry()
+      .then(() => {
+        if (!this.maplibreMap) return;
+        this.renderableUnderseaCables = constrainUnderseaCablesToWater(
+          expandUnderseaCablePaths(UNDERSEA_CABLES),
+          (lat, lon) => Boolean(getCountryAtCoordinates(lat, lon)),
+        );
+        this.layerCache.delete('cables-layer');
+        this.markDirty('cables');
+        this.render();
+      })
+      .catch(() => {
+        // Keep fallback geometry if country land mask is unavailable.
+      });
 
     // Start day/night timer only if layer is initially enabled
     if (this.state.layers.dayNight) {
@@ -1641,16 +1659,16 @@ export class DeckGLMap {
     const layer = new PathLayer({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
       id: cacheKey,
-      data: UNDERSEA_CABLES,
-      getPath: (d) => d.points,
-      getColor: (d) => {
+      data: this.renderableUnderseaCables,
+      getPath: (d: UnderseaCable) => d.points,
+      getColor: (d: UnderseaCable) => {
         if (highlightedCables.has(d.id)) return COLORS.cableHighlight;
         const h = health[d.id];
         if (h?.status === 'fault') return COLORS.cableFault;
         if (h?.status === 'degraded') return COLORS.cableDegraded;
         return COLORS.cable;
       },
-      getWidth: (d) => {
+      getWidth: (d: UnderseaCable) => {
         if (highlightedCables.has(d.id)) return 3;
         const h = health[d.id];
         if (h?.status === 'fault') return 2.5;

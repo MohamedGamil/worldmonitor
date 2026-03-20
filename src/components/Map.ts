@@ -47,6 +47,7 @@ import {
 } from '@/config';
 import { tokenizeForMatch, matchKeyword, findMatchingKeywords } from '@/utils/keyword-match';
 import { haversineKm } from '@/utils/distance';
+import { expandUnderseaCablePaths } from '@/utils/undersea-cables';
 import { MapPopup, type EnrichedAircraftPopupData } from './MapPopup';
 import {
   updateHotspotEscalation,
@@ -63,6 +64,7 @@ import { t } from '@/services/i18n';
 
 export type TimeRange = '1h' | '6h' | '24h' | '48h' | '7d' | 'all';
 export type MapView = 'global' | 'america' | 'mena' | 'eu' | 'asia' | 'latam' | 'africa' | 'oceania';
+const RENDERABLE_UNDERSEA_CABLES = expandUnderseaCablePaths(UNDERSEA_CABLES);
 
 interface MapState {
   zoom: number;
@@ -1190,12 +1192,12 @@ export class MapComponent {
     if (!this.dynamicLayerGroup) return;
     const cableGroup = this.dynamicLayerGroup.append('g').attr('class', 'cables');
 
-    UNDERSEA_CABLES.forEach((cable) => {
+    RENDERABLE_UNDERSEA_CABLES.forEach((cable) => {
       const lineGenerator = d3
         .line<[number, number]>()
         .x((d) => projection(d)?.[0] ?? 0)
         .y((d) => projection(d)?.[1] ?? 0)
-        .curve(d3.curveCardinal);
+        .curve(d3.curveLinear);
 
       const isHighlighted = this.highlightedAssets.cable.has(cable.id);
       const cableAdvisory = this.getCableAdvisory(cable.id);
