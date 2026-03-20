@@ -1105,7 +1105,19 @@
         "noData": "No data",
         "cii": "CII",
         "status": "Status",
-        "renewable": "Renewable"
+        "renewable": "Renewable",
+        "tradeRoute": "Trade Route",
+        "tradeRouteStart": "Route Start",
+        "tradeRouteEnd": "Route End",
+        "tradeRouteDistance": "Distance",
+        "tradeRouteCargo": "Cargo Type",
+        "tradeRouteVolume": "Volume",
+        "tradeRouteStatus": "Status",
+        "tradeRouteActive": "Active",
+        "tradeRouteInactive": "Inactive",
+        "tradeRouteLastUpdated": "Last updated",
+        "tradeRouteSourcePort": "Source Port",
+        "tradeRouteDestinationPort": "Destination Port"
       },
       "layerHelp": {
         "title": "Map Layers Guide",

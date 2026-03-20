@@ -19,7 +19,7 @@ import { isDesktopRuntime } from '@/services/runtime';
 import type { GlobeInstance, ConfigOptions } from 'globe.gl';
 import { INTEL_HOTSPOTS, CONFLICT_ZONES, MILITARY_BASES, NUCLEAR_FACILITIES } from '@/config/geo';
 import { PORTS, type Port } from '@/config/ports';
-import { t } from '@/services/i18n';
+import { t, tv } from '@/services/i18n';
 import { svgIcon } from '@/utils/icons';
 import { SITE_VARIANT } from '@/config/variant';
 import { getGlobeRenderScale, resolveGlobePixelRatio, resolvePerformanceProfile, subscribeGlobeRenderScaleChange, getGlobeTexture, GLOBE_TEXTURE_URLS, subscribeGlobeTextureChange, type GlobeRenderScale, type GlobePerformanceProfile } from '@/services/globe-render-settings';
@@ -311,6 +311,12 @@ interface PortMarker extends BaseMarker {
   rank?: number;
   note?: string;
 }
+interface TradeRouteEndpointMarker extends BaseMarker {
+  _kind: 'tradeRoutePort';
+  id: string;
+  endpoint: 'start' | 'end';
+  routeSegment: TradeRouteSegment;
+}
 interface NavalStrikeGroupMarker extends BaseMarker {
   _kind: 'naval-csg';
   id: string;
@@ -355,7 +361,7 @@ type GlobeMarker =
   | ConflictZoneMarker | MilBaseMarker | NuclearSiteMarker | IrradiatorSiteMarker | SpaceportSiteMarker
   | EarthquakeMarker | EconomicMarker | DatacenterMarker | WaterwayMarker | MineralMarker
   | FlightDelayMarker | CableAdvisoryMarker | RepairShipMarker | AisDisruptionMarker | PortMarker
-  | NewsLocationMarker | FlashMarker | AircraftPositionMarker;
+  | TradeRouteEndpointMarker | NewsLocationMarker | FlashMarker | AircraftPositionMarker;
 
 interface GlobeControlsLike {
   autoRotate: boolean;
@@ -372,6 +378,20 @@ export class GlobeMap {
   private static readonly MAX_GLOBE_ZOOM_LEVEL = 4;
   private static readonly MIN_ALTITUDE_FOR_MAX_ZOOM = 0.5;
   private static readonly TRADE_ROUTE_ARC_ANIMATE_MS = 5000;
+
+  private localizeWithFallback(key: string, fallback: string): string {
+    const value = t(key);
+    return value === key ? fallback : value;
+  }
+
+  private localizeTradeRouteStatus(status: TradeRouteSegment['status']): string {
+    const fallback = status === 'disrupted' ? 'Disrupted' : status === 'high_risk' ? 'High Risk' : 'Active';
+    return tv(status, 'popups.tradeRoute.statuses', fallback);
+  }
+
+  private localizeTradeRouteCategory(category: TradeRouteSegment['category']): string {
+    return tv(category, 'popups.tradeRoute.categories', category.charAt(0).toUpperCase() + category.slice(1));
+  }
 
   private container: HTMLElement;
   private globe: GlobeInstance | null = null;
@@ -461,6 +481,7 @@ export class GlobeMap {
     note: p.note,
   }));
   private tradeRouteSegments: TradeRouteSegment[] = [];
+  private tradeRouteEndpointMarkers: TradeRouteEndpointMarker[] = [];
   private globePaths: GlobePath[] = [];
   private rawGlobePaths: GlobePath[] = [];
   private cableFaultIds = new Set<string>();
@@ -519,6 +540,7 @@ export class GlobeMap {
         this.waterwayMarkers = e.data.waterwayMarkers;
         this.mineralMarkers = e.data.mineralMarkers;
         this.tradeRouteSegments = e.data.tradeRouteSegments;
+        this.rebuildTradeRouteEndpointMarkers();
         this.rawGlobePaths = e.data.globePaths;
         this.globePaths = [...this.rawGlobePaths];
         if (this.countriesGeoData) this.applyWaterAwareCablePaths();
@@ -864,7 +886,17 @@ export class GlobeMap {
       .arcDashGap(1.2)
       .arcDashInitialGap(() => Math.random())
       .arcDashAnimateTime(GlobeMap.TRADE_ROUTE_ARC_ANIMATE_MS)
-      .arcLabel((d: TradeRouteSegment) => `${d.routeName} · ${d.volumeDesc}`);
+      .arcLabel((d: TradeRouteSegment) => {
+        const src = getCountryAtCoordinates(d.sourcePosition[1], d.sourcePosition[0])?.name;
+        const dst = getCountryAtCoordinates(d.targetPosition[1], d.targetPosition[0])?.name;
+        const srcGeo = src ? getLocalizedGeoName(src) : this.localizeWithFallback('popups.unknown', 'Unknown');
+        const dstGeo = dst ? getLocalizedGeoName(dst) : this.localizeWithFallback('popups.unknown', 'Unknown');
+        return `${d.routeName} · ${this.localizeTradeRouteCategory(d.category)} · ${this.localizeTradeRouteStatus(d.status)}\n${srcGeo} -> ${dstGeo}${d.volumeDesc ? `\n${d.volumeDesc}` : ''}`;
+      })
+      .onArcClick((route: TradeRouteSegment | null, event?: MouseEvent) => {
+        if (!route) return;
+        this.showTradeRoutePopup(route, event);
+      });
 
     // Path accessors — set once
     (globe as any)
@@ -1219,6 +1251,15 @@ export class GlobeMap {
       const pc = d.type === 'naval' ? '#4488ff' : d.type === 'oil' ? '#ff8800' : d.type === 'lng' ? '#ffee44' : d.type === 'container' ? '#44ddff' : d.type === 'bulk' ? '#bb8844' : '#44cc88';
       el.innerHTML = svgIcon('anchor', pc, 11);
       el.title = `${d.name}\n${d.type}${d.country ? ' · ' + d.country : ''}${d.rank != null ? ' · rank ' + d.rank : ''}`;
+    } else if (d._kind === 'tradeRoutePort') {
+      const mc = d.endpoint === 'start' ? '#36b5ff' : '#ff9f43';
+      const endpointLabel = d.endpoint === 'start'
+        ? this.localizeWithFallback('popups.tradeRoute.start', 'Start')
+        : this.localizeWithFallback('popups.tradeRoute.end', 'End');
+      const geo = getCountryAtCoordinates(d._lat, d._lng)?.name;
+      const localizedGeo = geo ? getLocalizedGeoName(geo) : this.localizeWithFallback('popups.unknown', 'Unknown');
+      el.innerHTML = svgIcon('port', mc, 13);
+      el.title = `${d.routeSegment.routeName}\n${endpointLabel} · ${this.localizeTradeRouteCategory(d.routeSegment.category)} · ${this.localizeTradeRouteStatus(d.routeSegment.status)}\n${localizedGeo}${d.routeSegment.volumeDesc ? `\n${d.routeSegment.volumeDesc}` : ''}`;
     } else if (d._kind === 'aircraftPos') {
       const isFlightLayerAircraft = this.layers.flights;
       const acColor = d.onGround
@@ -1270,6 +1311,11 @@ export class GlobeMap {
   }
 
   private handleMarkerClick(d: GlobeMarker, _anchor: HTMLElement, e: MouseEvent): void {
+    if (d._kind === 'tradeRoutePort') {
+      this.showTradeRoutePopup(d.routeSegment, e);
+      return;
+    }
+
     if (d._kind === 'hotspot' && this.onHotspotClickCb) {
       this.onHotspotClickCb({
         id: d.id,
@@ -1426,6 +1472,55 @@ export class GlobeMap {
       // Types without a dedicated PopupType — use minimal fallback tooltip
       default:              this.showFallbackTooltip(d, e); break;
     }
+  }
+
+  private showTradeRoutePopup(route: TradeRouteSegment, event?: MouseEvent): void {
+    const cr = this.container.getBoundingClientRect();
+    const x = event ? event.clientX - cr.left : cr.width / 2;
+    const y = event ? event.clientY - cr.top : cr.height / 2;
+    this.popup.show({
+      type: 'tradeRoute',
+      data: route,
+      x,
+      y,
+    });
+  }
+
+  private rebuildTradeRouteEndpointMarkers(): void {
+    if (!this.tradeRouteSegments.length) {
+      this.tradeRouteEndpointMarkers = [];
+      return;
+    }
+
+    const startByRoute = new Map<string, TradeRouteSegment>();
+    const endByRoute = new Map<string, TradeRouteSegment>();
+    for (const segment of this.tradeRouteSegments) {
+      if (!startByRoute.has(segment.routeId)) startByRoute.set(segment.routeId, segment);
+      endByRoute.set(segment.routeId, segment);
+    }
+
+    const markers: TradeRouteEndpointMarker[] = [];
+    for (const [routeId, startSegment] of startByRoute) {
+      const endSegment = endByRoute.get(routeId) ?? startSegment;
+      markers.push({
+        _kind: 'tradeRoutePort',
+        id: `${routeId}-start`,
+        endpoint: 'start',
+        routeSegment: startSegment,
+        _lat: startSegment.sourcePosition[1],
+        _lng: startSegment.sourcePosition[0],
+      });
+      markers.push({
+        _kind: 'tradeRoutePort',
+        id: `${routeId}-end`,
+        endpoint: 'end',
+        routeSegment: endSegment,
+        _lat: endSegment.targetPosition[1],
+        _lng: endSegment.targetPosition[0],
+      });
+    }
+
+    this.tradeRouteEndpointMarkers = markers;
   }
 
   /** Inject a loading overlay that hides the blank/loading globe until textures are ready. */
@@ -1831,6 +1926,7 @@ export class GlobeMap {
     if (this.layers.climate) markers.push(...this.climateMarkers);
     if (this.layers.gpsJamming) markers.push(...this.gpsJamMarkers);
     if (this.layers.techEvents) markers.push(...this.techMarkers);
+    if (this.layers.tradeRoutes) markers.push(...this.tradeRouteEndpointMarkers);
     if (this.layers.cables) {
       markers.push(...this.cableAdvisoryMarkers);
       markers.push(...this.repairShipMarkers);

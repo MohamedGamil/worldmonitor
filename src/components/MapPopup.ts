@@ -4,8 +4,10 @@ import type { Earthquake } from '@/services/earthquakes';
 import type { WeatherAlert } from '@/services/weather';
 import { UNDERSEA_CABLES } from '@/config';
 import type { StartupHub, Accelerator, TechHQ, CloudRegion } from '@/config/tech-geo';
+import type { TradeRouteSegment } from '@/config/trade-routes';
 import type { TechHubActivity } from '@/services/tech-activity';
 import type { GeoHubActivity } from '@/services/geo-activity';
+import { getCountryAtCoordinates } from '@/services/country-geometry';
 import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { svgIcon } from '@/utils/icons';
 import { isMobileDevice, getCSSColor } from '@/utils';
@@ -16,7 +18,7 @@ import { getHotspotEscalation, getEscalationChange24h } from '@/services/hotspot
 import { getCableHealthRecord } from '@/services/cable-health';
 import { getVesselWikiTitle, getStrikeGroupWikiTitle, fetchWikipediaImage, getCallsignWikiTitle, fetchHexWikiTitle, getMilitaryFlightWikiTitle, fetchPlanespottersImage } from '@/services/military-images';
 
-export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent' | 'navalStrikeGroup' | 'navalCluster';
+export type PopupType = 'conflict' | 'hotspot' | 'earthquake' | 'weather' | 'base' | 'waterway' | 'apt' | 'cyberThreat' | 'nuclear' | 'economic' | 'irradiator' | 'pipeline' | 'cable' | 'cable-advisory' | 'repair-ship' | 'outage' | 'datacenter' | 'datacenterCluster' | 'ais' | 'protest' | 'protestCluster' | 'flight' | 'aircraft' | 'militaryFlight' | 'militaryVessel' | 'militaryFlightCluster' | 'militaryVesselCluster' | 'natEvent' | 'port' | 'spaceport' | 'mineral' | 'startupHub' | 'cloudRegion' | 'techHQ' | 'accelerator' | 'techEvent' | 'techHQCluster' | 'techEventCluster' | 'techActivity' | 'geoActivity' | 'stockExchange' | 'financialCenter' | 'centralBank' | 'commodityHub' | 'iranEvent' | 'newsLocation' | 'gpsJamming' | 'ucdpEvent' | 'navalStrikeGroup' | 'navalCluster' | 'tradeRoute';
 export interface AircraftDelayContext {
   iata: string;
   name: string;
@@ -191,7 +193,7 @@ interface DatacenterClusterData {
 
 interface PopupData {
   type: PopupType;
-  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | EnrichedAircraftPopupData | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData | NavalStrikeGroup | NavalCluster;
+  data: ConflictZone | Hotspot | Earthquake | WeatherAlert | MilitaryBase | StrategicWaterway | APTGroup | CyberThreat | NuclearFacility | EconomicCenter | GammaIrradiator | Pipeline | UnderseaCable | CableAdvisory | RepairShip | InternetOutage | AIDataCenter | AisDisruptionEvent | SocialUnrestEvent | AirportDelayAlert | PositionSample | EnrichedAircraftPopupData | MilitaryFlight | MilitaryVessel | MilitaryFlightCluster | MilitaryVesselCluster | NaturalEvent | Port | Spaceport | CriticalMineralProject | StartupHub | CloudRegion | TechHQ | Accelerator | TechEventPopupData | TechHQClusterData | TechEventClusterData | ProtestClusterData | DatacenterClusterData | TechHubActivity | GeoHubActivity | StockExchangePopupData | FinancialCenterPopupData | CentralBankPopupData | CommodityHubPopupData | IranEventPopupData | NewsLocationPopupData | GpsJammingPopupData | NavalStrikeGroup | NavalCluster | TradeRouteSegment;
   relatedNews?: NewsItem[];
   x: number;
   y: number;
@@ -640,9 +642,70 @@ export class MapPopup {
         return this.renderGpsJammingPopup(data.data as GpsJammingPopupData);
       case 'ucdpEvent':
         return this.renderUcdpEventPopup(data.data as unknown as UcdpEventPopupData);
+      case 'tradeRoute':
+        return this.renderTradeRoutePopup(data.data as TradeRouteSegment);
       default:
         return '';
     }
+  }
+
+  private renderTradeRoutePopup(route: TradeRouteSegment): string {
+    const localized = (key: string, fallback: string): string => {
+      const value = t(key);
+      return value === key ? fallback : value;
+    };
+    const statusLabel = tv(
+      route.status,
+      'popups.tradeRoute.statuses',
+      route.status === 'disrupted' ? 'Disrupted' : route.status === 'high_risk' ? 'High Risk' : 'Active',
+    );
+    const badgeClass = route.status === 'disrupted'
+      ? 'high'
+      : route.status === 'high_risk'
+        ? 'elevated'
+        : 'low';
+    const categoryLabel = tv(
+      route.category,
+      'popups.tradeRoute.categories',
+      route.category ? route.category.charAt(0).toUpperCase() + route.category.slice(1) : 'General',
+    );
+    const [srcLon, srcLat] = route.sourcePosition;
+    const [dstLon, dstLat] = route.targetPosition;
+    const srcCountry = getCountryAtCoordinates(srcLat, srcLon)?.name;
+    const dstCountry = getCountryAtCoordinates(dstLat, dstLon)?.name;
+    const srcGeo = srcCountry ? getLocalizedGeoName(srcCountry) : localized('popups.unknown', 'Unknown');
+    const dstGeo = dstCountry ? getLocalizedGeoName(dstCountry) : localized('popups.unknown', 'Unknown');
+    const popupTitle = route.routeName || localized('popups.tradeRoute.title', 'Trade Route');
+    const popupSubtitle = route.volumeDesc || localized('popups.tradeRoute.subtitle', 'Global maritime corridor');
+
+    return `
+      <div class="popup-header waterway">
+        <span class="popup-title">${svgIcon('network', '#66b3ff', 14)} ${escapeHtml(popupTitle.toUpperCase())}</span>
+        <span class="popup-badge ${badgeClass}">${escapeHtml(statusLabel)}</span>
+        <button class="popup-close" aria-label="${escapeHtml(localized('common.close', 'Close'))}">×</button>
+      </div>
+      <div class="popup-body">
+        <div class="popup-subtitle">${escapeHtml(popupSubtitle)}</div>
+        <div class="popup-stats">
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(localized('popups.category', 'Category'))}</span>
+            <span class="stat-value">${escapeHtml(categoryLabel)}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(localized('popups.status', 'Status'))}</span>
+            <span class="stat-value">${escapeHtml(statusLabel)}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(localized('popups.from', 'From'))}</span>
+            <span class="stat-value">${srcLat.toFixed(2)}°, ${srcLon.toFixed(2)}° · ${escapeHtml(srcGeo)}</span>
+          </div>
+          <div class="popup-stat">
+            <span class="stat-label">${escapeHtml(localized('popups.to', 'To'))}</span>
+            <span class="stat-value">${dstLat.toFixed(2)}°, ${dstLon.toFixed(2)}° · ${escapeHtml(dstGeo)}</span>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
 

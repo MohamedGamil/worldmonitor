@@ -1109,7 +1109,19 @@
         "noData": "لا بيانات",
         "cii": "مؤشر CII",
         "status": "الحالة",
-        "renewable": "طاقة متجددة"
+        "renewable": "طاقة متجددة",
+        "tradeRoute": "طريق تجاري",
+        "tradeRouteStart": "بداية الطريق",
+        "tradeRouteEnd": "نهاية الطريق",
+        "tradeRouteDistance": "المسافة",
+        "tradeRouteCargo": "نوع الحمولة",
+        "tradeRouteVolume": "الحجم",
+        "tradeRouteStatus": "الحالة",
+        "tradeRouteActive": "نشط",
+        "tradeRouteInactive": "غير نشط",
+        "tradeRouteLastUpdated": "آخر تحديث",
+        "tradeRouteSourcePort": "ميناء المصدر",
+        "tradeRouteDestinationPort": "ميناء الوجهة"
       },
       "layerHelp": {
         "title": "دليل طبقات الخريطة",

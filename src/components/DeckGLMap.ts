@@ -56,7 +56,7 @@ import type { WeatherAlert } from '@/services/weather';
 import { escapeHtml } from '@/utils/sanitize';
 import { svgIcon } from '@/utils/icons';
 import { tokenizeForMatch, matchKeyword, matchesAnyKeyword, findMatchingKeywords } from '@/utils/keyword-match';
-import { t, getCurrentLanguage, getLocalizedGeoName, getLocalizedCountryName } from '@/services/i18n';
+import { t, tv, getCurrentLanguage, getLocalizedGeoName, getLocalizedCountryName } from '@/services/i18n';
 import arGeoFallbacks from '@/locales/geo/ar';
 import { debounce, rafSchedule, getCurrentTheme } from '@/utils/index';
 import { localizeMapLabels } from '@/utils/map-locale';
@@ -3456,6 +3456,20 @@ export class DeckGLMap {
               : `${text(obj.type)} ${t('components.deckgl.tooltip.pipeline')}`;
         return { html: `<div class="deckgl-tooltip"><strong>${text(obj.name)}</strong><br/>${pipelineTypeLabel}</div>` };
       }
+      case 'trade-routes-layer': {
+        const status = tv(String(obj.status || 'active'), 'popups.tradeRoute.statuses', String(obj.status || 'active').replace('_', ' '));
+        const category = tv(String(obj.category || 'general'), 'popups.tradeRoute.categories', String(obj.category || 'general'));
+        const sourcePosition = obj.sourcePosition as [number, number] | undefined;
+        const targetPosition = obj.targetPosition as [number, number] | undefined;
+        const srcCountry = sourcePosition ? getCountryAtCoordinates(sourcePosition[1], sourcePosition[0])?.name : null;
+        const dstCountry = targetPosition ? getCountryAtCoordinates(targetPosition[1], targetPosition[0])?.name : null;
+        const geoLine = (srcCountry || dstCountry)
+          ? `<br/>${text(getLocalizedGeoName(srcCountry || t('popups.unknown')))} → ${text(getLocalizedGeoName(dstCountry || t('popups.unknown')))}`
+          : '';
+        return {
+          html: `<div class="deckgl-tooltip"><strong>${text(obj.routeName || t('components.deckgl.layers.tradeRoutes'))}</strong><br/>${text(category)} · ${text(status)}${obj.volumeDesc ? `<br/>${text(obj.volumeDesc)}` : ''}${geoLine}</div>`,
+        };
+      }
       case 'conflict-zones-layer': {
         const props = obj.properties || obj;
         const czKey = `geo.conflictZones.${props.id}`;
@@ -3810,6 +3824,7 @@ export class DeckGLMap {
       'cable-advisories-layer': 'cable-advisory',
       'repair-ships-layer': 'repair-ship',
       'ucdp-events-layer': 'ucdpEvent',
+      'trade-routes-layer': 'tradeRoute',
     };
 
     const popupType = layerToPopupType[layerId];
@@ -4578,7 +4593,7 @@ export class DeckGLMap {
       widthMinPixels: 1,
       widthMaxPixels: 6,
       greatCircle: true,
-      pickable: false,
+      pickable: true,
     });
   }
 
