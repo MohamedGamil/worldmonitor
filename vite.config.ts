@@ -114,6 +114,19 @@ function htmlVariantPlugin(): Plugin {
 }
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor and large libs to improve initial load by code-splitting
+          globe: ["globe.gl","three"],
+          map: ["deck.gl","maplibre-gl"],
+          ai: ["transformers","onnxruntime-web"],
+          ui: ["./src/ui/**/*.ts"]
+        }
+      }
+    }
+  }
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
