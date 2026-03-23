@@ -373,7 +373,7 @@ export class MapComponent {
       'iranAttacks',                                      // Iran conflict
       'conflicts', 'hotspots', 'sanctions', 'protests',  // geopolitical
       'bases', 'nuclear', 'irradiators',                 // military/strategic
-      'military',                                         // military tracking (flights + vessels)
+      'military', 'militaryStrikes',                      // military tracking (flights + vessels)
       'cables', 'pipelines', 'outages', 'datacenters',   // infrastructure
       // cyberThreats is intentionally hidden on SVG/mobile fallback (DeckGL desktop only)
       'ais', 'flights', 'gpsJamming',                      // transport/interference
@@ -405,6 +405,7 @@ export class MapComponent {
       nuclear: 'components.deckgl.layers.nuclearSites',
       irradiators: 'components.deckgl.layers.gammaIrradiators',
       military: 'components.deckgl.layers.militaryActivity',
+      militaryStrikes: 'components.deckgl.layers.militaryStrikes',
       cables: 'components.deckgl.layers.underseaCables',
       pipelines: 'components.deckgl.layers.pipelines',
       outages: 'components.deckgl.layers.internetOutages',

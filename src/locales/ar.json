@@ -403,6 +403,7 @@
       "types": {
         "country": "دولة",
         "news": "أخبار",
+        "militaryStrike": "ضربة عسكرية",
         "hotspot": "بؤرة ساخنة",
         "market": "سوق",
         "prediction": "تنبؤ",
@@ -1077,7 +1078,8 @@
         "renewableInstallations": "مشاريع الطاقة المتجددة",
         "militaryAircraftConfirmed": "طائرات عسكرية",
         "militaryAircraftUnknown": "طائرات مدنية",
-        "navalActivity": "نشاط بحري"
+        "navalActivity": "نشاط بحري",
+        "militaryStrikes": "ضربات عسكرية"
       },
       "tooltip": {
         "earthquake": "زلزال",
@@ -1103,6 +1105,7 @@
         "internetOutage": "انقطاع إنترنت",
         "medium": "متوسط",
         "news": "أخبار",
+        "militaryStrike": "ضربة عسكرية",
         "undisclosed": "غير مُفصَح",
         "stake": "حصة",
         "basesCount": "{{count}} قاعدة",
@@ -1993,6 +1996,17 @@
       "nato": "NATO",
       "other": "أخرى"
     },
+    "militaryStrikes": {
+      "confidence": "مستوى الثقة",
+      "sources": "المصادر",
+      "evidence": "الأدلة",
+      "reliabilityLabel": "الموثوقية",
+      "reliability": { "high": "عالية", "medium": "متوسطة", "low": "منخفضة" },
+      "satellite": "إثراء الأقمار الصناعية",
+      "severity": { "low": "منخفض", "medium": "متوسط", "high": "عالٍ" },
+      "types": { "airstrike": "غارة جوية", "missile": "ضربة صاروخية", "drone": "ضربة بمسيّرة", "artillery": "قصف مدفعي", "naval": "ضربة بحرية", "special-operation": "عملية خاصة", "strike": "ضربة" },
+      "satelliteStatus": { "pending": "قيد الانتظار", "available": "متاح", "none": "لا يوجد" }
+    },
     "protest": {
       "acledVerified": "ACLED (موثّق)",
       "gdelt": "GDELT",
@@ -2164,6 +2178,7 @@
       "trend": "الاتجاه",
       "components": {
         "news": "أخبار",
+        "militaryStrike": "ضربة عسكرية",
         "cii": "CII",
         "geo": "جغرافي",
         "military": "عسكري"

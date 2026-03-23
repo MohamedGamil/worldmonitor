@@ -104,6 +104,7 @@ const layers = {
   protests: false,
   flights: false,
   military: false,
+  militaryStrikes: false,
   militaryAircraftConfirmed: false,
   militaryAircraftUnknown: false,
   navalActivity: false,

@@ -57,6 +57,7 @@ import {
   fetchShippingRates,
   fetchChokepointStatus,
   fetchCriticalMinerals,
+  deriveMilitaryStrikeEvents,
 } from '@/services';
 import { getMarketWatchlistEntries } from '@/services/market-watchlist';
 import { checkBatchForBreakingAlerts, dispatchOrefBreakingAlert } from '@/services/breaking-news-alerts';
@@ -448,6 +449,9 @@ export class DataLoaderManager implements AppModule {
         case 'militaryAircraftConfirmed':
         case 'navalActivity':
           await this.loadMilitary();
+          break;
+        case 'militaryStrikes':
+          this.ctx.map?.setMilitaryStrikes(deriveMilitaryStrikeEvents(this.ctx.allNews));
           break;
         case 'militaryAircraftUnknown':
           await this.loadFlightDelays();
@@ -889,6 +893,9 @@ export class DataLoaderManager implements AppModule {
     }
 
     this.ctx.allNews = collectedNews;
+    const derivedMilitaryStrikes = deriveMilitaryStrikeEvents(this.ctx.allNews);
+    this.ctx.map?.setMilitaryStrikes(derivedMilitaryStrikes);
+    ingestStrikesForCII(derivedMilitaryStrikes.map((e) => ({ id: e.id, category: e.eventType, severity: e.severity, latitude: e.targetLat, longitude: e.targetLon, timestamp: e.timestamp.getTime(), title: e.title, locationName: e.targetLabel })));
     this.ctx.initialLoadComplete = true;
     mountCommunityWidget();
     updateAndCheck([

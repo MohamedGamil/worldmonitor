@@ -13,7 +13,7 @@ export interface Command {
 }
 
 export const LAYER_PRESETS: Record<string, (keyof MapLayers)[]> = {
-  military: ['bases', 'nuclear', 'flights', 'militaryAircraftConfirmed', 'militaryAircraftUnknown', 'navalActivity', 'waterways'],
+  military: ['bases', 'nuclear', 'flights', 'militaryAircraftConfirmed', 'militaryAircraftUnknown', 'navalActivity', 'militaryStrikes', 'waterways'],
   finance: ['stockExchanges', 'financialCenters', 'centralBanks', 'commodityHubs', 'economic', 'tradeRoutes'],
   infra: ['cables', 'pipelines', 'datacenters', 'spaceports', 'minerals'],
   intel: ['conflicts', 'hotspots', 'protests', 'ucdpEvents', 'displacement'],
@@ -77,6 +77,7 @@ export const COMMANDS: Command[] = [
   { id: 'layer:spaceports', keywords: ['spaceports', 'launch sites', 'rockets'], label: 'Toggle spaceports', icon: '\u{1F680}', category: 'layers' },
   { id: 'layer:datacenters', keywords: ['datacenters', 'data centers', 'ai data'], label: 'Toggle AI data centers', icon: '\u{1F5A5}\uFE0F', category: 'layers' },
   { id: 'layer:military', keywords: ['military activity', 'mil activity'], label: 'Toggle military activity', icon: '\u{1F396}\uFE0F', category: 'layers' },
+  { id: 'layer:militaryStrikes', keywords: ['military strikes', 'strikes layer', 'airstrikes', 'missile strikes'], label: 'Toggle military strikes', icon: '\u{1F3AF}', category: 'layers' },
   { id: 'layer:natural', keywords: ['natural events', 'earthquakes', 'volcanoes', 'tsunamis'], label: 'Toggle natural events', icon: '\u{1F30B}', category: 'layers' },
   { id: 'layer:waterways', keywords: ['waterways', 'chokepoints', 'straits', 'canals'], label: 'Toggle strategic waterways', icon: '\u2693', category: 'layers' },
   { id: 'layer:economic', keywords: ['economic centers', 'gdp'], label: 'Toggle economic centers', icon: '\u{1F4B0}', category: 'layers' },
