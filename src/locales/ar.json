@@ -1998,6 +1998,10 @@
     },
     "militaryStrikes": {
       "confidence": "مستوى الثقة",
+      "sources": "المصادر",
+      "evidence": "الأدلة",
+      "reliabilityLabel": "الموثوقية",
+      "reliability": { "high": "عالية", "medium": "متوسطة", "low": "منخفضة" },
       "satellite": "إثراء الأقمار الصناعية",
       "severity": { "low": "منخفض", "medium": "متوسط", "high": "عالٍ" },
       "types": { "airstrike": "غارة جوية", "missile": "ضربة صاروخية", "drone": "ضربة بمسيّرة", "artillery": "قصف مدفعي", "naval": "ضربة بحرية", "special-operation": "عملية خاصة", "strike": "ضربة" },

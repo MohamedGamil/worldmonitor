@@ -653,6 +653,11 @@ export class MapPopup {
   }
 
   private renderMilitaryStrikePopup(strike: MilitaryStrikeEvent): string {
+    const evidence = (strike.sourceEvidence ?? []).slice(0, 4);
+    const evidenceHtml = evidence.length
+      ? `<div class="popup-description"><strong>${escapeHtml(t('popups.militaryStrikes.evidence'))}:</strong><br/>${evidence.map((item) => `• ${escapeHtml(item.source)} (${escapeHtml(tv(item.reliability, 'popups.militaryStrikes.reliability', item.reliability))})`).join('<br/>')}</div>`
+      : '';
+
     return `
       <div class="popup-header conflict">
         <span class="popup-title">${svgIcon('crosshair', '#ff7043', 14)} ${escapeHtml(t('components.deckgl.layers.militaryStrikes').toUpperCase())}</span>
@@ -667,9 +672,12 @@ export class MapPopup {
           <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.type'))}</span><span class="stat-value">${escapeHtml(tv(strike.eventType, 'popups.militaryStrikes.types', strike.eventType))}</span></div>
           <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.updated'))}</span><span class="stat-value">${escapeHtml(formatArticleDate(strike.timestamp.toISOString()))}</span></div>
           <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.militaryStrikes.confidence'))}</span><span class="stat-value">${Math.round(strike.confidence * 100)}%</span></div>
+          <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.militaryStrikes.sources'))}</span><span class="stat-value">${strike.corroboratingSourceCount}</span></div>
+          <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.militaryStrikes.reliabilityLabel'))}</span><span class="stat-value">${escapeHtml(tv(strike.sourceReliability, 'popups.militaryStrikes.reliability', strike.sourceReliability))}</span></div>
           <div class="popup-stat"><span class="stat-label">${escapeHtml(t('popups.militaryStrikes.satellite'))}</span><span class="stat-value">${escapeHtml(tv(strike.satelliteEnrichment?.status || 'pending', 'popups.militaryStrikes.satelliteStatus', strike.satelliteEnrichment?.status || 'pending'))}</span></div>
         </div>
         <div class="popup-description">${escapeHtml(strike.summary)}</div>
+        ${evidenceHtml}
         ${strike.link ? `<a class="popup-link" href="${sanitizeUrl(strike.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(strike.source)}</a>` : ''}
       </div>`;
   }

@@ -500,6 +500,16 @@ export interface PanelConfig {
   priority?: number;
 }
 
+export type MilitaryStrikeSourceReliability = 'high' | 'medium' | 'low';
+
+export interface MilitaryStrikeSourceEvidence {
+  source: string;
+  title: string;
+  link: string;
+  reliability: MilitaryStrikeSourceReliability;
+  publishedAt: Date;
+}
+
 export interface MilitaryStrikeEvent {
   id: string;
   title: string;
@@ -518,6 +528,14 @@ export interface MilitaryStrikeEvent {
   eventType: 'airstrike' | 'missile' | 'drone' | 'artillery' | 'naval' | 'special-operation' | 'strike';
   severity: 'low' | 'medium' | 'high';
   confidence: number;
+  corroboratingSourceCount: number;
+  sourceReliability: MilitaryStrikeSourceReliability;
+  sourceEvidence: MilitaryStrikeSourceEvidence[];
+  confidenceBreakdown?: {
+    sourceReliability: number;
+    corroboration: number;
+    detailConsistency: number;
+  };
   satelliteEnrichment?: {
     status: 'pending' | 'available' | 'none';
     provider?: string;

@@ -1933,6 +1933,10 @@
     },
     "militaryStrikes": {
       "confidence": "Confidence",
+      "sources": "Sources",
+      "evidence": "Evidence",
+      "reliabilityLabel": "Reliability",
+      "reliability": { "high": "High", "medium": "Medium", "low": "Low" },
       "satellite": "Satellite Enrichment",
       "severity": { "low": "LOW", "medium": "MEDIUM", "high": "HIGH" },
       "types": { "airstrike": "Airstrike", "missile": "Missile Strike", "drone": "Drone Strike", "artillery": "Artillery Strike", "naval": "Naval Strike", "special-operation": "Special Operation", "strike": "Strike" },

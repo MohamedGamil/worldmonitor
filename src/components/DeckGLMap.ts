@@ -3017,9 +3017,17 @@ export class DeckGLMap {
       data: this.militaryStrikes,
       getSourcePosition: (d) => [d.originLon, d.originLat],
       getTargetPosition: (d) => [d.targetLon, d.targetLat],
-      getSourceColor: [255, 176, 59, 180],
-      getTargetColor: (d) => d.severity === 'high' ? [255, 64, 64, 230] : d.severity === 'medium' ? [255, 140, 0, 210] : [255, 204, 102, 180],
-      getWidth: (d) => d.severity === 'high' ? 4 : d.severity === 'medium' ? 3 : 2,
+      getSourceColor: (d) => [255, 176, 59, Math.round(90 + (d.confidence * 130))],
+      getTargetColor: (d) => {
+        const alpha = Math.round(110 + (d.confidence * 120));
+        if (d.severity === 'high') return [255, 64, 64, alpha];
+        if (d.severity === 'medium') return [255, 140, 0, alpha];
+        return [255, 204, 102, alpha];
+      },
+      getWidth: (d) => {
+        const base = d.severity === 'high' ? 3.5 : d.severity === 'medium' ? 2.6 : 1.8;
+        return base + (d.confidence * 2.4);
+      },
       pickable: true,
     });
   }
@@ -3030,10 +3038,18 @@ export class DeckGLMap {
       id: 'military-strikes-targets-layer',
       data: this.militaryStrikes,
       getPosition: (d) => [d.targetLon, d.targetLat],
-      getRadius: (d) => d.severity === 'high' ? 60000 : d.severity === 'medium' ? 42000 : 28000,
-      radiusMinPixels: 4, radiusMaxPixels: 18, pickable: true, stroked: true, lineWidthMinPixels: 1.5,
-      getFillColor: (d) => d.severity === 'high' ? [255, 50, 50, 170] : d.severity === 'medium' ? [255, 140, 0, 155] : [255, 215, 0, 140],
-      getLineColor: [255,255,255,180],
+      getRadius: (d) => {
+        const base = d.severity === 'high' ? 52000 : d.severity === 'medium' ? 36000 : 22000;
+        return base + (d.confidence * 28000) + (Math.min(3, d.corroboratingSourceCount) * 5000);
+      },
+      radiusMinPixels: 4, radiusMaxPixels: 22, pickable: true, stroked: true, lineWidthMinPixels: 1.5,
+      getFillColor: (d) => {
+        const alpha = Math.round(80 + (d.confidence * 140));
+        if (d.severity === 'high') return [255, 50, 50, alpha];
+        if (d.severity === 'medium') return [255, 140, 0, alpha];
+        return [255, 215, 0, alpha];
+      },
+      getLineColor: (d) => [255, 255, 255, Math.round(110 + (d.confidence * 110))],
     });
   }
 
@@ -3583,8 +3599,12 @@ export class DeckGLMap {
       case 'news-locations-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${svgIcon('news', '#aaaaaa', 12)} ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'military-strikes-arcs-layer':
-      case 'military-strikes-targets-layer':
-        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.militaryStrikes')}</strong><br/>${text(obj.originCountry)} → ${text(obj.targetCountry)}<br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
+      case 'military-strikes-targets-layer': {
+        const evidenceCount = Number(obj.corroboratingSourceCount ?? 0);
+        return {
+          html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.militaryStrikes')}</strong><br/>${text(obj.originCountry)} → ${text(obj.targetCountry)}<br/>${text(obj.title?.slice(0, 80) || '')}<br/>${t('popups.militaryStrikes.confidence')}: ${Math.round(Number(obj.confidence ?? 0) * 100)}% · ${evidenceCount} ${t('popups.militaryStrikes.sources')}</div>`,
+        };
+      }
       case 'positive-events-layer': {
         const catLabel = obj.category ? obj.category.replace(/-/g, ' & ') : t('components.deckgl.tooltip.positiveEvent');
         const countInfo = obj.count > 1 ? `<br/><span style="opacity:.7">${obj.count} ${t('components.deckgl.tooltip.sourcesReporting')}</span>` : '';
