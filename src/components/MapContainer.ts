@@ -28,6 +28,7 @@ import type {
     UcdpGeoEvent,
   CyberThreat,
   CableHealthRecord,
+  MilitaryStrikeEvent,
 } from '@/types';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import type { DisplacementFlow } from '@/services/displacement';
@@ -125,6 +126,7 @@ export class MapContainer {
   private cachedIranEvents: IranEvent[] | null = null;
   private cachedIranEventsLang: string = '';
   private cachedNewsLocations: NewsLocationMarker[] | null = null;
+  private cachedMilitaryStrikes: MilitaryStrikeEvent[] | null = null;
   private cachedPositiveEvents: PositiveGeoEvent[] | null = null;
   private cachedKindnessData: KindnessPoint[] | null = null;
   private cachedHappinessScores: HappinessData | null = null;
@@ -321,6 +323,7 @@ export class MapContainer {
       this.cachedIranEventsLang = '';
     }
     if (this.cachedNewsLocations) this.setNewsLocations(this.cachedNewsLocations);
+    if (this.cachedMilitaryStrikes) this.setMilitaryStrikes(this.cachedMilitaryStrikes);
     if (this.cachedPositiveEvents) this.setPositiveEvents(this.cachedPositiveEvents);
     if (this.cachedKindnessData) this.setKindnessData(this.cachedKindnessData);
     if (this.cachedHappinessScores) this.setHappinessScores(this.cachedHappinessScores);
@@ -609,6 +612,14 @@ export class MapContainer {
       this.deckGLMap?.setNewsLocations(data);
     } else {
       this.svgMap?.setNewsLocations(data);
+    }
+  }
+
+  public setMilitaryStrikes(events: MilitaryStrikeEvent[]): void {
+    this.cachedMilitaryStrikes = events;
+    if (this.useGlobe) { this.globeMap?.setMilitaryStrikes(events); return; }
+    if (this.useDeckGL) {
+      this.deckGLMap?.setMilitaryStrikes(events);
     }
   }
 
@@ -984,6 +995,7 @@ export class MapContainer {
     this.cachedCyberThreats = null;
     this.cachedIranEvents = null;
     this.cachedNewsLocations = null;
+    this.cachedMilitaryStrikes = null;
     this.cachedPositiveEvents = null;
     this.cachedKindnessData = null;
     this.cachedHappinessScores = null;

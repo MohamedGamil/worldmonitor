@@ -394,6 +394,7 @@
       "types": {
         "country": "Country",
         "news": "News",
+        "militaryStrike": "Military Strike",
         "hotspot": "Hotspot",
         "market": "Market",
         "prediction": "Prediction",
@@ -1040,6 +1041,7 @@
         "militaryAircraftConfirmed": "Military Aircraft",
         "militaryAircraftUnknown": "Civilian Aircraft",
         "navalActivity": "Naval Activity",
+        "militaryStrikes": "Military Strikes",
         "shipTraffic": "Ship Traffic",
         "flightDelays": "Civilian Flights",
         "protests": "Protests",
@@ -1090,6 +1092,7 @@
         "internetOutage": "Internet Outage",
         "medium": "medium",
         "news": "News",
+        "militaryStrike": "Military Strike",
         "undisclosed": "Undisclosed",
         "stake": "stake",
         "basesCount": "{{count}} bases",
@@ -1928,6 +1931,13 @@
       "nato": "NATO",
       "other": "Other"
     },
+    "militaryStrikes": {
+      "confidence": "Confidence",
+      "satellite": "Satellite Enrichment",
+      "severity": { "low": "LOW", "medium": "MEDIUM", "high": "HIGH" },
+      "types": { "airstrike": "Airstrike", "missile": "Missile Strike", "drone": "Drone Strike", "artillery": "Artillery Strike", "naval": "Naval Strike", "special-operation": "Special Operation", "strike": "Strike" },
+      "satelliteStatus": { "pending": "Pending", "available": "Available", "none": "None" }
+    },
     "protest": {
       "acledVerified": "ACLED (verified)",
       "gdelt": "GDELT",
@@ -2105,6 +2115,7 @@
       "trend": "Trend",
       "components": {
         "news": "News",
+        "militaryStrike": "Military Strike",
         "cii": "CII",
         "geo": "Geo",
         "military": "Military"

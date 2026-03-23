@@ -500,6 +500,31 @@ export interface PanelConfig {
   priority?: number;
 }
 
+export interface MilitaryStrikeEvent {
+  id: string;
+  title: string;
+  summary: string;
+  source: string;
+  link: string;
+  timestamp: Date;
+  originCountry: string;
+  originLabel: string;
+  originLat: number;
+  originLon: number;
+  targetCountry: string;
+  targetLabel: string;
+  targetLat: number;
+  targetLon: number;
+  eventType: 'airstrike' | 'missile' | 'drone' | 'artillery' | 'naval' | 'special-operation' | 'strike';
+  severity: 'low' | 'medium' | 'high';
+  confidence: number;
+  satelliteEnrichment?: {
+    status: 'pending' | 'available' | 'none';
+    provider?: string;
+    note?: string;
+  };
+}
+
 export interface MapLayers {
   conflicts: boolean;
   bases: boolean;
@@ -522,6 +547,7 @@ export interface MapLayers {
   militaryAircraftUnknown: boolean;
   navalActivity: boolean;
   military: boolean;
+  militaryStrikes: boolean;
   natural: boolean;
   spaceports: boolean;
   minerals: boolean;

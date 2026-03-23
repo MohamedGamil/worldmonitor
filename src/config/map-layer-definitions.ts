@@ -27,6 +27,7 @@ export const LAYER_REGISTRY: Record<keyof MapLayers, LayerDefinition> = {
   militaryAircraftConfirmed: def('militaryAircraftConfirmed', 'plane', 'militaryAircraftConfirmed', 'Confirmed Military Aircraft'),
   militaryAircraftUnknown: def('militaryAircraftUnknown', 'plane-civilian', 'militaryAircraftUnknown', 'Civilian Aircraft'),
   navalActivity: def('navalActivity', 'carrier', 'navalActivity', 'Naval Activity'),
+  militaryStrikes: def('militaryStrikes', 'crosshair', 'militaryStrikes', 'Military Strikes'),
   military: def('military', 'plane', 'militaryActivity', 'Military Activity', []),
 
   bases: def('bases', 'target', 'militaryBases', 'Military Bases'),
@@ -82,7 +83,7 @@ const VARIANT_LAYER_ORDER: Record<MapVariant, Array<keyof MapLayers>> = {
     'militaryAircraftConfirmed', 
     // 'militaryAircraftUnknown', 
     'flights', 
-    'navalActivity', 'ais',
+    'navalActivity', 'militaryStrikes', 'ais',
     'ucdpEvents', 'displacement',
     'bases',
     'nuclear', 'irradiators', 'spaceports',

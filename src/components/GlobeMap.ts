@@ -35,7 +35,7 @@ import type { NaturalEventCategory } from '@/types';
 import { getLocalizedGeoName } from '@/services/i18n';
 import { identifyByCallsign, isKnownMilitaryHex } from '@/config/military';
 import type { FeatureCollection, Geometry } from 'geojson';
-import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup, NavalCluster, SeededVessel } from '@/types';
+import type { MapLayers, Hotspot, MilitaryFlight, MilitaryVessel, NaturalEvent, InternetOutage, CyberThreat, SocialUnrestEvent, UcdpGeoEvent, CableAdvisory, RepairShip, AisDisruptionEvent, AisDensityZone, AisDisruptionType, NavalActivitySnapshot, NavalStrikeGroup, NavalCluster, SeededVessel, MilitaryStrikeEvent } from '@/types';
 import type { Earthquake } from '@/services/earthquakes';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
 import { fetchAircraftPositions } from '@/services/aviation';
@@ -311,6 +311,13 @@ interface PortMarker extends BaseMarker {
   rank?: number;
   note?: string;
 }
+interface MilitaryStrikeMarker extends BaseMarker {
+  _kind: 'militaryStrike';
+  id: string;
+  title: string;
+  originCountry: string;
+  targetCountry: string;
+}
 interface TradeRouteEndpointMarker extends BaseMarker {
   _kind: 'tradeRoutePort';
   id: string;
@@ -361,7 +368,7 @@ type GlobeMarker =
   | ConflictZoneMarker | MilBaseMarker | NuclearSiteMarker | IrradiatorSiteMarker | SpaceportSiteMarker
   | EarthquakeMarker | EconomicMarker | DatacenterMarker | WaterwayMarker | MineralMarker
   | FlightDelayMarker | CableAdvisoryMarker | RepairShipMarker | AisDisruptionMarker | PortMarker
-  | TradeRouteEndpointMarker | NewsLocationMarker | FlashMarker | AircraftPositionMarker;
+  | TradeRouteEndpointMarker | NewsLocationMarker | FlashMarker | AircraftPositionMarker | MilitaryStrikeMarker;
 
 interface GlobeControlsLike {
   autoRotate: boolean;
@@ -868,11 +875,14 @@ export class GlobeMap {
     // Arc accessors — set once, only data changes on flush
 
     (globe as any)
-      .arcStartLat((d: TradeRouteSegment) => d.sourcePosition[1])
-      .arcStartLng((d: TradeRouteSegment) => d.sourcePosition[0])
-      .arcEndLat((d: TradeRouteSegment) => d.targetPosition[1])
-      .arcEndLng((d: TradeRouteSegment) => d.targetPosition[0])
-      .arcColor((d: TradeRouteSegment) => {
+      .arcStartLat((d: any) => ('sourcePosition' in d ? d.sourcePosition[1] : d.originLat))
+      .arcStartLng((d: any) => ('sourcePosition' in d ? d.sourcePosition[0] : d.originLon))
+      .arcEndLat((d: any) => ('targetPosition' in d ? d.targetPosition[1] : d.targetLat))
+      .arcEndLng((d: any) => ('targetPosition' in d ? d.targetPosition[0] : d.targetLon))
+      .arcColor((d: any) => {
+        if ('originCountry' in d) {
+          return d.severity === 'high' ? ['rgba(255,150,90,0.48)','rgba(255,48,48,0.98)','rgba(255,150,90,0.48)'] : ['rgba(255,210,120,0.42)','rgba(255,140,0,0.94)','rgba(255,210,120,0.42)'];
+        }
         // Keep edge alpha high enough to stay visible over bright terrain/water textures.
         if (d.status === 'disrupted') return ['rgba(255, 62, 62, 0.52)', 'rgba(255, 18, 18, 0.98)', 'rgba(255, 62, 62, 0.52)'];
         if (d.status === 'high_risk') return ['rgba(255, 206, 72, 0.5)', 'rgba(255, 166, 0, 0.96)', 'rgba(255, 206, 72, 0.5)'];
@@ -886,15 +896,23 @@ export class GlobeMap {
       .arcDashGap(1.2)
       .arcDashInitialGap(() => Math.random())
       .arcDashAnimateTime(GlobeMap.TRADE_ROUTE_ARC_ANIMATE_MS)
-      .arcLabel((d: TradeRouteSegment) => {
+      .arcLabel((d: any) => {
+        if ('originCountry' in d) return `${d.originCountry} -> ${d.targetCountry}
+${d.title}`;
+
         const src = getCountryAtCoordinates(d.sourcePosition[1], d.sourcePosition[0])?.name;
         const dst = getCountryAtCoordinates(d.targetPosition[1], d.targetPosition[0])?.name;
         const srcGeo = src ? getLocalizedGeoName(src) : this.localizeWithFallback('popups.unknown', 'Unknown');
         const dstGeo = dst ? getLocalizedGeoName(dst) : this.localizeWithFallback('popups.unknown', 'Unknown');
         return `${d.routeName} · ${this.localizeTradeRouteCategory(d.category)} · ${this.localizeTradeRouteStatus(d.status)}\n${srcGeo} -> ${dstGeo}${d.volumeDesc ? `\n${d.volumeDesc}` : ''}`;
       })
-      .onArcClick((route: TradeRouteSegment | null, event?: MouseEvent) => {
+      .onArcClick((route: any | null, event?: MouseEvent) => {
         if (!route) return;
+        if ('originCountry' in route) {
+          const cr = this.container.getBoundingClientRect();
+          this.popup.show({ type: 'militaryStrike', data: route as any, x: (event?.clientX ?? cr.left) - cr.left, y: (event?.clientY ?? cr.top) - cr.top });
+          return;
+        }
         this.showTradeRoutePopup(route, event);
       });
 
@@ -1436,6 +1454,7 @@ export class GlobeMap {
       case 'port':          this.popup.show({ type: 'port', data: d as any, x, y }); break;
       case 'gpsjam':        this.popup.show({ type: 'gpsJamming', data: { h3: d.id, lat: d._lat, lon: d._lng, level: d.level, pct: d.pct, good: 0, bad: 0, total: 0 } as any, x, y }); break;
       case 'newsLocation':  this.popup.show({ type: 'newsLocation', data: { title: d.title, lat: d._lat, lon: d._lng, threatLevel: d.threatLevel, timestamp: d.timestamp }, x, y }); break;
+      case 'militaryStrike': this.popup.show({ type: 'militaryStrike', data: this.militaryStrikeArcs.find(s => s.id === d.id) || d as any, x, y }); break;
       case 'tech':          this.popup.show({ type: 'techEvent', data: d as any, x, y }); break;
       case 'aircraftPos': {
         const aircraft = d as AircraftPositionMarker;
@@ -1926,6 +1945,7 @@ export class GlobeMap {
     if (this.layers.climate) markers.push(...this.climateMarkers);
     if (this.layers.gpsJamming) markers.push(...this.gpsJamMarkers);
     if (this.layers.techEvents) markers.push(...this.techMarkers);
+    if (this.layers.militaryStrikes) markers.push(...this.militaryStrikeMarkers);
     if (this.layers.tradeRoutes) markers.push(...this.tradeRouteEndpointMarkers);
     if (this.layers.cables) {
       markers.push(...this.cableAdvisoryMarkers);
@@ -1938,9 +1958,15 @@ export class GlobeMap {
     } catch (err) { if (import.meta.env.DEV) console.warn('[GlobeMap] flush error', err); }
   }
 
+  private militaryStrikeMarkers: MilitaryStrikeMarker[] = [];
+  private militaryStrikeArcs: MilitaryStrikeEvent[] = [];
+
   private flushArcs(): void {
     if (!this.globe || !this.initialized || this.destroyed) return;
-    const segments = this.layers.tradeRoutes ? this.tradeRouteSegments : [];
+    const segments = [
+      ...(this.layers.tradeRoutes ? this.tradeRouteSegments : []),
+      ...(this.layers.militaryStrikes ? this.militaryStrikeArcs : []),
+    ];
     (this.globe as any).arcsData(segments);
   }
 
@@ -2199,6 +2225,7 @@ export class GlobeMap {
     ['military', { markers: true, arcs: false, paths: false, polygons: false }],
     ['ciiChoropleth', { markers: false, arcs: false, paths: false, polygons: true }],
     ['tradeRoutes', { markers: false, arcs: true, paths: false, polygons: false }],
+    ['militaryStrikes', { markers: true, arcs: true, paths: false, polygons: false }],
     ['pipelines', { markers: false, arcs: false, paths: true, polygons: false }],
     ['conflicts', { markers: true, arcs: false, paths: false, polygons: true }],
     ['cables', { markers: true, arcs: false, paths: true, polygons: false }],
@@ -2727,6 +2754,13 @@ export class GlobeMap {
       if (import.meta.env.DEV) console.warn('[GlobeMap] aircraft fetch error', err);
     }
     return 120_000;
+  }
+
+  public setMilitaryStrikes(events: MilitaryStrikeEvent[]): void {
+    this.militaryStrikeArcs = (events ?? []).filter(e => e.originLat != null && e.targetLat != null);
+    this.militaryStrikeMarkers = this.militaryStrikeArcs.map(e => ({ _kind: 'militaryStrike' as const, _lat: e.targetLat, _lng: e.targetLon, id: e.id, title: e.title, originCountry: e.originCountry, targetCountry: e.targetCountry }));
+    this.flushMarkers();
+    this.flushArcs();
   }
 
   public setNewsLocations(data: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }>): void {

@@ -40,6 +40,7 @@ import type {
   CyberThreat,
   CableHealthRecord,
   MilitaryBaseEnriched,
+  MilitaryStrikeEvent,
 } from '@/types';
 import { fetchMilitaryBases, type MilitaryBaseCluster as ServerBaseCluster } from '@/services/military-bases';
 import type { AirportDelayAlert, PositionSample } from '@/services/aviation';
@@ -347,6 +348,7 @@ export class DeckGLMap {
   private aircraftFetchTimer: ReturnType<typeof setInterval> | null = null;
   private news: NewsItem[] = [];
   private newsLocations: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }> = [];
+  private militaryStrikes: MilitaryStrikeEvent[] = [];
   private newsLocationFirstSeen = new Map<string, number>();
   private ucdpEvents: UcdpGeoEvent[] = [];
   private displacementFlows: DisplacementFlow[] = [];
@@ -1571,6 +1573,11 @@ export class DeckGLMap {
       } else {
         this.layerCache.delete('trade-routes-layer');
         this.layerCache.delete('trade-chokepoints-layer');
+      }
+
+      if (mapLayers.militaryStrikes && this.militaryStrikes.length > 0) {
+        layers.push(this.createMilitaryStrikeArcsLayer());
+        layers.push(this.createMilitaryStrikeTargetsLayer());
       }
 
       // Tech variant layers (Supercluster-based deck.gl layers for HQs and events)
@@ -3004,6 +3011,32 @@ export class DeckGLMap {
     return layers;
   }
 
+  private createMilitaryStrikeArcsLayer(): ArcLayer<MilitaryStrikeEvent> {
+    return new ArcLayer<MilitaryStrikeEvent>({
+      id: 'military-strikes-arcs-layer',
+      data: this.militaryStrikes,
+      getSourcePosition: (d) => [d.originLon, d.originLat],
+      getTargetPosition: (d) => [d.targetLon, d.targetLat],
+      getSourceColor: [255, 176, 59, 180],
+      getTargetColor: (d) => d.severity === 'high' ? [255, 64, 64, 230] : d.severity === 'medium' ? [255, 140, 0, 210] : [255, 204, 102, 180],
+      getWidth: (d) => d.severity === 'high' ? 4 : d.severity === 'medium' ? 3 : 2,
+      pickable: true,
+    });
+  }
+
+  private createMilitaryStrikeTargetsLayer(): ScatterplotLayer<MilitaryStrikeEvent> {
+    return new ScatterplotLayer<MilitaryStrikeEvent>({
+      parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
+      id: 'military-strikes-targets-layer',
+      data: this.militaryStrikes,
+      getPosition: (d) => [d.targetLon, d.targetLat],
+      getRadius: (d) => d.severity === 'high' ? 60000 : d.severity === 'medium' ? 42000 : 28000,
+      radiusMinPixels: 4, radiusMaxPixels: 18, pickable: true, stroked: true, lineWidthMinPixels: 1.5,
+      getFillColor: (d) => d.severity === 'high' ? [255, 50, 50, 170] : d.severity === 'medium' ? [255, 140, 0, 155] : [255, 215, 0, 140],
+      getLineColor: [255,255,255,180],
+    });
+  }
+
   private createGulfInvestmentsLayer(): ScatterplotLayer {
     return new ScatterplotLayer<GulfInvestment>({
       parameters: { depthCompare: 'always' as const, depthWriteEnabled: false },
@@ -3549,6 +3582,9 @@ export class DeckGLMap {
         return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.iranAttacks')}: ${text(obj.category || '')}</strong><br/>${text((obj.title || '').slice(0, 80))}</div>` };
       case 'news-locations-layer':
         return { html: `<div class="deckgl-tooltip"><strong>${svgIcon('news', '#aaaaaa', 12)} ${t('components.deckgl.tooltip.news')}</strong><br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
+      case 'military-strikes-arcs-layer':
+      case 'military-strikes-targets-layer':
+        return { html: `<div class="deckgl-tooltip"><strong>${t('components.deckgl.layers.militaryStrikes')}</strong><br/>${text(obj.originCountry)} → ${text(obj.targetCountry)}<br/>${text(obj.title?.slice(0, 80) || '')}</div>` };
       case 'positive-events-layer': {
         const catLabel = obj.category ? obj.category.replace(/-/g, ' & ') : t('components.deckgl.tooltip.positiveEvent');
         const countInfo = obj.count > 1 ? `<br/><span style="opacity:.7">${obj.count} ${t('components.deckgl.tooltip.sourcesReporting')}</span>` : '';
@@ -3635,6 +3671,12 @@ export class DeckGLMap {
     }
 
     // Handle cluster layers with single/multi logic
+    if (layerId === 'military-strikes-arcs-layer' || layerId === 'military-strikes-targets-layer') {
+      const strike = info.object as MilitaryStrikeEvent;
+      this.popup.show({ type: 'militaryStrike', data: strike as any, x: info.x, y: info.y });
+      return;
+    }
+
     if (layerId === 'protest-clusters-layer') {
       const cluster = info.object as MapProtestCluster;
       if (cluster.items.length === 0 && cluster._clusterId != null && this.protestSC) {
@@ -4941,6 +4983,12 @@ export class DeckGLMap {
     this.render();
   }
 
+
+  public setMilitaryStrikes(events: MilitaryStrikeEvent[]): void {
+    this.militaryStrikes = events;
+    this.markDirty('militaryStrikes');
+    this.render();
+  }
 
   public setNewsLocations(data: Array<{ lat: number; lon: number; title: string; threatLevel: string; timestamp?: Date }>): void {
     const now = Date.now();
